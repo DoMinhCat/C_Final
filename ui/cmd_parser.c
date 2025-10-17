@@ -5,4 +5,3 @@ Group 2 ESGI 2A3
 */
 
 #include <stdio.h>
-#include "func.h"
