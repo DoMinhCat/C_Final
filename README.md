@@ -21,6 +21,7 @@ Projet final de C à ESGI
 - JOIN and SELECT can't be used in the same SELECT command
 - NOT NULL and UNIQUE constraint are not available
 - Only one primary key is allowed for each table => relation many-many not available
+- A semicolon (;) is required at the end of a command
 
 - Max col per table = 50
 - Max chars for table/col/row name = 30
