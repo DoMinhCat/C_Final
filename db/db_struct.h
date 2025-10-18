@@ -27,7 +27,7 @@ typedef struct Col{
 } Col;
 
 typedef struct Table{
-    char name[30];
+    char *name;
     Row *first_row;
     Col *first_col;
 
