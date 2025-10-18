@@ -6,6 +6,7 @@ Group 2 ESGI 2A3
 
 #include <stdio.h>
 #include <stdlib.h>
+// Include all necessary .h files
 
 int main(int argc, char **argv){
     char import_confirm;

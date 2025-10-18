@@ -34,4 +34,6 @@ typedef struct Table{
     struct Table *next_table;
 } Table;
 
+void create_table(char* tb_name);
+
 #endif

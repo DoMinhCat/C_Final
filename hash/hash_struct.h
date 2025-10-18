@@ -7,7 +7,7 @@ Group 2 ESGI 2A3
 #ifndef HASH_STRUCT_H
 #define HASH_STRUCT_H
 #include <stdio.h>
-#include "db_struct.h"
+#include "db.h"
 
 //hash table is a list of bucketnode
 typedef struct BucketNode{
@@ -23,4 +23,6 @@ typedef struct{
     BucketNode bucket; 
 } HashTable;
 
+
+unsigned int hash_this(long);
 #endif

@@ -4,8 +4,4 @@ Description : Code for JOIN operation with bubble sort and linear search
 Group 2 ESGI 2A3
 */
 
-#include <stdio.h>
-
-int main(int argc, char ** argv){
-    
-}
+#include "db.h"
