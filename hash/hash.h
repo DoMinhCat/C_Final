@@ -4,8 +4,8 @@ Description : All structures of hashing are delcared here
 Group 2 ESGI 2A3
 */
 
-#ifndef HASH_STRUCT_H
-#define HASH_STRUCT_H
+#ifndef HASH_H
+#define HASH_H
 #include <stdio.h>
 #include "db.h"
 
@@ -24,5 +24,8 @@ typedef struct{
 } HashTable;
 
 
-unsigned int hash_this(long);
+unsigned int hash_int(int);
+unsigned int hash_string(char*);
+unsigned int hash_all(ColType, void*);
+
 #endif

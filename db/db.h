@@ -4,9 +4,10 @@ Description : All structures of database are declared here
 Group 2 ESGI 2A3
 */
 
-#ifndef DB_STRUCT_H
-#define DB_STRUCT_H
+#ifndef DB_H
+#define DB_H
 #include <stdio.h>
+#include <stdbool.h>
 
 typedef struct Row{
     void **data_field;
@@ -22,6 +23,8 @@ typedef enum{
 typedef struct Col{
     char name[30];
     ColType type;
+    bool is_fk;
+    bool is_pk;
 
     struct Col *next_col;
 } Col;
