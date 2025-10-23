@@ -5,10 +5,19 @@ Group 2 ESGI 2A3
 */
 
 #include <stdio.h>
+#include "hash.h"
+#define HASH_TABLE_SIZE 67 // prime number size for better key distribution
 
-unsigned int hash_this(long val_to_hash){
-    int res;
-    // hash algorithm here
+unsigned int hash_this(int num_to_hash){
+    
+}
+
+unsigned int hash_int(int num_to_hash){
+    int res = 2025;
+    short last_digit = num_to_hash%10;
+
+    res = res * num_to_hash + last_digit;
+    res = res % HASH_TABLE_SIZE;
 
     return res;
 }

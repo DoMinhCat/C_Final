@@ -11,7 +11,7 @@ Projet final de C à ESGI
 
 - Space to separate all elements (key words, even commas and brackets)
 - Strings are applied directly, no need to wrap them in quotes or double quotes
-- Available types are int, string, and double
+- Available types : int, string, and double
 - Insert: values will be inserted in the order of which columns are created and all columns must be inserted (can't insert only 4 values into a table with 5 columns)
 - The primary column value will not be automatically generated or incremented, must be manually inserted with INSERT INTO
 - All command ends with a semicolon without spaces before it
@@ -22,9 +22,10 @@ Projet final de C à ESGI
 - NOT NULL and UNIQUE constraint are not available
 - Only one primary key is allowed for each table => relation many-many not available
 - A semicolon (;) is required at the end of a command
+- Primary key must be of type int or string
 
 - Max col per table = 50
-- Max chars for table/col/row name = 30
+- Max chars for table/col/row name = 100
 
 5. Usage
 6. Contributors
