@@ -17,7 +17,7 @@ unsigned int hash_int(int num_to_hash){
     short last_digit = num_to_hash%10;
 
     res = res * num_to_hash + last_digit;
-    res = res % HASH_TABLE_SIZE;
+    res = (res % HASH_TABLE_SIZE + HASH_TABLE_SIZE) % HASH_TABLE_SIZE; // handle negative values
 
     return res;
 }
