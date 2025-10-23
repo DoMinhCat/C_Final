@@ -4,3 +4,6 @@ Description : Free functions for all pointers to call before exit
 Group 2 ESGI 2A3
 */
 
+#include "db.h"
+#include "main.h"
+#include "hash.h"
