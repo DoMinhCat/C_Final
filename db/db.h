@@ -37,6 +37,16 @@ typedef struct Table{
     struct Table *next_table;
 } Table;
 
-void create_table(char* tb_name);
+// Database management functions
+Table* create_table(const char* table_name, char** col_names, ColType* col_types, int col_count);
+bool drop_table(const char* table_name);
+Table* get_table(const char* table_name);
+Table* get_first_table(void);
+void set_first_table(Table* table);
+
+// Data manipulation functions
+bool delete_rows(Table* table, const char* column_name, const char* value);
+bool insert_row(Table* table, char** values, int value_count);
+Row* select_rows(Table* table, const char* column_name, const char* value);
 
 #endif
