@@ -2,12 +2,15 @@
 #include <string.h>
 #include <stdlib.h>
 
+// temporary ?
 static Table* first_table = NULL;
 
+// temporary ?
 Table* get_first_table(void) {
     return first_table;
 }
 
+// temporary ?
 void set_first_table(Table* table) {
     first_table = table;
 }
@@ -23,6 +26,7 @@ Table* get_table(const char* table_name) {
     return NULL;
 }
 
+// TODO : delete_rows() and drop_table() should return the structure Response
 bool delete_rows(Table* table, const char* column_name, const char* value) {
     if (!table || !column_name || !value) return false;
 
