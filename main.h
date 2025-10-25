@@ -45,9 +45,21 @@ typedef struct {
     char table_name[TABLE_NAME_MAX];
 } DropParams;
 
+typedef enum{
+    SUCCESS,
+    FAILURE
+} ResponseStatus;
+
+typedef struct{
+    ResponseStatus status;
+    char message[100];
+} Response;
+
 typedef struct 
 {
     CommandType cmd_type; 
+
+    // take one of these params based on cmd_type
     union{
         CreateParams create_params;
         SelectParams select_params;
@@ -57,8 +69,6 @@ typedef struct
 
     } params;
 
-    // Error message to set if there is syntax error or parameter excede max num of chars allowed
-    char err_msg[100];
 } Query;
 
 #endif
