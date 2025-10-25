@@ -50,6 +50,7 @@ typedef enum{
     FAILURE
 } ResponseStatus;
 
+// DB functions return this struct for error/success in db operations
 typedef struct{
     ResponseStatus status;
     char message[100];
@@ -66,9 +67,10 @@ typedef struct
         // Other structs of other types of commands
         DeleteParams delete_params;
         DropParams drop_params;
-
     } params;
 
+    // set this if there is a syntax error that the parser detected
+    syntax_message[100];
 } Query;
 
 #endif
