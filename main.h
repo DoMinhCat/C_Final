@@ -21,8 +21,8 @@ typedef enum{
 typedef struct{
     char table_name[TABLE_NAME_MAX];
     char **col_list; // list of column names passed in the query
-    CommandType *type_list  // list of types corresponding to column
-
+    CommandType *type_list;  // list of types corresponding to column
+    int col_count;          // number of columns
     // TODO : what about foreign key and primary key
 } CreateParams;
 
@@ -35,18 +35,40 @@ typedef struct{
     // TODO: define other necessary params
 } SelectParams;
 
+typedef struct {
+    char table_name[TABLE_NAME_MAX];
+    char condition_column[TABLE_NAME_MAX];
+    char condition_value[TABLE_NAME_MAX];
+} DeleteParams;
+
+typedef struct {
+    char table_name[TABLE_NAME_MAX];
+} DropParams;
+
+typedef enum{
+    SUCCESS,
+    FAILURE
+} ResponseStatus;
+
+typedef struct{
+    ResponseStatus status;
+    char message[100];
+} Response;
+
 typedef struct 
 {
     CommandType cmd_type; 
+
+    // take one of these params based on cmd_type
     union{
         CreateParams create_params;
         SelectParams select_params;
         // Other structs of other types of commands
+        DeleteParams delete_params;
+        DropParams drop_params;
 
     } params;
 
-    // Error message to set if there is syntax error or parameter excede max num of chars allowed
-    char err_msg[100];
 } Query;
 
 #endif
