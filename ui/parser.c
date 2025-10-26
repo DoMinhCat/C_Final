@@ -23,6 +23,43 @@ char* read_cmd(char* cmd_buffer){
     return cmd_string;
 }
 
+void parse_delete(Query** query){
+    char* token;
+
+    (*query)->cmd_type = DELETE;
+    token = strtok(NULL, " ");
+    if (token && strcmp(token, "FROM") == 0) {
+        token = strtok(NULL, " \n");
+        if (token) {
+            strcpy((*query)->params.delete_params.table_name, token);
+            token = strtok(NULL, " ");
+            if (token && strcmp(token, "WHERE") == 0) {
+                token = strtok(NULL, " =");
+                if (token) {
+                    strcpy((*query)->params.delete_params.condition_column, token);
+                    token = strtok(NULL, " ");
+                    if (token) {
+                        strcpy((*query)->params.delete_params.condition_value, token);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void parse_drop(Query** query){
+    char* token;
+
+    (*query)->cmd_type = DROP;
+    token = strtok(NULL, " ");
+    if (token && strcmp(token, "TABLE") == 0) {
+        token = strtok(NULL, " \n");
+        if (token) {
+            strcpy((*query)->params.drop_params.table_name, token);
+        }
+    }
+}
+
 Query* parse_cmd(char* cmd) {
     Query* query = init_query();
 
@@ -38,34 +75,9 @@ Query* parse_cmd(char* cmd) {
         query->cmd_type = INVALID;
         sprintf(query->syntax_message, "Command invalid, please check the syntax.\n");
     }else if(strcmp(token, "DELETE") == 0) {
-        query->cmd_type = DELETE;
-        token = strtok(NULL, " ");
-        if (token && strcmp(token, "FROM") == 0) {
-            token = strtok(NULL, " \n");
-            if (token) {
-                strcpy(query->params.delete_params.table_name, token);
-                token = strtok(NULL, " ");
-                if (token && strcmp(token, "WHERE") == 0) {
-                    token = strtok(NULL, " =");
-                    if (token) {
-                        strcpy(query->params.delete_params.condition_column, token);
-                        token = strtok(NULL, " ");
-                        if (token) {
-                            strcpy(query->params.delete_params.condition_value, token);
-                        }
-                    }
-                }
-            }
-        }
+        parse_delete(&query);
     } else if (strcmp(token, "DROP") == 0) {
-        query->cmd_type = DROP;
-        token = strtok(NULL, " ");
-        if (token && strcmp(token, "TABLE") == 0) {
-            token = strtok(NULL, " \n");
-            if (token) {
-                strcpy(query->params.drop_params.table_name, token);
-            }
-        }
+        parse_drop(&query);
     }
 
     // exit/quit case 

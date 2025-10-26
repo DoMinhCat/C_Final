@@ -18,6 +18,9 @@ Group 2 ESGI 2A3
 
 Query* init_query();
 
-Query* parse_cmd(char* cmd);
 char* read_cmd(char* cmd_buffer);
+
+void parse_delete(Query** query);
+void parse_drop(Query** query);
+Query* parse_cmd(char* cmd);
 #endif
