@@ -23,17 +23,6 @@ char* read_cmd(char* cmd_buffer){
     return cmd_string;
 }
 
-Query* init_query(){
-    // safely initialise Query struct
-    Query* query = NULL;
-    assert((query = (Query*)malloc(sizeof(Query))) != NULL);
-    query->cmd_type = INVALID;
-    memset(&query->params, 0, sizeof(query->params));
-    query->syntax_message[0] = '\0';
-
-    return query;
-}
-
 Query* parse_cmd(char* cmd) {
     Query* query = init_query();
 
