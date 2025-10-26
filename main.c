@@ -45,14 +45,15 @@ int main(int argc, char **argv){
     // Infinite loop to get user's command
     while(1){
         
+        // put the command in cmd_input
         printf(">>> ");
         cmd_input = read_cmd(cmd_buffer);
-        if(strcmp(cmd_input, "exit") == 0 || strcmp(cmd_input, "quit") == 0){
-            break;
-        }
 
         // Call parser from ui folder analyze command
         parser_output = parse_cmd(cmd_input);
+
+        // Check exit/quit
+        if(parser_output->cmd_type == EXIT) break;
 
         // Check invalid syntax
         if(parser_output->cmd_type == INVALID && parser_output->syntax_message){

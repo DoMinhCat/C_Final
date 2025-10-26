@@ -30,9 +30,11 @@ Query* parse_cmd(char* cmd) {
     strcpy(cmd_copy, cmd);
 
     token = strtok(rest, " ");
-    if (token == NULL) return NULL;
 
-    if (strcmp(token, "DELETE") == 0) {
+    if (token == NULL){
+        query->cmd_type = INVALID;
+        sprintf(query->syntax_message, "Command invalid, please check the syntax.\n");
+    }else if(strcmp(token, "DELETE") == 0) {
         query->cmd_type = DELETE;
         token = strtok(NULL, " ");
         if (token && strcmp(token, "FROM") == 0) {
@@ -52,8 +54,7 @@ Query* parse_cmd(char* cmd) {
                 }
             }
         }
-    }
-    else if (strcmp(token, "DROP") == 0) {
+    } else if (strcmp(token, "DROP") == 0) {
         query->cmd_type = DROP;
         token = strtok(NULL, " ");
         if (token && strcmp(token, "TABLE") == 0) {
@@ -63,11 +64,14 @@ Query* parse_cmd(char* cmd) {
             }
         }
     }
+
+    // exit/quit case 
+    else if(strcmp(token, "exit") == 0 || strcmp(token, "quit") == 0) query->cmd_type = EXIT;
+    
     // first word is not one of the accepted command (create, select, insert,...)
     else {
         query->cmd_type = INVALID;
-
-        sprintf(query->syntax_message, "The command %s not found, please check the syntax.\n", token);
+        sprintf(query->syntax_message, "Command %s not found, please check the syntax.\n", token);
     }
 
     return query;
