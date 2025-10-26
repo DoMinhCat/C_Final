@@ -70,7 +70,16 @@ typedef struct
     } params;
 
     // set this if there is a syntax error that the parser detected
-    syntax_message[100];
+    char syntax_message[100];
 } Query;
+
+
+
+
+
+
+
+
+void print_divider();
 
 #endif
