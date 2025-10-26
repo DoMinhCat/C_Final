@@ -9,9 +9,10 @@ Group 2 ESGI 2A3
 #include <assert.h>
 #include <string.h>
 
+// Include all necessary .h files
 #include "ui/parser.h"
 #include "main.h"
-// Include all necessary .h files
+#include "clean/clean.h"
 
 void print_divider(){
     for(int i=0; i<20; i++) printf("-");
@@ -22,8 +23,10 @@ int main(int argc, char **argv){
     char import_confirm;
     char export_confirm;
     char cmd_buffer[MAX_CMD_SIZE];
-    char* cmd_input;
-    Query* parser_output;
+    char* cmd_input = NULL;
+
+    Query* parser_output = NULL;
+    Response* db_response = NULL;
 
     printf("Welcome to MiniDB !\n");
     printf("The Final Project developed in C by Minh Cat, Paco, Bamba. 2A3 ESGI 2025-2026.\n");
@@ -53,21 +56,85 @@ int main(int argc, char **argv){
         parser_output = parse_cmd(cmd_input);
 
         // Check exit/quit
-        if(parser_output->cmd_type == EXIT) break;
+        if(parser_output->cmd_type == EXIT){ 
+            free_current_cmd(&cmd_input, &parser_output);
+            break;
+        }
 
         // Check invalid syntax
         if(parser_output->cmd_type == INVALID && parser_output->syntax_message){
-            printf("%s", parser_output->syntax_message);
-            free(cmd_input);
-            cmd_input = NULL;
-            free(parser_output);
-            parser_output = NULL;
+            printf("%s\n", parser_output->syntax_message);
+            free_current_cmd(&cmd_input, &parser_output);
             continue;
         }
 
-        // free after each command
-        free(cmd_input);
-        cmd_input = NULL;
+
+        // Execute command
+        /*
+        switch (parser_output->cmd_type)
+        {
+        case CREATE:
+            // Call create() of db : db_response = create(...);
+
+            //placeholder
+            assert((db_response = (Response*)malloc(sizeof(Response))) != NULL);
+            db_response->status = SUCCESS;
+            sprintf(db_response->message, "done");
+            printf("CREATE is called\n");
+            break;
+        case INSERT:
+            // Call insert() of db
+
+            //placeholder
+            assert((db_response = (Response*)malloc(sizeof(Response))) != NULL);
+            db_response->status = SUCCESS;
+            sprintf(db_response->message, "done");
+            printf("INSERT is called\n");
+            break;
+        case SELECT:
+            // Call select() of db
+
+            //placeholder
+            assert((db_response = (Response*)malloc(sizeof(Response))) != NULL);
+            db_response->status = SUCCESS;
+            sprintf(db_response->message, "done");
+            printf("SELECT is called\n");
+            break;
+        case DELETE:
+            // Call delete() of db
+
+            //placeholder
+            assert((db_response = (Response*)malloc(sizeof(Response))) != NULL);
+            db_response->status = SUCCESS;
+            sprintf(db_response->message, "done");
+            printf("DELETE is called\n");
+            break;
+        case DROP:
+            // Call drop() of db : 
+
+            //placeholder
+            assert((db_response = (Response*)malloc(sizeof(Response))) != NULL);
+            db_response->status = SUCCESS;
+            sprintf(db_response->message, "done");
+            printf("DROP is called\n");
+            break;
+        default:
+            printf("Command invalid, please check the syntax.\n");
+            break;
+        }
+
+        // Check execution status
+        if(db_response->status == FAILURE && db_response->message){
+            printf("%s\n", db_response->message);
+            free_current_cmd(&cmd_input, &parser_output);
+            continue;
+        } else if(db_response->status == SUCCESS && db_response->message){
+            printf("Executed : %s\n", db_response->message);
+        }
+            */
+
+        // free before getting new command
+        free_current_cmd(&cmd_input, &parser_output);
     }
 
     printf("Do you want to export the database, do it now or never (y/n) : ");
@@ -81,7 +148,7 @@ int main(int argc, char **argv){
     }
 
     
-    // Call to functions in clean.c to free all before exit
+    // Call to functions in clean.c to free all db struct before exit
 
     printf("Goodbye !");
     exit(EXIT_SUCCESS);

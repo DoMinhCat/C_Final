@@ -23,6 +23,7 @@ Projet final de C à ESGI
 - Only one primary key is allowed for each table => relation many-many not available
 - A semicolon (;) is required at the end of a command
 - Primary key must be of type int or string
+- "exit" or "quit" to exit the program
 
 - Max col per table = 50
 - Max chars for table/col/row name = 100
