@@ -42,7 +42,7 @@ void free_query(Query** query){
         }
         free((*query)->params.insert_params.col_list);
         (*query)->params.insert_params.col_list = NULL;
-        (*query)->params.create_params.col_count = 0;
+        (*query)->params.insert_params.col_count = 0;
 
         //free data_list
         for(i=0; i<(*query)->params.insert_params.col_count; i++){
@@ -68,7 +68,7 @@ void free_query(Query** query){
 }
 
 void free_current_cmd(char** cmd_string, Query** query){
-    free(cmd_string);
-    cmd_string = NULL;
+    free(*cmd_string);
+    *cmd_string = NULL;
     free_query(query);
 }
