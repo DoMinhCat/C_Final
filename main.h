@@ -9,6 +9,8 @@ Group 2 ESGI 2A3
 #define TABLE_NAME_MAX 100
 #define MAX_TOKEN_SIZE 256
 
+#include "db/db.h"
+
 typedef enum{
     CREATE,
     INSERT,

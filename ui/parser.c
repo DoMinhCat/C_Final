@@ -9,8 +9,6 @@ Group 2 ESGI 2A3
 #include <string.h>
 #include <assert.h>
 
-#include "../main.h"
-#include "../db/db.h"
 #include "parser.h"
 
 char* read_cmd(char* cmd_buffer){
