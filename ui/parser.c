@@ -5,13 +5,11 @@ Group 2 ESGI 2A3
 */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+
 #include "../main.h"
 #include "../db/db.h"
-
-#define MAX_CMD_SIZE 1024
-#define MAX_TOKEN_SIZE 256
+#include "parser.h"
 
 Query* parse_command(char* cmd) {
     Query* query = malloc(sizeof(Query));
@@ -62,6 +60,7 @@ Query* parse_command(char* cmd) {
     return query;
 }
 
+// TODO: not necessary, see workflow sent in Discord
 void execute_delete(Query* query) {
     Table* current_table = get_table(query->params.delete_params.table_name);
     if (current_table == NULL) return;
@@ -114,6 +113,7 @@ void execute_delete(Query* query) {
     }
 }
 
+// TODO: not necessary, see workflow sent in Discord
 void execute_drop(Query* query) {
     Table* current = get_first_table();
     Table* prev = NULL;
