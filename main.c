@@ -23,6 +23,7 @@ int main(int argc, char **argv){
     char export_confirm;
     char cmd_buffer[MAX_CMD_SIZE];
     char* cmd_input;
+    Query* parser_output;
 
     printf("Welcome to MiniDB !\n");
     printf("The Final Project developed in C by Minh Cat, Paco, Bamba. 2A3 ESGI 2025-2026.\n");
@@ -50,10 +51,22 @@ int main(int argc, char **argv){
             break;
         }
 
+        // Call parser from ui folder analyze command
+        parser_output = parse_cmd(cmd_input);
 
+        // Check invalid syntax
+        if(parser_output->cmd_type == INVALID && parser_output->syntax_message){
+            printf("%s", parser_output->syntax_message);
+            free(cmd_input);
+            cmd_input = NULL;
+            free(parser_output);
+            parser_output = NULL;
+            continue;
+        }
 
-        // Call functions from ui folder to read and analyze command
-
+        // free after each command
+        free(cmd_input);
+        cmd_input = NULL;
     }
 
     printf("Do you want to export the database, do it now or never (y/n) : ");
@@ -66,8 +79,7 @@ int main(int argc, char **argv){
         print_divider();
     }
 
-    free(cmd_input);
-    cmd_input = NULL;
+    
     // Call to functions in clean.c to free all before exit
 
     printf("Goodbye !");

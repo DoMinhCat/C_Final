@@ -14,7 +14,8 @@ typedef enum{
     DELETE,
     SELECT,
     DROP,
-    EXIT
+    EXIT,
+    INVALID
 } CommandType;
 
 // For Create table function

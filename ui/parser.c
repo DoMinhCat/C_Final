@@ -21,11 +21,12 @@ char* read_cmd(char* cmd_buffer){
     return cmd_string;
 }
 
-Query* parse_command(char* cmd) {
+Query* parse_cmd(char* cmd) {
     Query* query = malloc(sizeof(Query));
     char* token;
     char* rest = cmd;
     char cmd_copy[MAX_CMD_SIZE];
+    char* err_msg;
     strcpy(cmd_copy, cmd);
 
     token = strtok(rest, " ");
@@ -62,9 +63,11 @@ Query* parse_command(char* cmd) {
             }
         }
     }
+    // first word is not one of the accepted command (create, select, insert,...)
     else {
-        free(query);
-        return NULL;
+        query->cmd_type = INVALID;
+
+        sprintf(query->syntax_message, "The command %s not found, please check the syntax.\n", token);
     }
 
     return query;
