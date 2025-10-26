@@ -6,6 +6,9 @@ Group 2 ESGI 2A3
 */
 
 #include "../main.h"
+#include "../main.h"
+#include "../db/db.h"
+
 #ifndef PARSER_H
 #define PARSER_H
 
