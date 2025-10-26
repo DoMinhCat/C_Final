@@ -20,6 +20,7 @@ void print_divider(){
 }
 
 int main(int argc, char **argv){
+    char import_export_line[5];
     char import_confirm;
     char export_confirm;
     char cmd_buffer[MAX_CMD_SIZE];
@@ -35,7 +36,8 @@ int main(int argc, char **argv){
 
     // Prompt for file import
     printf("Do you want to import an existing database, do it now or never (y/n) : ");
-    scanf(" %c", &import_confirm);
+    fgets(import_export_line, sizeof(import_export_line), stdin);
+    import_confirm = import_export_line[0];
     
     if(import_confirm == 'y' || import_confirm == 'Y'){
         // Call import function from file folder
@@ -138,7 +140,8 @@ int main(int argc, char **argv){
     }
 
     printf("Do you want to export the database, do it now or never (y/n) : ");
-    scanf(" %c", &export_confirm);
+    fgets(import_export_line, sizeof(import_export_line), stdin);
+    export_confirm = import_export_line[0];
     if(export_confirm == 'y' || export_confirm == 'Y'){
         // Call export func from file folder
     }else {

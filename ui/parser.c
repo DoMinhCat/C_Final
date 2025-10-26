@@ -9,27 +9,18 @@ Group 2 ESGI 2A3
 #include <string.h>
 #include <assert.h>
 
-#include "../main.h"
-#include "../db/db.h"
 #include "parser.h"
 
 char* read_cmd(char* cmd_buffer){
-    char* cmd_string;
-    scanf("%s", cmd_buffer);
-    assert((cmd_string = (char*)malloc(sizeof(char)*strlen(cmd_buffer)+1)) != NULL);
+    if(fgets(cmd_buffer, MAX_CMD_SIZE, stdin) == NULL) return NULL;
+
+    // remove trailing newline
+    cmd_buffer[strcspn(cmd_buffer, "\n")] = '\0';
+
+    char* cmd_string = malloc(strlen(cmd_buffer)+1);
+    assert(cmd_string != NULL);
     strcpy(cmd_string, cmd_buffer);
     return cmd_string;
-}
-
-Query* init_query(){
-    // safely initialise Query struct
-    Query* query = NULL;
-    assert((query = (Query*)malloc(sizeof(Query))) != NULL);
-    query->cmd_type = INVALID;
-    memset(&query->params, 0, sizeof(query->params));
-    query->syntax_message[0] = '\0';
-
-    return query;
 }
 
 Query* parse_cmd(char* cmd) {
