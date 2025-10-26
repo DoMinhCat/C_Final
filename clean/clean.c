@@ -8,6 +8,17 @@ Group 2 ESGI 2A3
 
 #include "clean.h"
 
+
+/*IMPORTANT : 
+- Free all dynamic pointers in a struct before freeing the struct
+*/ 
+
+void free_query(Query** query){
+    if(!query) return;
+    free(query);
+    query = NULL;
+}
+
 void free_current_cmd(char** cmd_string, Query** query){
     free(cmd_string);
     cmd_string = NULL;
