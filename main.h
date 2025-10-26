@@ -14,7 +14,8 @@ typedef enum{
     DELETE,
     SELECT,
     DROP,
-    EXIT
+    EXIT,
+    INVALID
 } CommandType;
 
 // For Create table function
@@ -50,6 +51,7 @@ typedef enum{
     FAILURE
 } ResponseStatus;
 
+// DB functions return this struct for error/success in db operations
 typedef struct{
     ResponseStatus status;
     char message[100];
@@ -69,6 +71,17 @@ typedef struct
 
     } params;
 
+    // set this if there is a syntax error that the parser detected
+    char syntax_message[100];
 } Query;
+
+
+
+
+
+
+
+
+void print_divider();
 
 #endif

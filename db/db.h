@@ -6,7 +6,6 @@ Group 2 ESGI 2A3
 
 #ifndef DB_H
 #define DB_H
-#include <stdio.h>
 #include <stdbool.h>
 
 typedef struct Row{
