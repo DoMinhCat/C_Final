@@ -9,7 +9,6 @@ Projet final de C à ESGI
 3. Installation
 4. Features
 
-- Space to separate all elements (key words, even commas and brackets)
 - Strings are applied directly, no need to wrap them in quotes or double quotes
 - Available types : int, string, and double
 - Insert: values will be inserted in the order of which columns are created and all columns must be inserted (can't insert only 4 values into a table with 5 columns)
@@ -29,4 +28,7 @@ Projet final de C à ESGI
 - Max chars for table/col/row name = 100
 
 5. Usage
+
+- `delete from tab1 where col1=6`
+
 6. Contributors
