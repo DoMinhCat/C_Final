@@ -22,5 +22,8 @@ char* read_cmd(char* cmd_buffer);
 
 void parse_delete(Query** query);
 void parse_drop(Query** query);
+void parse_select(Query** query);
+void parse_insert(Query** query);
+void parse_create(Query** query);
 Query* parse_cmd(char* cmd);
 #endif

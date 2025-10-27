@@ -23,78 +23,6 @@ char* read_cmd(char* cmd_buffer){
     return cmd_string;
 }
 
-void parse_delete(Query** query){
-    char* token;
-
-    (*query)->cmd_type = DELETE;
-
-    // check FROM
-    token = strtok(NULL, " ");
-    if (!token || strcasecmp(token, "FROM") != 0) {
-        (*query)->cmd_type = INVALID;
-        sprintf((*query)->syntax_message, "Syntax error: expected 'FROM' after DELETE.");
-        return;
-    }
-
-    // check table name
-    token = strtok(NULL, " \n");
-    if (!token) {
-        (*query)->cmd_type = INVALID;
-        sprintf((*query)->syntax_message, "Syntax error: missing table name after FROM.");
-        return;
-    }
-
-    // get table name
-    strncpy((*query)->params.delete_params.table_name, token, sizeof((*query)->params.delete_params.table_name) - 1);
-
-    // get WHERE (optional)
-    token = strtok(NULL, " ");
-    if (token && strcasecmp(token, "WHERE") == 0) {
-        // get col name
-        token = strtok(NULL, " =");
-        if (!token) {
-            (*query)->cmd_type = INVALID;
-            sprintf((*query)->syntax_message, "Syntax error: missing column name in WHERE clause.");
-            return;
-        }
-        strncpy((*query)->params.delete_params.condition_column, token, sizeof((*query)->params.delete_params.condition_column) - 1);
-        
-        // get condition value
-        token = strtok(NULL, " \n");
-        if (!token) {
-            (*query)->cmd_type = INVALID;
-            sprintf((*query)->syntax_message, "Syntax error: missing value in WHERE clause.");
-            return;
-        }
-        // strip newline from fgets because this is the end of cmd when user hit enter
-        token[strcspn(token, "\n")] = '\0';
-        strncpy((*query)->params.delete_params.condition_value, token, sizeof((*query)->params.delete_params.condition_value) - 1);
-    }
-}
-
-void parse_drop(Query** query){
-    char* token;
-
-    (*query)->cmd_type = DROP;
-
-    // check TABLE
-    token = strtok(NULL, " ");
-    if(!token || strcasecmp(token, "TABLE") != 0){
-        (*query)->cmd_type = INVALID;
-        sprintf((*query)->syntax_message, "Syntax error: missing 'TABLE' after DROP.");
-        return;
-    }
-
-    // get table name to drop
-    token = strtok(NULL, " \n");
-    if (!token) {
-        (*query)->cmd_type = INVALID;
-        sprintf((*query)->syntax_message, "Syntax error: missing table name after TABLE.");
-        return;
-    }
-    strncpy((*query)->params.drop_params.table_name, token, sizeof((*query)->params.drop_params.table_name)-1);
-}
-
 Query* parse_cmd(char* cmd) {
     Query* query = init_query();
 
@@ -103,14 +31,15 @@ Query* parse_cmd(char* cmd) {
 
     token = strtok(cmd, " ");
 
-    if (token == NULL){
+    if(token == NULL){
         query->cmd_type = INVALID;
         sprintf(query->syntax_message, "Command invalid, please check the syntax.\n");
-    }else if(strcasecmp(token, "DELETE") == 0) {
-        parse_delete(&query);
-    } else if (strcasecmp(token, "DROP") == 0) {
-        parse_drop(&query);
-    }
+    } else if(strcasecmp(token, "DELETE") == 0) parse_delete(&query);
+    else if(strcasecmp(token, "DROP") == 0) parse_drop(&query);
+    else if(strcasecmp(token, "CREATE") == 0) parse_create(&query);
+    else if(strcasecmp(token, "SELECT") == 0) parse_create(&query);
+    else if(strcasecmp(token, "INSERT") == 0) parse_insert(&query);
+
 
     // exit/quit case 
     else if(strcasecmp(token, "EXIT") == 0 || strcasecmp(token, "QUIT") == 0) query->cmd_type = EXIT;
