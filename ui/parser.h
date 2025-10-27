@@ -14,10 +14,16 @@ Group 2 ESGI 2A3
 #define PARSER_H
 
 #define MAX_CMD_SIZE 1024
-#define MAX_TOKEN_SIZE 256
+#define MAX_TOKEN_SIZE 257
 
 Query* init_query();
 
-Query* parse_cmd(char* cmd);
 char* read_cmd(char* cmd_buffer);
+
+void parse_delete(Query** query);
+void parse_drop(Query** query);
+void parse_select(Query** query);
+void parse_insert(Query** query);
+void parse_create(Query** query);
+Query* parse_cmd(char* cmd);
 #endif

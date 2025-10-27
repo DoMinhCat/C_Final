@@ -6,8 +6,8 @@ Group 2 ESGI 2A3
 
 #ifndef MAIN_H
 #define MAIN_H
-#define TABLE_NAME_MAX 100
-#define MAX_TOKEN_SIZE 256
+#define TABLE_NAME_MAX 101
+#define MAX_TOKEN_SIZE 257
 
 #include "db/db.h"
 
@@ -21,6 +21,12 @@ typedef enum{
     INVALID
 } CommandType;
 
+typedef enum{
+    NONE,
+    FK,
+    PK
+} ColConstraintType;
+
 // For Create table function
 typedef struct{
     char table_name[TABLE_NAME_MAX];
@@ -29,7 +35,7 @@ typedef struct{
     int col_count;          // number of columns
 
     ColType *type_list;  // list of types corresponding to column
-    // TODO : what about foreign key and primary key
+    ColConstraintType *constraint_list; // list of constraint corresponding to order of col_list
 } CreateParams;
 
 // For Insert function
