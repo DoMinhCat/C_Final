@@ -14,7 +14,7 @@ Group 2 ESGI 2A3
 #define PARSER_H
 
 #define MAX_CMD_SIZE 1024
-#define MAX_TOKEN_SIZE 256
+#define MAX_TOKEN_SIZE 257
 
 Query* init_query();
 

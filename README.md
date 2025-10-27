@@ -20,7 +20,7 @@ Projet final de C à ESGI
 - JOIN and SELECT can't be used in the same SELECT command
 - NOT NULL and UNIQUE constraint are not available
 - Only one primary key is allowed for each table => relation many-many not available
-- A semicolon (;) is required at the end of a command
+- A semicolon (;) at the end of a command is not allowed since it is command line based
 - Primary key must be of type int or string
 - "exit" or "quit" to exit the program
 
@@ -30,5 +30,7 @@ Projet final de C à ESGI
 5. Usage
 
 - `delete from tab1 where col1=6`
+- `drop table tab1`
+- `create table
 
 6. Contributors
