@@ -32,6 +32,10 @@ void free_query(Query** query){
         free((*query)->params.create_params.type_list);
         (*query)->params.create_params.type_list = NULL;
 
+        //free constraint_list
+        free((*query)->params.create_params.constraint_list);
+        (*query)->params.create_params.constraint_list = NULL;
+
         (*query)->params.create_params.col_count = 0;
         break;
     case INSERT:
