@@ -34,62 +34,122 @@ void parse_create(Query** query){
     strncpy((*query)->params.create_params.table_name, token, sizeof((*query)->params.create_params.table_name)-1);
     (*query)->params.create_params.table_name[sizeof((*query)->params.create_params.table_name)-1] = '\0';
 
+    // check '('
+    token = strtok(NULL, " ");
+    if (!token || token[0] != '(') {
+        (*query)->cmd_type = INVALID;
+        sprintf((*query)->syntax_message, "Syntax error: missing '(' after table name.");
+        return;
+    }
+
     // get column names, type, pk/fk
+    char* col_def;        // single column definition (e.g., "col int pk")
     char* col_name;
     char* col_type;
     char* col_constraint;
     int i;
 
     (*query)->params.create_params.col_count = 0;
-    token = strtok(NULL, " ,"); // get first column
-    while(token != NULL){
-        i = (*query)->params.create_params.col_count;
 
-        // increase size of dynamic elements via realloc
-        (*query)->params.create_params.col_list = (char**)realloc((*query)->params.create_params.col_list, (i + 1) * sizeof(char*));
-        assert((*query)->params.create_params.col_list != NULL);
+    // get first column definition inside parentheses
+    col_def = strtok(NULL, ")");
+    if (!col_def){
+        (*query)->cmd_type = INVALID;
+        sprintf((*query)->syntax_message, "Syntax error: at least 1 column is required.");
+        return;
+    }
 
-        (*query)->params.create_params.type_list = (ColType*)realloc((*query)->params.create_params.type_list, (i + 1) * sizeof(ColType));
-        assert((*query)->params.create_params.type_list != NULL);
-
-        (*query)->params.create_params.constraint_list = (ColConstraintType*)realloc((*query)->params.create_params.constraint_list, (i + 1) * sizeof(ColConstraintType));
-        assert((*query)->params.create_params.constraint_list != NULL);
-
-        // get "col_name"
-        col_name = token;
-        (*query)->params.create_params.col_list[i] = strdup(col_name);
-
-        // get type
-        token = strtok(NULL, " ,");
-        if (!token){
-            (*query)->cmd_type = INVALID;
-            sprintf((*query)->syntax_message, "Syntax error: missing type for column '%s'.", col_name);
-            return;
+    // split each column by ','
+token = strtok(col_def, ",");
+while(token != NULL){
+    // Trim spaces
+    while(*token == ' ' || *token == '\t') token++;
+    char* end = token + strlen(token) - 1;
+    while(end > token && (*end == ' ' || *end == '\t')) { *end = '\0'; end--; }
+    
+    col_name = token;
+    
+    // Find first space/tab to separate name from type
+    col_type = NULL;
+    col_constraint = NULL;
+    
+    char* p = token;
+    while(*p && *p != ' ' && *p != '\t') p++;
+    
+    if(*p) {
+        *p = '\0'; 
+        p++;
+        while(*p == ' ' || *p == '\t') p++;  // Skip spaces
+        
+        if(*p) {
+            col_type = p;
+            // Find next space for constraint
+            while(*p && *p != ' ' && *p != '\t') p++;
+            
+            if(*p) {
+                *p = '\0';  // Terminate col_type
+                p++;
+                while(*p == ' ' || *p == '\t') p++;  // Skip spaces
+                
+                if(*p) {
+                    col_constraint = p;
+                }
+            }
         }
-        col_type = token;
+    }
+    
+    // Validate
+    if (!col_name || strlen(col_name) == 0){
+        (*query)->cmd_type = INVALID;
+        sprintf((*query)->syntax_message, "Syntax error: at least 1 column is required.");
+        return;
+    }
 
-        if (strcasecmp(col_type, "INT") == 0)
-            (*query)->params.create_params.type_list[i] = INT;
-        else if (strcasecmp(col_type, "STRING") == 0 || strcasecmp(col_type, "STR") == 0)
-            (*query)->params.create_params.type_list[i] = STRING;
-        else if (strcasecmp(col_type, "DOUBLE") == 0)
-            (*query)->params.create_params.type_list[i] = DOUBLE;
+    if (!col_type){
+        (*query)->cmd_type = INVALID;
+        sprintf((*query)->syntax_message, "Syntax error: missing type for column '%s'.", col_name);
+        return;
+    }
+
+    // Allocate and fill (rest of your code stays the same)
+    i = (*query)->params.create_params.col_count;
+
+    (*query)->params.create_params.col_list = (char**)realloc((*query)->params.create_params.col_list, (i + 1) * sizeof(char*));
+    (*query)->params.create_params.type_list = (ColType*)realloc((*query)->params.create_params.type_list, (i + 1) * sizeof(ColType));
+    (*query)->params.create_params.constraint_list = (ColConstraintType*)realloc((*query)->params.create_params.constraint_list, (i + 1) * sizeof(ColConstraintType));
+    assert((*query)->params.create_params.col_list != NULL);
+    assert((*query)->params.create_params.type_list != NULL);
+    assert((*query)->params.create_params.constraint_list != NULL);
+
+    (*query)->params.create_params.col_list[i] = strdup(col_name);
+
+    if (strcasecmp(col_type, "INT") == 0)
+        (*query)->params.create_params.type_list[i] = INT;
+    else if (strcasecmp(col_type, "STRING") == 0 || strcasecmp(col_type, "STR") == 0)
+        (*query)->params.create_params.type_list[i] = STRING;
+    else if (strcasecmp(col_type, "DOUBLE") == 0)
+        (*query)->params.create_params.type_list[i] = DOUBLE;
+    else {
+        (*query)->cmd_type = INVALID;
+        sprintf((*query)->syntax_message, "Invalid column type '%s' for column '%s'.", col_type, col_name);
+        return;
+    }
+
+    if (col_constraint){
+        if (strcasecmp(col_constraint, "PK") == 0)
+            (*query)->params.create_params.constraint_list[i] = PK;
+        else if (strcasecmp(col_constraint, "FK") == 0)
+            (*query)->params.create_params.constraint_list[i] = FK;
         else {
             (*query)->cmd_type = INVALID;
-            sprintf((*query)->syntax_message, "Invalid column type '%s' for column '%s'.", col_type, col_name);
+            sprintf((*query)->syntax_message, "Invalid constraint '%s' for column '%s'.", col_constraint, col_name);
             return;
         }
+    } else (*query)->params.create_params.constraint_list[i] = NONE;
 
-        // get pk/fk (optional)
-        token = strtok(NULL, " ,");
-        if (token && (strcasecmp(token, "PK") == 0 || strcasecmp(token, "FK") == 0)){
-            col_constraint = token;
-            (*query)->params.create_params.constraint_list[i] = (strcasecmp(col_constraint, "PK") == 0 ? PK : FK);
-            token = strtok(NULL, " ,"); // move to next column
-        } else {
-            (*query)->params.create_params.constraint_list[i] = NONE;
-        }
+    (*query)->params.create_params.col_count++;
 
-        (*query)->params.create_params.col_count++;
+    // next column
+    token = strtok(NULL, ",");
     }
 }
