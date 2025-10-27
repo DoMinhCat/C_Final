@@ -28,7 +28,7 @@ void parse_delete(Query** query){
 
     (*query)->cmd_type = DELETE;
 
-    // get FROM
+    // check FROM
     token = strtok(NULL, " ");
     if (!token || strcasecmp(token, "FROM") != 0) {
         (*query)->cmd_type = INVALID;
@@ -72,18 +72,27 @@ void parse_delete(Query** query){
     }
 }
 
-
 void parse_drop(Query** query){
     char* token;
 
     (*query)->cmd_type = DROP;
+
+    // check TABLE
     token = strtok(NULL, " ");
-    if (token && strcasecmp(token, "TABLE") == 0) {
-        token = strtok(NULL, " \n");
-        if (token) {
-            strcpy((*query)->params.drop_params.table_name, token);
-        }
+    if(!token || strcasecmp(token, "TABLE") != 0){
+        (*query)->cmd_type = INVALID;
+        sprintf((*query)->syntax_message, "Syntax error: missing 'TABLE' after DROP.");
+        return;
     }
+
+    // get table name to drop
+    token = strtok(NULL, " \n");
+    if (!token) {
+        (*query)->cmd_type = INVALID;
+        sprintf((*query)->syntax_message, "Syntax error: missing table name after TABLE.");
+        return;
+    }
+    strncpy((*query)->params.drop_params.table_name, token, sizeof((*query)->params.drop_params.table_name)-1);
 }
 
 Query* parse_cmd(char* cmd) {
