@@ -53,7 +53,7 @@ void parse_create(Query** query){
     int i;
     int fk_count;
 
-    (*query).params.create_params.fk_count = 0;
+    (*query)->params.create_params.fk_count = 0;
     (*query)->params.create_params.col_count = 0;
 
     // get first column definition inside parentheses
@@ -79,7 +79,7 @@ void parse_create(Query** query){
         col_constraint = NULL;
         reference_keyword = NULL;
         table_name_refer = NULL;
-        col_name_refer = NULL
+        col_name_refer = NULL;
         
         char* p = token;
         while(*p && *p != ' ' && *p != '\t') p++;
@@ -202,17 +202,17 @@ void parse_create(Query** query){
                 }
 
                 // allocate table_name_refer_list and col_name_refer TODO
-                fk_count = (*query).params.create_params.fk_count;
+                fk_count = (*query)->params.create_params.fk_count;
 
-                (*query).params.create_params.table_name_refer_list = (char**)realloc((*query)->params.create_params.table_name_refer_list, (fk_count + 1) * sizeof(char*)));
-                (*query).params.create_params.col_name_refer_list = (char**)realloc((*query)->params.create_params.col_name_refer_list, (fk_count + 1) * sizeof(char*)));
-                assert(((*query).params.create_params.table_name_refer_list) != NULL);
-                assert(((*query).params.create_params.col_name_refer_list) != NULL);
+                (*query)->params.create_params.table_name_refer_list = (char**)realloc((*query)->params.create_params.table_name_refer_list, (fk_count + 1) * sizeof(char*));
+                (*query)->params.create_params.col_name_refer_list = (char**)realloc((*query)->params.create_params.col_name_refer_list, (fk_count + 1) * sizeof(char*));
+                assert(((*query)->params.create_params.table_name_refer_list) != NULL);
+                assert(((*query)->params.create_params.col_name_refer_list) != NULL);
                 // set table and col refered to
                 (*query)->params.create_params.table_name_refer_list[fk_count] = strdup(table_name_refer);
                 (*query)->params.create_params.col_name_refer_list[fk_count] = strdup(col_name_refer);
-                
-                (*query).params.create_params.fk_count++;
+
+                (*query)->params.create_params.fk_count++;
             }else {
                 (*query)->cmd_type = INVALID;
                 sprintf((*query)->syntax_message, "Invalid constraint '%s' for column '%s'.", col_constraint, col_name);
