@@ -23,7 +23,7 @@ void parse_delete(Query** query){
 
     // check table name
     token = strtok(NULL, " \n");
-    if (!token) {
+    if (!token || strlen(token) == 0) {
         (*query)->cmd_type = INVALID;
         sprintf((*query)->syntax_message, "Syntax error: missing table name after FROM.");
         return;
@@ -37,7 +37,7 @@ void parse_delete(Query** query){
     if (token && strcasecmp(token, "WHERE") == 0) {
         // get col name
         token = strtok(NULL, " =");
-        if (!token) {
+        if (!token || strlen(token) == 0) {
             (*query)->cmd_type = INVALID;
             sprintf((*query)->syntax_message, "Syntax error: missing column name in WHERE clause.");
             return;
@@ -46,7 +46,7 @@ void parse_delete(Query** query){
         
         // get condition value
         token = strtok(NULL, " \n");
-        if (!token) {
+        if (!token || strlen(token) == 0) {
             (*query)->cmd_type = INVALID;
             sprintf((*query)->syntax_message, "Syntax error: missing value in WHERE clause.");
             return;
