@@ -23,7 +23,7 @@ void parse_drop(Query** query){
 
     // get table name to drop
     token = strtok(NULL, " \n");
-    if (!token) {
+    if (!token || strlen(token) == 0) {
         (*query)->cmd_type = INVALID;
         sprintf((*query)->syntax_message, "Syntax error: missing table name after TABLE.");
         return;
