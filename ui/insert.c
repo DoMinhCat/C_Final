@@ -44,10 +44,16 @@ void parse_insert(Query** query){
 
     // get col_list : ( col1, col2 )
     char* col_list;
+    char* value_keyword;
+    char* open_value;
+    char* data_list;
     int current_col_count;
     (*query)->params.insert_params.col_count = 0;
 
-    col_list = strtok(NULL, ")"); // got " col1, col2, col3 "
+    col_list = strtok(NULL, ")"); // got " col1, col2, col3 " 
+    value_keyword = strtok(NULL, " "); // got "VALUES"
+    open_value = strtok(NULL, " \t"); // got "("
+    data_list = strtok(NULL, ")"); // got "val1, val2 "
     if(!col_list){
         (*query)->cmd_type = INVALID;
         sprintf((*query)->syntax_message, "Syntax error: at least 1 column is required.");
@@ -71,26 +77,21 @@ void parse_insert(Query** query){
     }
 
     // check for "VALUES"
-    token = strtok(NULL, " ");
-    if(!token || strcasecmp(token, "VALUES") != 0){
+    if(!value_keyword || strcasecmp(value_keyword, "VALUES") != 0){
         (*query)->cmd_type = INVALID;
         sprintf((*query)->syntax_message, "Syntax error: missing 'VALUES' after column list.");
         return;
     }
 
     // check '('
-    token = strtok(NULL, " \t");
-    if (!token || token[0] != '(') {
+    if (!open_value || open_value[0] != '(') {
         (*query)->cmd_type = INVALID;
         sprintf((*query)->syntax_message, "Syntax error: missing '(' after VALUES.");
         return;
     }
 
     // get data_list : ( val1, val2 )
-    char* data_list;
     int val_count = 0;
-
-    data_list = strtok(NULL, ")"); // got " val1, val2 "
     if(!data_list){
         (*query)->cmd_type = INVALID;
         sprintf((*query)->syntax_message, "Syntax error: at least 1 value is required.");
