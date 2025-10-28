@@ -19,20 +19,20 @@ void parse_insert(Query** query){
     // check "INTO"
     token = strtok(NULL, " \t");
     if(!token || strcasecmp(token, "INTO") != 0){
-        (*query).cmd_type = INVALID;
-        sprintf((*query).syntax_message, "Syntax error: missing 'INTO' after INSERT.");
+        (*query)->cmd_type = INVALID;
+        sprintf((*query)->syntax_message, "Syntax error: missing 'INTO' after INSERT.");
         return;
     }
 
     // get table name
     token = strtok(NULL, " \t");
     if(!token){
-        (*query).cmd_type = INVALID;
-        sprintf((*query).syntax_message, "Syntax error: missing table name after INTO.");
+        (*query)->cmd_type = INVALID;
+        sprintf((*query)->syntax_message, "Syntax error: missing table name after INTO.");
         return;
     }
-    strncpy((*query).params.insert_params.table_name, token, sizeof((*query).params.insert_params.table_name)-1);
-    (*query).params.insert_params.table_name[sizeof((*query).params.insert_params.table_name)-1] = "\0";
+    strncpy((*query)->params.insert_params.table_name, token, sizeof((*query)->params.insert_params.table_name)-1);
+    (*query)->params.insert_params.table_name[sizeof((*query)->params.insert_params.table_name)-1] = '\0';
  
     // check '('
     token = strtok(NULL, " \t");
@@ -63,7 +63,7 @@ void parse_insert(Query** query){
         (*query)->params.insert_params.col_list = (char**)realloc((*query)->params.insert_params.col_list, (current_col_count+1) * sizeof(char*));
         assert(((*query)->params.insert_params.col_list) != NULL);
         // put into col_list
-        (*query)->params.create_params.col_list[current_col_count] = strdup(token);
+        (*query)->params.insert_params.col_list[current_col_count] = strdup(token);
 
         (*query)->params.insert_params.col_count++;
         // get next col
@@ -101,11 +101,10 @@ void parse_insert(Query** query){
     token = strtok(data_list, " ,\t"); // got val1
     while(token != NULL){
         // increase size of data_list 
-        //store all values as string, need to cast to the correct type later in db functions by refering to ColType
-        (*query)->params.insert_params.data_list = (char**)realloc((*query)->params.insert_params.data_list, (val_count+1) * sizeof(char*)); 
+        (*query)->params.insert_params.data_list = (void**)realloc((*query)->params.insert_params.data_list, (val_count+1) * sizeof(void*)); 
         assert(((*query)->params.insert_params.data_list) != NULL);
         // set value
-        (*query)->params.create_params.data_list[val_count] = strdup(token);
+        (*query)->params.insert_params.data_list[val_count] = strdup(token);
 
         val_count++;
         // get next value
@@ -113,7 +112,7 @@ void parse_insert(Query** query){
     }
 
     // check number of values passed and number of columns passed
-    if(val_count != (*query)->params.insert_params.col_count;){
+    if(val_count != (*query)->params.insert_params.col_count){
         (*query)->cmd_type = INVALID;
         sprintf((*query)->syntax_message, "Syntax error: %d value(s) provided for %d column(s).", val_count, (*query)->params.insert_params.col_count);
         return;
