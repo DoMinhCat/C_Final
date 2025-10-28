@@ -44,7 +44,7 @@ void parse_insert(Query** query){
 
     // get col_list : ( col1, col2 )
     char* col_list;
-    int i;
+    int current_col_count;
     (*query)->params.insert_params.col_count = 0;
 
     col_list = strtok(NULL, ")"); // got " col1, col2, col3 "
@@ -57,26 +57,65 @@ void parse_insert(Query** query){
     // get each col by trimming "," and " "
     token = strtok(col_list, " ,\t"); // got col1
     while(token != NULL){
-        i = (*query)->params.insert_params.col_count;
+        current_col_count = (*query)->params.insert_params.col_count;
 
         // increase size of col_list 
-        (*query)->params.insert_params.col_list = (char**)realloc((*query)->params.insert_params.col_list, (i+1) * sizeof(char*));
+        (*query)->params.insert_params.col_list = (char**)realloc((*query)->params.insert_params.col_list, (current_col_count+1) * sizeof(char*));
         assert(((*query)->params.insert_params.col_list) != NULL);
-        // set col name
-        (*query)->params.create_params.col_list[i] = strdup(col_name);
+        // put into col_list
+        (*query)->params.create_params.col_list[current_col_count] = strdup(token);
 
         (*query)->params.insert_params.col_count++;
         // get next col
-        token = strtok(NULL, ",");
+        token = strtok(NULL, ", ");
     }
 
     // check for "VALUES"
     token = strtok(NULL, " ");
-    if(!token || strcasecmp(token, "VALUES")){
+    if(!token || strcasecmp(token, "VALUES") != 0){
         (*query)->cmd_type = INVALID;
         sprintf((*query)->syntax_message, "Syntax error: missing 'VALUES' after column list.");
         return;
     }
-    //insert into tab (col1, col2) values ( 1, sds, sss)
 
+    // check '('
+    token = strtok(NULL, " \t");
+    if (!token || token[0] != '(') {
+        (*query)->cmd_type = INVALID;
+        sprintf((*query)->syntax_message, "Syntax error: missing '(' after VALUES.");
+        return;
+    }
+
+    // get data_list : ( val1, val2 )
+    char* data_list;
+    int val_count = 0;
+
+    data_list = strtok(NULL, ")"); // got " val1, val2 "
+    if(!data_list){
+        (*query)->cmd_type = INVALID;
+        sprintf((*query)->syntax_message, "Syntax error: at least 1 value is required.");
+        return;
+    }
+
+    // get each col by trimming "," and " "
+    token = strtok(data_list, " ,\t"); // got val1
+    while(token != NULL){
+        // increase size of data_list 
+        //store all values as string, need to cast to the correct type later in db functions by refering to ColType
+        (*query)->params.insert_params.data_list = (char**)realloc((*query)->params.insert_params.data_list, (val_count+1) * sizeof(char*)); 
+        assert(((*query)->params.insert_params.data_list) != NULL);
+        // set value
+        (*query)->params.create_params.data_list[val_count] = strdup(token);
+
+        val_count++;
+        // get next value
+        token = strtok(NULL, ", ");
+    }
+
+    // check number of values passed and number of columns passed
+    if(val_count != (*query)->params.insert_params.col_count;){
+        (*query)->cmd_type = INVALID;
+        sprintf((*query)->syntax_message, "Syntax error: %d value(s) provided for %d column(s).", val_count, (*query)->params.insert_params.col_count);
+        return;
+    }
 }
