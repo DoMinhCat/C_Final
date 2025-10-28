@@ -104,7 +104,7 @@ while(token != NULL){
 
                     if(*p){
                         *p = '\0';  // Terminate constraint
-                        p++;  // lowercase p
+                        p++;  
                         while(*p == ' ' || *p == '\t') p++;  // Skip spaces
 
                         if(*p){
@@ -114,7 +114,7 @@ while(token != NULL){
 
                             if(*p){
                                 *p = '\0';  // Terminate REFERENCES
-                                p++;  // lowercase p
+                                p++;  
                                 while(*p == ' ' || *p == '\t') p++;  // Skip spaces
 
                                 if(*p){
@@ -124,12 +124,11 @@ while(token != NULL){
 
                                     if(*p){
                                         *p = '\0';  // Terminate refer table name
-                                        p++;  // lowercase p
+                                        p++;  
                                         while(*p == ' ' || *p == '\t') p++;  // Skip spaces
 
                                         if(*p){
                                             col_name_refer = p;
-                                            // No more fields after this
                                         }
                                     }
                                 }
@@ -183,6 +182,23 @@ while(token != NULL){
             (*query)->params.create_params.constraint_list[i] = PK;
         else if (strcasecmp(col_constraint, "FK") == 0)
             (*query)->params.create_params.constraint_list[i] = FK;
+
+            if (!reference_keyword){
+                (*query)->cmd_type = INVALID;
+                sprintf((*query)->syntax_message, "Syntax error: missing 'REFERENCES' after FK.");
+                return;
+            }
+            if (!table_name_refer){
+                (*query)->cmd_type = INVALID;
+                sprintf((*query)->syntax_message, "Syntax error: missing table name to refer to after REFERENCES.");
+                return;
+            }
+            if (!col_name_refer){
+                (*query)->cmd_type = INVALID;
+                sprintf((*query)->syntax_message, "Syntax error: missing column name to refer to after table name.");
+                return;
+            }
+
         else {
             (*query)->cmd_type = INVALID;
             sprintf((*query)->syntax_message, "Invalid constraint '%s' for column '%s'.", col_constraint, col_name);
