@@ -31,6 +31,7 @@ Projet final de C à ESGI
 
 - `delete from tab1 where col1=6`
 - `drop table tab1`
-- `create table
+- `create table tab1 ( col1 int pk, col2 string fk references tab2 col1, col3 double )`, spaces between parentheses are obligated for the program to parse the command correctly
+- `insert into tab1 ( col1, col2 ) values ( val1, val2 )
 
 6. Contributors
