@@ -7,6 +7,7 @@ Group 2 ESGI 2A3
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "db.h"
 
@@ -14,17 +15,18 @@ Response* create_table(Query query){
     Response* res = init_response();
     Table* current_table = first_table;
 
-    char* new_tb_name = (*query)->params.create_params.table_name;
-    int col_count = (*query)->params.create_params.col_count;
-    char** col_list = (*query)->params.create_params.col_list;
+    char* new_tb_name = query.params.create_params.table_name;
+    int col_count = query.params.create_params.col_count;
+    char** col_list = query.params.create_params.col_list;
+    ColConstraintType* constraint_list = query.params.create_params.constraint_list;
 
     int i,j;
 
     // check table name
     while(current_table != NULL){
-        if(strcmp((*current_table)->name, new_tb_name) == 0){
-            (*res)->status = FAILURE;
-            snprintf((*res)->message, "Execution error : table '%s' already exist.", new_tb_name);
+        if(strcmp(current_table->name, new_tb_name) == 0){
+            res->status = FAILURE;
+            sprintf(res->message, "Execution error : table '%s' already exist.", new_tb_name);
             return res;
         }
         current_table = current_table->next_table;
@@ -34,15 +36,63 @@ Response* create_table(Query query){
     for(i=0; i<(col_count-1); i++){
         for(j=i+1; j<col_count; j++){
             if(strcmp(col_list[i], col_list[j]) == 0){
-                (*res)->status = FAILURE;
-                snprintf((*res)->message, "Execution error : duplicated columns '%s' in table '%s'.", col_list[i], new_tb_name);
+                res->status = FAILURE;
+                sprintf(res->message, "Execution error : duplicated columns '%s' in table '%s'.", col_list[i], new_tb_name);
                 return res;
             }
         }
     }
 
     //check 1 pk
-    //check fk : reference to an existing table + col of that table exists + that col is pk + col of same type + many cols refer to same col not allowed
+    int pk_count = 0;
+    for(i=0; i<sizeof(constraint_list)/sizeof(ColConstraintType); i++){
+        if(constraint_list[i] == PK) pk_count++;
+    }
+    if(pk_count != 1){
+        res->status = FAILURE;
+        sprintf(res->message, "Execution error : a table must have a primary key column.");
+        return res;
+    }
+
+    //check fk : reference to an existing table 
+    int fk_count = query.params.create_params.fk_count;
+    
+
+    if(fk_count>0){
+        int existing_refer_table_count = 0;
+        int index_table_not_found;
+        char** table_refer_list = query.params.create_params.table_refer_list;
+        
+        for(i=0; i<fk_count; i++){
+            for(current_table = first_table; current_table != NULL; current_table = current_table->next_table){
+                if(strcmp(current_table->name, table_refer_list[i]) == 0){
+                    existing_refer_table_count++;
+                }
+            }
+            if(existing_refer_table_count != i+1){
+                index_table_not_found = i;
+                break;
+            }
+        }
+        if(existing_refer_table_count != fk_count){
+            res->status = FAILURE;
+            sprintf(res->message, "Execution error : table '%s' refered to by '%s' does not exist.", table_refer_list[i], //fk_col[i]);
+            return res;
+        }
+    }
+
+    
+    while(current_table != NULL){
+        if(strcmp(current_table->name, new_tb_name) == 0){
+            res->status = FAILURE;
+            sprintf(res->message, "Execution error : table '%s' already exist.", new_tb_name);
+            return res;
+        }
+        current_table = current_table->next_table;
+    }
+
+
+    //check fk : + col of that table exists + that col is pk + col of same type + many cols refer to same col not allowed
 
 
     // create/malloc new table when all check is passed
