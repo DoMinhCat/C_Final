@@ -10,8 +10,8 @@ Group 2 ESGI 2A3
 
 #include "init.h"
 
+// safely initialise Query struct
 Query* init_query(){
-    // safely initialise Query struct
     Query* query = NULL;
     assert((query = (Query*)malloc(sizeof(Query))) != NULL);
     query->cmd_type = INVALID;

@@ -35,3 +35,7 @@ Projet final de C à ESGI
 - `insert into tab1 ( col1, col2 ) values ( val1, val2 )`
 
 6. Contributors
+
+
+Quick start
+gcc main.c ui/*c clean/*.c init/*.c

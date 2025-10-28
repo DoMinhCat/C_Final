@@ -4,7 +4,6 @@ Description : All hash-related functions/operations are here
 Group 2 ESGI 2A3
 */
 
-#include <stdio.h>
 #include <string.h>
 #include "hash.h"
 #include "db.h"

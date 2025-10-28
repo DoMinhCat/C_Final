@@ -8,6 +8,8 @@ Group 2 ESGI 2A3
 #define DB_H
 #include <stdbool.h>
 
+#include "../main.h"
+
 typedef struct Row{
     void **data_field;
     struct Row *next_row;
@@ -36,6 +38,5 @@ typedef struct Table{
     struct Table *next_table;
 } Table;
 
-void create_table(char* tb_name);
 
 #endif

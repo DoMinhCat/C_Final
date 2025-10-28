@@ -70,6 +70,10 @@ typedef struct {
     char table_name[TABLE_NAME_MAX];
 } DropParams;
 
+
+
+
+
 typedef enum{
     SUCCESS,
     FAILURE
@@ -103,5 +107,6 @@ typedef struct
 
 
 void print_divider();
+int main(int argc, char ** argv);
 
 #endif
