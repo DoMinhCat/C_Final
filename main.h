@@ -6,7 +6,10 @@ Group 2 ESGI 2A3
 
 #ifndef MAIN_H
 #define MAIN_H
-#define TABLE_NAME_MAX 50
+#define TABLE_NAME_MAX 101
+#define MAX_TOKEN_SIZE 257
+
+#include "db/db.h"
 
 typedef enum{
     CREATE,
@@ -18,29 +21,50 @@ typedef enum{
     INVALID
 } CommandType;
 
+typedef enum{
+    NONE,
+    FK,
+    PK
+} ColConstraintType;
+
 // For Create table function
 typedef struct{
     char table_name[TABLE_NAME_MAX];
+
     char **col_list; // list of column names passed in the query
-    CommandType *type_list;  // list of types corresponding to column
     int col_count;          // number of columns
-    // TODO : what about foreign key and primary key
+
+    ColType *type_list;  // list of types corresponding to column
+    ColConstraintType *constraint_list; // list of constraint corresponding to order of col_list
+
+    char** table_refer_list; //list of tables refered to by fk cols
+    char** col_refer_list; // list of cols of refered tables refered to by fk cols
+    int fk_count; // number of fk to free 2 lists above
 } CreateParams;
 
 // For Insert function
 typedef struct{
     char table_name[TABLE_NAME_MAX];
+
     char **col_list; // list of column names passed in the query
+    int col_count;          // number of columns for free operation
+
     void **data_list; // list of input for each column
     
     // TODO: define other necessary params
-} SelectParams;
+} InsertParams;
 
 typedef struct {
     char table_name[TABLE_NAME_MAX];
     char condition_column[TABLE_NAME_MAX];
-    char condition_value[TABLE_NAME_MAX];
+    char condition_value[MAX_TOKEN_SIZE];
 } DeleteParams;
+
+typedef struct {
+    char table_name[TABLE_NAME_MAX];
+    
+    // add more later
+} SelectParams;
 
 typedef struct {
     char table_name[TABLE_NAME_MAX];
@@ -64,20 +88,16 @@ typedef struct
     // take one of these params based on cmd_type
     union{
         CreateParams create_params;
-        SelectParams select_params;
+        InsertParams insert_params;
         // Other structs of other types of commands
         DeleteParams delete_params;
         DropParams drop_params;
-
+        SelectParams select_params;
     } params;
 
     // set this if there is a syntax error that the parser detected
     char syntax_message[100];
 } Query;
-
-
-
-
 
 
 
