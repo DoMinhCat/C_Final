@@ -47,6 +47,9 @@ void parse_create(Query** query){
     char* col_name;
     char* col_type;
     char* col_constraint;
+    char* reference_keyword;
+    char* table_name_refer;
+    char* col_name_refer;
     int i;
 
     (*query)->params.create_params.col_count = 0;
@@ -72,6 +75,9 @@ while(token != NULL){
     // Find first space/tab to separate name from type
     col_type = NULL;
     col_constraint = NULL;
+    reference_keyword = NULL;
+    table_name_refer = NULL;
+    col_name_refer = NULL
     
     char* p = token;
     while(*p && *p != ' ' && *p != '\t') p++;
@@ -93,6 +99,43 @@ while(token != NULL){
                 
                 if(*p) {
                     col_constraint = p;
+                    // Find next space for REFERENCES
+                    while(*p && *p != ' ' && *p != '\t') p++;
+
+                    if(*p){
+                        *p = '\0';  // Terminate constraint
+                        p++;  // lowercase p
+                        while(*p == ' ' || *p == '\t') p++;  // Skip spaces
+
+                        if(*p){
+                            reference_keyword = p;
+                            // Find next space for refer table name
+                            while(*p && *p != ' ' && *p != '\t') p++;
+
+                            if(*p){
+                                *p = '\0';  // Terminate REFERENCES
+                                p++;  // lowercase p
+                                while(*p == ' ' || *p == '\t') p++;  // Skip spaces
+
+                                if(*p){
+                                    table_name_refer = p;
+                                    // Find next space for refer col name
+                                    while(*p && *p != ' ' && *p != '\t') p++;
+
+                                    if(*p){
+                                        *p = '\0';  // Terminate refer table name
+                                        p++;  // lowercase p
+                                        while(*p == ' ' || *p == '\t') p++;  // Skip spaces
+
+                                        if(*p){
+                                            col_name_refer = p;
+                                            // No more fields after this
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
