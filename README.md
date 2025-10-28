@@ -10,6 +10,7 @@ Projet final de C à ESGI
 4. Features
 
 - Strings are applied directly, no need to wrap them in quotes or double quotes
+- Table and column names are case sensitive
 - Available types : int, string, and double
 - Insert: values will be inserted in the order of which columns are created and all columns must be inserted (can't insert only 4 values into a table with 5 columns)
 - The primary column value will not be automatically generated or incremented, must be manually inserted with INSERT INTO

@@ -5,14 +5,46 @@ Group 2 ESGI 2A3
 */
 
 #include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
 #include "db.h"
 
 Response* create_table(Query query){
     Response* res = init_response();
-    Table* table = init_table();
+    Table* current_table = first_table;
+
+    char* new_tb_name = (*query)->params.create_params.table_name;
+    int col_count = (*query)->params.create_params.col_count;
+    char** col_list = (*query)->params.create_params.col_list;
+
+    int i,j;
 
     // check table name
+    while(current_table != NULL){
+        if(strcmp((*current_table)->name, new_tb_name) == 0){
+            (*res)->status = FAILURE;
+            snprintf((*res)->message, "Execution error : table '%s' already exist.", new_tb_name);
+            return res;
+        }
+        current_table = current_table->next_table;
+    }
+
+    // check col names
+    for(i=0; i<(col_count-1); i++){
+        for(j=i+1; j<col_count; j++){
+            if(strcmp(col_list[i], col_list[j]) == 0){
+                (*res)->status = FAILURE;
+                snprintf((*res)->message, "Execution error : duplicated columns '%s' in table '%s'.", col_list[i], new_tb_name);
+                return res;
+            }
+        }
+    }
+    
+
+    // create new table
+    Table* new_tb = init_table();
+
     // set table name
 
 

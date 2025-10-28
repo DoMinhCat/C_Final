@@ -38,5 +38,10 @@ typedef struct Table{
     struct Table *next_table;
 } Table;
 
+// defined in main.c
+extern Table* first_table;
+extern Row* first_row;
+extern Col* first_col;
+
 
 #endif
