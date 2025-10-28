@@ -37,8 +37,8 @@ typedef struct{
     ColType *type_list;  // list of types corresponding to column
     ColConstraintType *constraint_list; // list of constraint corresponding to order of col_list
 
-    char** table_name_refer_list; //list of tables refered to by fk cols
-    char** col_name_refer_list; // list of cols of refered tables refered to by fk cols
+    char** table_refer_list; //list of tables refered to by fk cols
+    char** col_refer_list; // list of cols of refered tables refered to by fk cols
     int fk_count; // number of fk to free 2 lists above
 } CreateParams;
 

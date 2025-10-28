@@ -201,16 +201,16 @@ void parse_create(Query** query){
                     return;
                 }
 
-                // allocate table_name_refer_list and col_name_refer TODO
+                // allocate table_refer_list and col_name_refer TODO
                 fk_count = (*query)->params.create_params.fk_count;
 
-                (*query)->params.create_params.table_name_refer_list = (char**)realloc((*query)->params.create_params.table_name_refer_list, (fk_count + 1) * sizeof(char*));
-                (*query)->params.create_params.col_name_refer_list = (char**)realloc((*query)->params.create_params.col_name_refer_list, (fk_count + 1) * sizeof(char*));
-                assert(((*query)->params.create_params.table_name_refer_list) != NULL);
-                assert(((*query)->params.create_params.col_name_refer_list) != NULL);
+                (*query)->params.create_params.table_refer_list = (char**)realloc((*query)->params.create_params.table_refer_list, (fk_count + 1) * sizeof(char*));
+                (*query)->params.create_params.col_refer_list = (char**)realloc((*query)->params.create_params.col_refer_list, (fk_count + 1) * sizeof(char*));
+                assert(((*query)->params.create_params.table_refer_list) != NULL);
+                assert(((*query)->params.create_params.col_refer_list) != NULL);
                 // set table and col refered to
-                (*query)->params.create_params.table_name_refer_list[fk_count] = strdup(table_name_refer);
-                (*query)->params.create_params.col_name_refer_list[fk_count] = strdup(col_name_refer);
+                (*query)->params.create_params.table_refer_list[fk_count] = strdup(table_name_refer);
+                (*query)->params.create_params.col_refer_list[fk_count] = strdup(col_name_refer);
 
                 (*query)->params.create_params.fk_count++;
             }else {
