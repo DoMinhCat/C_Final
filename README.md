@@ -26,6 +26,7 @@ Projet final de C à ESGI
 - "exit" or "quit" to exit the program
 
 - Max col per table = 50
+- Max table = 50
 - Max chars for table/col/row name = 100
 
 5. Usage

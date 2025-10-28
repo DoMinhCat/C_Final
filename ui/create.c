@@ -165,6 +165,7 @@ void parse_create(Query** query){
             return;
         }
 
+        //TODO : check col_name != SELECT, INSERT,... or contains special chars
         // expand list size 
         i = (*query)->params.create_params.col_count;
 
@@ -190,6 +191,7 @@ void parse_create(Query** query){
             return;
         }
 
+        // validate constraint
         if (col_constraint){
             if (strcasecmp(col_constraint, "PK") == 0)
                 (*query)->params.create_params.constraint_list[i] = PK;

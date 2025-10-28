@@ -40,9 +40,12 @@ Response* create_table(Query query){
             }
         }
     }
-    
 
-    // create new table
+    //check 1 pk
+    //check fk : reference to an existing table + col of that table exists + that col is pk + col of same type + many cols refer to same col not allowed
+
+
+    // create/malloc new table when all check is passed
     Table* new_tb = init_table();
 
     // set table name
