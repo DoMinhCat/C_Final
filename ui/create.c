@@ -26,7 +26,7 @@ void parse_create(Query** query){
 
     // get table name to create
     token = strtok(NULL, " ");
-    if (!token) {
+    if (!token || strlen(token) == 0) {
         (*query)->cmd_type = INVALID;
         sprintf((*query)->syntax_message, "Syntax error: missing table name after TABLE.");
         return;
@@ -63,7 +63,7 @@ void parse_create(Query** query){
 
     // get first column definition inside parentheses
     col_def = strtok(NULL, ")");
-    if (!col_def){
+    if (!col_def || strlen(col_def) == 0){
         (*query)->cmd_type = INVALID;
         sprintf((*query)->syntax_message, "Syntax error: at least 1 column is required.");
         return;
@@ -159,7 +159,7 @@ void parse_create(Query** query){
             return;
         }
 
-        if (!col_type){
+        if (!col_type || strlen(col_type) == 0){
             (*query)->cmd_type = INVALID;
             sprintf((*query)->syntax_message, "Syntax error: missing type for column '%s'.", col_name);
             return;
@@ -196,17 +196,17 @@ void parse_create(Query** query){
             else if (strcasecmp(col_constraint, "FK") == 0){
                 (*query)->params.create_params.constraint_list[i] = FK;
                 // check for REFERENCES table col for fk
-                if (!reference_keyword){
+                if (!reference_keyword  || strlen(reference_keyword) == 0){
                     (*query)->cmd_type = INVALID;
                     sprintf((*query)->syntax_message, "Syntax error: missing 'REFERENCES' after FK.");
                     return;
                 }
-                if (!table_name_refer){
+                if (!table_name_refer || strlen(table_name_refer) == 0){
                     (*query)->cmd_type = INVALID;
                     sprintf((*query)->syntax_message, "Syntax error: missing table name to refer to after REFERENCES.");
                     return;
                 }
-                if (!col_name_refer){
+                if (!col_name_refer || strlen(col_name_refer) == 0){
                     (*query)->cmd_type = INVALID;
                     sprintf((*query)->syntax_message, "Syntax error: missing column name to refer to after table name.");
                     return;
