@@ -31,6 +31,11 @@ void parse_create(Query** query){
         sprintf((*query)->syntax_message, "Syntax error: missing table name after TABLE.");
         return;
     }
+    if (strlen(token)>(TABLE_NAME_MAX-1)){
+        (*query)->cmd_type = INVALID;
+        sprintf((*query)->syntax_message, "Syntax error: 100 characters maximum allowed for table name.");
+        return;
+    }
     strncpy((*query)->params.create_params.table_name, token, sizeof((*query)->params.create_params.table_name)-1);
     (*query)->params.create_params.table_name[sizeof((*query)->params.create_params.table_name)-1] = '\0';
 
@@ -148,6 +153,11 @@ void parse_create(Query** query){
             sprintf((*query)->syntax_message, "Syntax error: at least 1 column is required.");
             return;
         }
+        if(strlen(col_name)>(TABLE_NAME_MAX-1)){
+            (*query)->cmd_type = INVALID;
+            sprintf((*query)->syntax_message, "Syntax error: 100 characters maximum allowed for column name.");
+            return;
+        }
 
         if (!col_type){
             (*query)->cmd_type = INVALID;
@@ -155,7 +165,7 @@ void parse_create(Query** query){
             return;
         }
 
-        // Allocate and fill (rest of your code stays the same)
+        // expand list size 
         i = (*query)->params.create_params.col_count;
 
         (*query)->params.create_params.col_list = (char**)realloc((*query)->params.create_params.col_list, (i + 1) * sizeof(char*));
@@ -165,6 +175,7 @@ void parse_create(Query** query){
         assert((*query)->params.create_params.type_list != NULL);
         assert((*query)->params.create_params.constraint_list != NULL);
 
+        // set params
         (*query)->params.create_params.col_list[i] = strdup(col_name);
 
         if (strcasecmp(col_type, "INT") == 0)
