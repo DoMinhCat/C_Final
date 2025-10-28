@@ -26,7 +26,7 @@ void parse_insert(Query** query){
 
     // get table name
     token = strtok(NULL, " \t");
-    if(!token){
+    if(!token || strlen(token) == 0){
         (*query)->cmd_type = INVALID;
         sprintf((*query)->syntax_message, "Syntax error: missing table name after INTO.");
         return;
@@ -54,7 +54,7 @@ void parse_insert(Query** query){
     value_keyword = strtok(NULL, " "); // got "VALUES"
     open_value = strtok(NULL, " \t"); // got "("
     data_list = strtok(NULL, ")"); // got "val1, val2 "
-    if(!col_list){
+    if(!col_list || strlen(col_list) == 0){
         (*query)->cmd_type = INVALID;
         sprintf((*query)->syntax_message, "Syntax error: at least 1 column is required.");
         return;
@@ -92,7 +92,7 @@ void parse_insert(Query** query){
 
     // get data_list : ( val1, val2 )
     int val_count = 0;
-    if(!data_list){
+    if(!data_list || strlen(data_list) == 0){
         (*query)->cmd_type = INVALID;
         sprintf((*query)->syntax_message, "Syntax error: at least 1 value is required.");
         return;
