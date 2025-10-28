@@ -52,8 +52,13 @@ void parse_create(Query** query){
     char* col_name;
     char* col_type;
     char* col_constraint;
+    char* reference_keyword;
+    char* table_name_refer;
+    char* col_name_refer;
     int i;
+    int fk_count;
 
+    (*query)->params.create_params.fk_count = 0;
     (*query)->params.create_params.col_count = 0;
 
     // get first column definition inside parentheses
@@ -77,6 +82,9 @@ void parse_create(Query** query){
         // Find first space/tab to separate name from type
         col_type = NULL;
         col_constraint = NULL;
+        reference_keyword = NULL;
+        table_name_refer = NULL;
+        col_name_refer = NULL;
         
         char* p = token;
         while(*p && *p != ' ' && *p != '\t') p++;
@@ -98,6 +106,42 @@ void parse_create(Query** query){
                     
                     if(*p) {
                         col_constraint = p;
+                        // Find next space for REFERENCES
+                        while(*p && *p != ' ' && *p != '\t') p++;
+
+                        if(*p){
+                            *p = '\0';  // Terminate constraint
+                            p++;  
+                            while(*p == ' ' || *p == '\t') p++;  // Skip spaces
+
+                            if(*p){
+                                reference_keyword = p;
+                                // Find next space for refer table name
+                                while(*p && *p != ' ' && *p != '\t') p++;
+
+                                if(*p){
+                                    *p = '\0';  // Terminate REFERENCES
+                                    p++;  
+                                    while(*p == ' ' || *p == '\t') p++;  // Skip spaces
+
+                                    if(*p){
+                                        table_name_refer = p;
+                                        // Find next space for refer col name
+                                        while(*p && *p != ' ' && *p != '\t') p++;
+
+                                        if(*p){
+                                            *p = '\0';  // Terminate refer table name
+                                            p++;  
+                                            while(*p == ' ' || *p == '\t') p++;  // Skip spaces
+
+                                            if(*p){
+                                                col_name_refer = p;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -149,9 +193,38 @@ void parse_create(Query** query){
         if (col_constraint){
             if (strcasecmp(col_constraint, "PK") == 0)
                 (*query)->params.create_params.constraint_list[i] = PK;
-            else if (strcasecmp(col_constraint, "FK") == 0)
+            else if (strcasecmp(col_constraint, "FK") == 0){
                 (*query)->params.create_params.constraint_list[i] = FK;
-            else {
+                // check for REFERENCES table col for fk
+                if (!reference_keyword){
+                    (*query)->cmd_type = INVALID;
+                    sprintf((*query)->syntax_message, "Syntax error: missing 'REFERENCES' after FK.");
+                    return;
+                }
+                if (!table_name_refer){
+                    (*query)->cmd_type = INVALID;
+                    sprintf((*query)->syntax_message, "Syntax error: missing table name to refer to after REFERENCES.");
+                    return;
+                }
+                if (!col_name_refer){
+                    (*query)->cmd_type = INVALID;
+                    sprintf((*query)->syntax_message, "Syntax error: missing column name to refer to after table name.");
+                    return;
+                }
+
+                // allocate table_refer_list and col_name_refer TODO
+                fk_count = (*query)->params.create_params.fk_count;
+
+                (*query)->params.create_params.table_refer_list = (char**)realloc((*query)->params.create_params.table_refer_list, (fk_count + 1) * sizeof(char*));
+                (*query)->params.create_params.col_refer_list = (char**)realloc((*query)->params.create_params.col_refer_list, (fk_count + 1) * sizeof(char*));
+                assert(((*query)->params.create_params.table_refer_list) != NULL);
+                assert(((*query)->params.create_params.col_refer_list) != NULL);
+                // set table and col refered to
+                (*query)->params.create_params.table_refer_list[fk_count] = strdup(table_name_refer);
+                (*query)->params.create_params.col_refer_list[fk_count] = strdup(col_name_refer);
+
+                (*query)->params.create_params.fk_count++;
+            }else {
                 (*query)->cmd_type = INVALID;
                 sprintf((*query)->syntax_message, "Invalid constraint '%s' for column '%s'.", col_constraint, col_name);
                 return;

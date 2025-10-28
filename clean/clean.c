@@ -32,7 +32,28 @@ void free_query(Query** query){
         free((*query)->params.create_params.type_list);
         (*query)->params.create_params.type_list = NULL;
 
+        //free constraint_list
+        free((*query)->params.create_params.constraint_list);
+        (*query)->params.create_params.constraint_list = NULL;
+
+        //free table_refer_list
+        for(i=0; i<(*query)->params.create_params.fk_count; i++){
+            free((*query)->params.create_params.table_refer_list[i]);
+            (*query)->params.create_params.table_refer_list[i] = NULL;
+        }
+        free((*query)->params.create_params.table_refer_list);
+        (*query)->params.create_params.table_refer_list = NULL;
+
+        //free col_refer_list
+        for(i=0; i<(*query)->params.create_params.fk_count; i++){
+            free((*query)->params.create_params.col_refer_list[i]);
+            (*query)->params.create_params.col_refer_list[i] = NULL;
+        }
+        free((*query)->params.create_params.col_refer_list);
+        (*query)->params.create_params.col_refer_list = NULL;
+
         (*query)->params.create_params.col_count = 0;
+        (*query)->params.create_params.fk_count = 0;
         break;
     case INSERT:
         //free col_list
