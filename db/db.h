@@ -1,6 +1,6 @@
 /*
 Date of creation : 17/10/2025
-Description : All structures of database are declared here
+Description : All structures of database and db prototypes are declared here
 Group 2 ESGI 2A3
 */
 
@@ -11,6 +11,7 @@ Group 2 ESGI 2A3
 
 #include "../main.h"
 
+// struct
 typedef struct Row{
     void **data_field;
     struct Row *next_row;
@@ -39,10 +40,14 @@ typedef struct Table{
     struct Table *next_table;
 } Table;
 
+
+
 // defined in main.c
 extern Table* first_table;
 extern Row* first_row;
 extern Col* first_col;
 
 
+// prototypes
+Response* create_table(Query query);
 #endif

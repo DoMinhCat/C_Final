@@ -7,9 +7,10 @@ Group 2 ESGI 2A3
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <stdbool.h>
+#include <assert.h>
 
 #include "db.h"
+#include "helper.h"
 
 Response* create_table(Query query){
     Response* res = init_response();
@@ -59,9 +60,12 @@ Response* create_table(Query query){
     
 
     if(fk_count>0){
+        int* fk_list_index = get_fk_col_list_index(query);
+        assert(fk_list_index != NULL);
         int existing_refer_table_count = 0;
         int index_table_not_found;
         char** table_refer_list = query.params.create_params.table_refer_list;
+
         
         for(i=0; i<fk_count; i++){
             for(current_table = first_table; current_table != NULL; current_table = current_table->next_table){
@@ -76,7 +80,7 @@ Response* create_table(Query query){
         }
         if(existing_refer_table_count != fk_count){
             res->status = FAILURE;
-            sprintf(res->message, "Execution error : table '%s' refered to by '%s' does not exist.", table_refer_list[i], //fk_col[i]);
+            sprintf(res->message, "Execution error : table '%s' refered to by '%s' does not exist.", table_refer_list[index_table_not_found], col_list[fk_list_index[index_table_not_found]]);
             return res;
         }
     }

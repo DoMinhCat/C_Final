@@ -13,6 +13,7 @@ Group 2 ESGI 2A3
 int* get_fk_col_list_index(Query query){
     /*
     The function returns an array/pointer of index matches with col_refer_list and table_refer_list
+    
     Example : 
     col_list = col1 pk, col2, col3 fk, col4, col5 fk
     fk_index = 2, 4 -> which are indexes of col3 and col5 in col_list
