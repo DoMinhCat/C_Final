@@ -8,6 +8,7 @@ Group 2 ESGI 2A3
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+#include <stdbool.h>
 
 #include "db.h"
 #include "helper.h"
@@ -55,48 +56,67 @@ Response* create_table(Query query){
         return res;
     }
 
-    //check fk : reference to an existing table 
+    //check fk
     int fk_count = query.params.create_params.fk_count;
-    
 
     if(fk_count>0){
+        // refer to an existing table 
         int* fk_list_index = get_fk_col_list_index(query);
         assert(fk_list_index != NULL);
         int existing_refer_table_count = 0;
-        int index_table_not_found;
+        int existing_refer_col_count = 0;
+        int index_not_found;
         char** table_refer_list = query.params.create_params.table_refer_list;
-
+        char** col_refer_list = query.params.create_params.col_refer_list;
+        Table* refered_table;
+        Col* refered_col;
         
+        // loop through all fk to check
         for(i=0; i<fk_count; i++){
             for(current_table = first_table; current_table != NULL; current_table = current_table->next_table){
                 if(strcmp(current_table->name, table_refer_list[i]) == 0){
-                    existing_refer_table_count++;
+                    existing_refer_table_count++; // flag to check if all fk refer to existing tables
+                    refered_table = current_table; // get the pointer to table to check if refered col exists later
+                    break;
                 }
             }
+            // if a table refered to doesn't exist, get index for error msg and break out to return error
             if(existing_refer_table_count != i+1){
-                index_table_not_found = i;
+                index_not_found = i;
                 break;
             }
+
+            // if table exist, check for col refered to exists in that table
+            for(refered_col = refered_table->first_col; refered_col != NULL; refered_col = refered_col->next_col){
+                if(strcmp(refered_col->name, col_refer_list[i]) == 0){
+                    existing_refer_col_count ++; // flag to check if col exist
+                    break;
+                }
+            }
+            // if col doesn't exist, get index for error msg and break out to return error
+            if(existing_refer_col_count != i+1){
+                index_not_found = i;
+                break;
+            }
+            
         }
+        // error referd table doesn't exist
         if(existing_refer_table_count != fk_count){
             res->status = FAILURE;
-            sprintf(res->message, "Execution error : table '%s' refered to by '%s' does not exist.", table_refer_list[index_table_not_found], col_list[fk_list_index[index_table_not_found]]);
+            sprintf(res->message, "Execution error : table '%s' refered to by '%s' does not exist.", table_refer_list[index_not_found], col_list[fk_list_index[index_not_found]]);
             return res;
         }
-    }
-
-    
-    while(current_table != NULL){
-        if(strcmp(current_table->name, new_tb_name) == 0){
+        // error refered col doesn't exist
+        if(existing_refer_col_count != fk_count){
             res->status = FAILURE;
-            sprintf(res->message, "Execution error : table '%s' already exist.", new_tb_name);
+            sprintf(res->message, "Execution error : column '%s' does not exist in table '%s' refered to.", col_refer_list[index_not_found], table_refer_list[index_not_found]);
             return res;
         }
-        current_table = current_table->next_table;
+
     }
 
 
-    //check fk : + col of that table exists + that col is pk + col of same type + many cols refer to same col not allowed
+    //check fk : that col is pk + col of same type + many cols refer to same col not allowed
 
 
     // create/malloc new table when all check is passed

@@ -24,7 +24,7 @@ typedef enum{
 } ColType;
 
 typedef struct Col{
-    char name[30];
+    char name[TABLE_NAME_MAX];
     ColType type;
     bool is_fk;
     bool is_pk;

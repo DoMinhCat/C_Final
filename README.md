@@ -27,7 +27,7 @@ Projet final de C à ESGI
 
 - Max col per table = 50
 - Max table = 50
-- Max chars for table/col/row name = 100
+- Max chars for table/col name = 100
 
 5. Usage
 
@@ -38,6 +38,5 @@ Projet final de C à ESGI
 
 6. Contributors
 
-
 Quick start
-gcc main.c ui/*c clean/*.c init/*.c
+gcc main.c ui/_c clean/_.c init/\*.c
