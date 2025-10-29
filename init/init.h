@@ -4,9 +4,18 @@ Description : prototypes for all init functions
 Group 2 ESGI 2A3
 */
 
-#include "../main.h"
-#include "../db/db.h"
+#ifndef INIT_H
+#define INIT_H
 
+#include "../main.h"
+#include "../hash/hash.h"
+#include "../db/db.h"
 Query* init_query();
-Table* init_table();
 Response* init_response();
+
+Node* init_node();
+HashTable* init_hash_table();
+
+Table* init_table();
+
+#endif

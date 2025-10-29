@@ -38,5 +38,4 @@ Projet final de C à ESGI
 
 6. Contributors
 
-Quick start
-gcc main.c ui/_c clean/_.c init/\*.c
+Quick start Cat: gcc sandbox.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/parser.c ui/select.c clean/clean.c init/query.c -o sandbox.exe
