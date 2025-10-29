@@ -35,3 +35,5 @@ Projet final de C à ESGI
 - `insert into tab1 ( col1, col2 ) values ( val1, val2 )`
 
 6. Contributors
+
+Quick start Cat: gcc sandbox.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/parser.c ui/select.c clean/clean.c init/query.c -o sandbox.exe
