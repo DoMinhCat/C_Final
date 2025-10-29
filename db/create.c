@@ -25,8 +25,9 @@ Response* create_table(Query query){
 
     int i,j;
 
+    // CHECK ALL INPUT 
     // check table name
-    while(current_table != NULL){
+    while(current_table){
         if(strcmp(current_table->name, new_tb_name) == 0){
             res->status = FAILURE;
             sprintf(res->message, "Execution error : table '%s' already exist.", new_tb_name);
@@ -88,6 +89,12 @@ Response* create_table(Query query){
             refer_table_exist = false;
             refer_col_exist = false;
             // check table refered exists
+            //if it is the first table, it can't refer to anything
+            if(!first_table){
+                res->status = FAILURE;
+                sprintf(res->message, "Execution error : table '%s' refered to by '%s' does not exist.", table_refer_list[i], col_list[fk_list_index[i]]);
+                return res;
+            }
             for(current_table = first_table; current_table != NULL; current_table = current_table->next_table){
                 if(strcmp(current_table->name, table_refer_list[i]) == 0){
                     refer_table_exist = true; // flag to check if all fk refer to existing tables
@@ -133,40 +140,42 @@ Response* create_table(Query query){
         }
     }
 
-
     // create/malloc new table when all check is passed
     Table* new_tb = init_table();
+    Col* new_col = NULL;
 
     // set table name
+    new_tb->name = strdup(new_tb_name);
 
+    // add col
+    Col* current_col;
+    // through through the col list and add them in the linked list
+    for(i=0; i<col_count; i++){
+        // set basic info
+        new_col = init_col();
+        new_col->name = strdup(col_list[i]);
+        new_col->type = type_list[i];
+        new_col->constraint = constraint_list[i];
+        
+        // set pointer to next col
+        if(!new_tb->first_col){
+            new_tb->first_col = new_col;
+        } else{
+            // get pointer to the last col in the list
+            current_col = get_last_col(new_tb->first_col);
+            // last col points to a new col
+            current_col->next_col = new_col;
+        }
+    }
+
+    // init hash table
+
+    // add table to the linked list
+    if(!first_table) first_table = new_tb;
+    else{
+        current_table = get_last_table(first_table);
+        current_table->next_table = new_tb;
+    }
     // WARNING : free new_tb if there is error after init before returning error
 
 }
-/*
-typedef struct 
-{
-    CommandType cmd_type; 
-
-    // take one of these params based on cmd_type
-    union{
-        CreateParams create_params;
-    } params;
-
-    // set this if there is a syntax error that the parser detected
-    char syntax_message[100];
-} Query;
-
-typedef struct{
-    char table_name[TABLE_NAME_MAX];
-
-    char **col_list; // list of column names passed in the query
-    int col_count;          // number of columns
-
-    ColType *type_list;  // list of types corresponding to column
-    ColConstraintType *constraint_list; // list of constraint corresponding to order of col_list
-
-    char** table_refer_list; //list of tables refered to by fk cols
-    char** col_refer_list; // list of cols of refered tables refered to by fk cols
-    int fk_count; // number of fk to free 2 lists above
-} CreateParams;
-*/

@@ -83,45 +83,40 @@ int main(int argc, char **argv){
             // Call create() of db : db_response = create(...);
 
             //placeholder
-            assert((db_response = (Response*)malloc(sizeof(Response))) != NULL);
-            db_response->status = SUCCESS;
-            sprintf(db_response->message, "done");
+            //no need to init response, it will be init in db functions
+            
             printf("CREATE is called\n");
             break;
         case INSERT:
             // Call insert() of db
 
             //placeholder
-            assert((db_response = (Response*)malloc(sizeof(Response))) != NULL);
-            db_response->status = SUCCESS;
-            sprintf(db_response->message, "done");
+            //no need to init response, it will be init in db functions
+            
             printf("INSERT is called\n");
             break;
         case SELECT:
             // Call select() of db
 
             //placeholder
-            assert((db_response = (Response*)malloc(sizeof(Response))) != NULL);
-            db_response->status = SUCCESS;
-            sprintf(db_response->message, "done");
+            //no need to init response, it will be init in db functions
+            
             printf("SELECT is called\n");
             break;
         case DELETE:
             // Call delete() of db
 
             //placeholder
-            assert((db_response = (Response*)malloc(sizeof(Response))) != NULL);
-            db_response->status = SUCCESS;
-            sprintf(db_response->message, "done");
+            //no need to init response, it will be init in db functions
+            
             printf("DELETE is called\n");
             break;
         case DROP:
             // Call drop() of db : 
 
             //placeholder
-            assert((db_response = (Response*)malloc(sizeof(Response))) != NULL);
-            db_response->status = SUCCESS;
-            sprintf(db_response->message, "done");
+            //no need to init response, it will be init in db functions
+            
             printf("DROP is called\n");
             break;
         default:
@@ -132,6 +127,7 @@ int main(int argc, char **argv){
         // Check execution status
         if(db_response->status == FAILURE && db_response->message){
             printf("%s\n", db_response->message);
+            free(db_response);
             free_current_cmd(&cmd_input, &parser_output);
             continue;
         } else if(db_response->status == SUCCESS && db_response->message){
@@ -140,6 +136,7 @@ int main(int argc, char **argv){
             */
 
         // free before getting new command
+        free(db_response);
         free_current_cmd(&cmd_input, &parser_output);
     }
 

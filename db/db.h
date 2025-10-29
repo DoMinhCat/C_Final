@@ -24,7 +24,7 @@ typedef enum{
 } ColType;
 
 typedef struct Col{
-    char name[TABLE_NAME_MAX];
+    char* name;
     ColType type;
     ColConstraintType constraint;
 

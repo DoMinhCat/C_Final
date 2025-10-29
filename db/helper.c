@@ -50,3 +50,23 @@ int* get_fk_col_list_index(Query query){
 
     return res;
 }
+
+Table* get_last_table(Table* first_table){
+    // this function assumes there are at least 1 table already
+    Table* current_table = first_table;
+    
+    while(current_table->next_table){
+        current_table = current_table->next_table;
+    }
+    return current_table;
+}
+
+Col* get_last_col(Col* first_col){
+    // this function assumes there are at least 1 col already
+    Col* current_col = first_col;
+    
+    while(current_col->next_col){
+        current_col = current_col->next_col;
+    }
+    return current_col;
+}
