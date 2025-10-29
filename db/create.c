@@ -48,7 +48,7 @@ Response* create_table(Query query){
 
     //check 1 pk
     int pk_count = 0;
-    for(i=0; i<sizeof(constraint_list)/sizeof(ColConstraintType); i++){
+    for(i=0; i<col_count; i++){
         if(constraint_list[i] == PK) pk_count++;
     }
     if(pk_count != 1){
@@ -64,98 +64,74 @@ Response* create_table(Query query){
         // refer to an existing table 
         int* fk_list_index = get_fk_col_list_index(query);
         assert(fk_list_index != NULL);
-        int existing_refer_table_count = 0;
-        int existing_refer_col_count = 0;
-        int refer_col_is_pk_count = 0;
-        int refer_col_is_same_type = 0;
-        int index_not_found;
+        bool refer_table_exist;
+        bool refer_col_exist;
         char** table_refer_list = query.params.create_params.table_refer_list;
         char** col_refer_list = query.params.create_params.col_refer_list;
         Table* refered_table;
         Col* refered_col;
         Col* current_col;
         
-        // loop through all fk to check
+        // check many cols refer to same col not allowed
+        for(i=0; i<fk_count-1; i++){
+            for(j=i+1; j<fk_count; j++){
+                if(strcmp(col_refer_list[i],col_refer_list[j]) == 0 && strcmp(table_refer_list[i], table_refer_list[j]) == 0){
+                    res->status = FAILURE;
+                    sprintf(res->message, "Execution error : many columns refering to a same column '%s' of table '%s' is not allowed.", col_refer_list[i], table_refer_list[i]);
+                    return res;
+                }
+            }
+        }
+
+        // loop through all fk to check other criterias
         for(i=0; i<fk_count; i++){
+            refer_table_exist = false;
+            refer_col_exist = false;
+            // check table refered exists
             for(current_table = first_table; current_table != NULL; current_table = current_table->next_table){
                 if(strcmp(current_table->name, table_refer_list[i]) == 0){
-                    existing_refer_table_count++; // flag to check if all fk refer to existing tables
+                    refer_table_exist = true; // flag to check if all fk refer to existing tables
                     refered_table = current_table; // get the pointer to table to check if refered col exists later
                     break;
                 }
             }
-            // if a table refered to doesn't exist, get index for error msg and break out to return error
-            if(existing_refer_table_count != i+1){
-                index_not_found = i;
-                break;
+            // if a table refered to doesn't exist, return error
+            if(!refer_table_exist){
+                res->status = FAILURE;
+                sprintf(res->message, "Execution error : table '%s' refered to by '%s' does not exist.", table_refer_list[i], col_list[fk_list_index[i]]);
+                return res;
             }
 
-            // if table exist, check for col refered to exists in that table
+            // table exist, check for col refered to exists in that table
             for(current_col = refered_table->first_col; current_col != NULL; current_col = current_col->next_col){
                 if(strcmp(current_col->name, col_refer_list[i]) == 0){
-                    existing_refer_col_count ++; // flag to check if col exist
+                    refer_col_exist = true; // flag to check if col exist
                     refered_col = current_col;
                     break;
                 }
             }
-            // if col doesn't exist, get index for error msg and break out to return error
-            if(existing_refer_col_count != i+1){
-                index_not_found = i;
-                break;
+            // if col doesn't exist, return error
+            if(!refer_col_exist){
+                res->status = FAILURE;
+                sprintf(res->message, "Execution error : column '%s' does not exist in table '%s' refered to.", col_refer_list[i], table_refer_list[i]);
+                return res;
             }
 
             // check if col is pk ?
-            if(refered_col->constraint == PK){
-                refer_col_is_pk_count++;
-                break;
-            }
-            // if col isn't pk, get index for error msg and break out to return error
-            if(refer_col_is_pk_count != i+1){
-                index_not_found = i;
-                break;
+            if(refered_col->constraint != PK){
+                res->status = FAILURE;
+                sprintf(res->message, "Execution error : column '%s' in table '%s' refered to is not a primary key.", col_refer_list[i], table_refer_list[i]);
+                return res;
             }
 
             // check if col type is the same as col that refer to it
             if(refered_col->type != type_list[fk_list_index[i]]){
-                refer_col_is_same_type++;
-                break;
+                res->status = FAILURE;
+                sprintf(res->message, "Execution error : column '%s' in table '%s' refered to is not the same type as column '%s'.", col_refer_list[i], table_refer_list[i], col_list[fk_list_index[i]]);
+                return res;
             }
-            // if col isn't the same type, get index for error msg and break out to return error
-            if(refer_col_is_same_type != i+1){
-                index_not_found = i;
-                break;
-            }
-
-
-        }
-        // error referd table doesn't exist
-        if(existing_refer_table_count != fk_count){
-            res->status = FAILURE;
-            sprintf(res->message, "Execution error : table '%s' refered to by '%s' does not exist.", table_refer_list[index_not_found], col_list[fk_list_index[index_not_found]]);
-            return res;
-        }
-        // error refered col doesn't exist
-        if(existing_refer_col_count != fk_count){
-            res->status = FAILURE;
-            sprintf(res->message, "Execution error : column '%s' does not exist in table '%s' refered to.", col_refer_list[index_not_found], table_refer_list[index_not_found]);
-            return res;
-        }
-        // error refered col isn't pk
-        if(refer_col_is_pk_count != fk_count){
-            res->status = FAILURE;
-            sprintf(res->message, "Execution error : column '%s' in table '%s' refered to is not a primary key.", col_refer_list[index_not_found], table_refer_list[index_not_found]);
-            return res;
-        }
-        // error refered col isn't the same type
-        if(refer_col_is_same_type != fk_count){
-            res->status = FAILURE;
-            sprintf(res->message, "Execution error : column '%s' in table '%s' refered to is not the same type as column '%s'.", col_refer_list[index_not_found], table_refer_list[index_not_found], col_list[fk_list_index[index_not_found]]);
-            return res;
         }
     }
-
-
-    //check fk :  col of same type + many cols refer to same col not allowed
 
 
     // create/malloc new table when all check is passed
@@ -163,7 +139,7 @@ Response* create_table(Query query){
 
     // set table name
 
-
+    // WARNING : free new_tb if there is error after init before returning error
 
 }
 /*

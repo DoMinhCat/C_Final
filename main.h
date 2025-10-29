@@ -34,12 +34,12 @@ typedef struct{
     char **col_list; // list of column names passed in the query
     int col_count;          // number of columns
 
-    ColType *type_list;  // list of types corresponding to column
+    ColType *type_list;  // list of types corresponding order of col_list
     ColConstraintType *constraint_list; // list of constraint corresponding to order of col_list
 
-    char** table_refer_list; //list of tables refered to by fk cols
-    char** col_refer_list; // list of cols of refered tables refered to by fk cols
-    int fk_count; // number of fk to free 2 lists above
+    char** table_refer_list; //list of tables refered to by fk cols, doesnt follow order of col_list
+    char** col_refer_list; // list of cols of refered tables refered to by fk cols, doesnt follow order of col_list
+    int fk_count; // number of fk to free 2 lists above, done in clean.c
 } CreateParams;
 
 // For Insert function
