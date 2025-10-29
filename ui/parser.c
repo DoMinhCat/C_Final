@@ -29,7 +29,7 @@ Query* parse_cmd(char* cmd) {
     char* token;
     char* err_msg;
 
-    token = strtok(cmd, " ");
+    token = strtok(cmd, " \t");
 
     if(token == NULL){
         query->cmd_type = INVALID;
@@ -47,7 +47,7 @@ Query* parse_cmd(char* cmd) {
     // first word is not one of the accepted command (create, select, insert,...)
     else {
         query->cmd_type = INVALID;
-        sprintf(query->syntax_message, "Command %s not found, please check the syntax.\n", token);
+        sprintf(query->syntax_message, "Syntax error : command %s not found, please check the syntax.", token);
     }
 
     return query;
