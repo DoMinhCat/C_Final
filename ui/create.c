@@ -178,6 +178,22 @@ void parse_create(Query** query){
             sprintf((*query)->syntax_message, "Syntax error: 100 characters maximum allowed for column name.");
             return;
         }
+        // check reserved keyword
+        for(i=0; i<sizeof(banned_name_list) / sizeof(banned_name_list[0]); i++){
+            if(strcasecmp(col_name, banned_name_list[i]) == 0){
+                (*query)->cmd_type = INVALID;
+                sprintf((*query)->syntax_message, "Syntax error: '%s' is a reserved keyword.", col_name);
+                return;
+            }
+        }
+        // check no special character allowed
+        for(i=0; i<strlen(col_name); i++){
+            if(!isalnum(col_name[i]) || col_name[i] != '_'){
+                (*query)->cmd_type = INVALID;
+                sprintf((*query)->syntax_message, "Syntax error: special character '%c' is not allowed.", col_name[i]);
+                return;
+            }
+        }
 
         if (!col_type || strlen(col_type) == 0){
             (*query)->cmd_type = INVALID;
