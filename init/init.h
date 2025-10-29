@@ -4,7 +4,15 @@ Description : prototypes for all init functions
 Group 2 ESGI 2A3
 */
 
+#ifndef INIT_H
+#define INIT_H
+
 #include "../main.h"
+#include "../hash/hash.h"
+
 
 Node* init_node();
 HashTable* init_hash_table();
+Query* init_query();
+
+#endif
