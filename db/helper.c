@@ -19,7 +19,8 @@ int* get_fk_col_list_index(Query query){
 
     Returns NULL pointer if there is error
     */
-    int* res = (int*)malloc(sizeof(int) * query.params.create_params.fk_count);
+   int fk_count = query.params.create_params.fk_count;
+    int* res = (int*)malloc(sizeof(int) * fk_count);
     assert(res != NULL);
     int current_index = 0;
     int i;
@@ -42,5 +43,8 @@ int* get_fk_col_list_index(Query query){
         break;
     }
     
+    // handle an edge case that will probably never happens just to safe guard parse_create() if it has bug :))
+    if(current_index != fk_count) free(res);
+
     return res;
 }
