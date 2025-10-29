@@ -34,25 +34,44 @@ void parse_delete(Query** query){
 
     // get WHERE (optional)
     token = strtok(NULL, " \t");
-    if (token && strcasecmp(token, "WHERE") == 0) {
-        // get col name
-        token = strtok(NULL, " =");
-        if (!token || strlen(token) == 0) {
+    if (token) {
+        if(strcasecmp(token, "WHERE") == 0){
+            // get col name
+            token = strtok(NULL, " \t");
+            if (!token || strlen(token) == 0) {
+                (*query)->cmd_type = INVALID;
+                sprintf((*query)->syntax_message, "Syntax error: missing column name in WHERE clause.");
+                return;
+            }
+            strncpy((*query)->params.delete_params.condition_column, token, sizeof((*query)->params.delete_params.condition_column) - 1);
+            
+            // get "="
+            token = strtok(NULL, " \t");
+            if (!token) {
+                (*query)->cmd_type = INVALID;
+                sprintf((*query)->syntax_message, "Syntax error: missing '=' after '%s'.", (*query)->params.delete_params.condition_column);
+                return;
+            }
+            if (strcmp(token, "=") != 0) {
+                (*query)->cmd_type = INVALID;
+                sprintf((*query)->syntax_message, "Syntax error: command '%s' not found, please check the syntax.", token);
+                return;
+            }
+
+            // get condition value
+            token = strtok(NULL, " \n\t");
+            if (!token || strlen(token) == 0) {
+                (*query)->cmd_type = INVALID;
+                sprintf((*query)->syntax_message, "Syntax error: missing value in WHERE clause.");
+                return;
+            }
+            // strip newline from fgets because this is the end of cmd when user hit enter
+            token[strcspn(token, "\n")] = '\0';
+            strncpy((*query)->params.delete_params.condition_value, token, sizeof((*query)->params.delete_params.condition_value) - 1);
+        } else{
             (*query)->cmd_type = INVALID;
-            sprintf((*query)->syntax_message, "Syntax error: missing column name in WHERE clause.");
+            sprintf((*query)->syntax_message, "Syntax error : command '%s' not found, please check the syntax.", token);
             return;
         }
-        strncpy((*query)->params.delete_params.condition_column, token, sizeof((*query)->params.delete_params.condition_column) - 1);
-        
-        // get condition value
-        token = strtok(NULL, " \n");
-        if (!token || strlen(token) == 0) {
-            (*query)->cmd_type = INVALID;
-            sprintf((*query)->syntax_message, "Syntax error: missing value in WHERE clause.");
-            return;
-        }
-        // strip newline from fgets because this is the end of cmd when user hit enter
-        token[strcspn(token, "\n")] = '\0';
-        strncpy((*query)->params.delete_params.condition_value, token, sizeof((*query)->params.delete_params.condition_value) - 1);
     }
 }
