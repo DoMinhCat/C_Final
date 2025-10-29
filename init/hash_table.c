@@ -28,8 +28,8 @@ HashTable* init_hash_table(){
 
     // init each bucket
     for(int i=0; i<HASH_TABLE_SIZE; i++){
-        hash_tab->bucket[i] = init_node();
-        hash_tab->bucket[i]->key = i;
+        hash_tab->bucket[i] = NULL;
+        // add buckets as rows are inserted
     }
     return hash_tab;
 }
