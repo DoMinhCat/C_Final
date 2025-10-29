@@ -16,10 +16,11 @@ Group 2 ESGI 2A3
 Response* create_table(Query query){
     Response* res = init_response();
     Table* current_table = first_table;
-
+    ColType* type_list = query.params.create_params.type_list;
     char* new_tb_name = query.params.create_params.table_name;
     int col_count = query.params.create_params.col_count;
     char** col_list = query.params.create_params.col_list;
+
     ColConstraintType* constraint_list = query.params.create_params.constraint_list;
 
     int i,j;
@@ -65,11 +66,14 @@ Response* create_table(Query query){
         assert(fk_list_index != NULL);
         int existing_refer_table_count = 0;
         int existing_refer_col_count = 0;
+        int refer_col_is_pk_count = 0;
+        int refer_col_is_same_type = 0;
         int index_not_found;
         char** table_refer_list = query.params.create_params.table_refer_list;
         char** col_refer_list = query.params.create_params.col_refer_list;
         Table* refered_table;
         Col* refered_col;
+        Col* current_col;
         
         // loop through all fk to check
         for(i=0; i<fk_count; i++){
@@ -87,9 +91,10 @@ Response* create_table(Query query){
             }
 
             // if table exist, check for col refered to exists in that table
-            for(refered_col = refered_table->first_col; refered_col != NULL; refered_col = refered_col->next_col){
-                if(strcmp(refered_col->name, col_refer_list[i]) == 0){
+            for(current_col = refered_table->first_col; current_col != NULL; current_col = current_col->next_col){
+                if(strcmp(current_col->name, col_refer_list[i]) == 0){
                     existing_refer_col_count ++; // flag to check if col exist
+                    refered_col = current_col;
                     break;
                 }
             }
@@ -98,7 +103,30 @@ Response* create_table(Query query){
                 index_not_found = i;
                 break;
             }
-            
+
+            // check if col is pk ?
+            if(refered_col->constraint == PK){
+                refer_col_is_pk_count++;
+                break;
+            }
+            // if col isn't pk, get index for error msg and break out to return error
+            if(refer_col_is_pk_count != i+1){
+                index_not_found = i;
+                break;
+            }
+
+            // check if col type is the same as col that refer to it
+            if(refered_col->type != type_list[fk_list_index[i]]){
+                refer_col_is_same_type++;
+                break;
+            }
+            // if col isn't the same type, get index for error msg and break out to return error
+            if(refer_col_is_same_type != i+1){
+                index_not_found = i;
+                break;
+            }
+
+
         }
         // error referd table doesn't exist
         if(existing_refer_table_count != fk_count){
@@ -112,11 +140,22 @@ Response* create_table(Query query){
             sprintf(res->message, "Execution error : column '%s' does not exist in table '%s' refered to.", col_refer_list[index_not_found], table_refer_list[index_not_found]);
             return res;
         }
-
+        // error refered col isn't pk
+        if(refer_col_is_pk_count != fk_count){
+            res->status = FAILURE;
+            sprintf(res->message, "Execution error : column '%s' in table '%s' refered to is not a primary key.", col_refer_list[index_not_found], table_refer_list[index_not_found]);
+            return res;
+        }
+        // error refered col isn't the same type
+        if(refer_col_is_same_type != fk_count){
+            res->status = FAILURE;
+            sprintf(res->message, "Execution error : column '%s' in table '%s' refered to is not the same type as column '%s'.", col_refer_list[index_not_found], table_refer_list[index_not_found], col_list[fk_list_index[index_not_found]]);
+            return res;
+        }
     }
 
 
-    //check fk : that col is pk + col of same type + many cols refer to same col not allowed
+    //check fk :  col of same type + many cols refer to same col not allowed
 
 
     // create/malloc new table when all check is passed
