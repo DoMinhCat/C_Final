@@ -14,7 +14,7 @@ void parse_drop(Query** query){
     (*query)->cmd_type = DROP;
 
     // check TABLE
-    token = strtok(NULL, " ");
+    token = strtok(NULL, " \t");
     if(!token || strcasecmp(token, "TABLE") != 0){
         (*query)->cmd_type = INVALID;
         sprintf((*query)->syntax_message, "Syntax error: missing 'TABLE' after DROP.");

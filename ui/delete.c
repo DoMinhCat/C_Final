@@ -14,7 +14,7 @@ void parse_delete(Query** query){
     (*query)->cmd_type = DELETE;
 
     // check FROM
-    token = strtok(NULL, " ");
+    token = strtok(NULL, " \t");
     if (!token || strcasecmp(token, "FROM") != 0) {
         (*query)->cmd_type = INVALID;
         sprintf((*query)->syntax_message, "Syntax error: expected 'FROM' after DELETE.");
@@ -33,7 +33,7 @@ void parse_delete(Query** query){
     strncpy((*query)->params.delete_params.table_name, token, sizeof((*query)->params.delete_params.table_name) - 1);
 
     // get WHERE (optional)
-    token = strtok(NULL, " ");
+    token = strtok(NULL, " \t");
     if (token && strcasecmp(token, "WHERE") == 0) {
         // get col name
         token = strtok(NULL, " =");

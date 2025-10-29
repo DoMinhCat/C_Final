@@ -29,7 +29,7 @@ Query* parse_cmd(char* cmd) {
     char* token;
     char* err_msg;
 
-    token = strtok(cmd, " ");
+    token = strtok(cmd, " \t");
 
     if(token == NULL){
         query->cmd_type = INVALID;
