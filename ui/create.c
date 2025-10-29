@@ -14,7 +14,7 @@ Group 2 ESGI 2A3
 
 void parse_create(Query** query){
     char* token;
-    char* banned_name_list[] = {"SELECT", "INSERT", "DROP", "DELETE", "TABLE", "FROM", "INTO", "WHERE", "JOIN", "ON", "INT", "STRING", "DOUBLE"};
+    char* banned_name_list[] = {"SELECT", "INSERT", "VALUES", "DROP", "DELETE", "TABLE", "FROM", "INTO", "WHERE", "JOIN", "ON", "INT", "STRING", "DOUBLE"};
     
     int i;
     (*query)->cmd_type = CREATE;
