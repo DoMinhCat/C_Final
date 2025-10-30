@@ -7,23 +7,19 @@ Group 2 ESGI 2A3
 #ifndef DB_H
 #define DB_H
 #define MAX_TABLE_COUNT 50
+
 #include <stdbool.h>
 
+
+
+
 #include "../main.h"
-#include "../hash/hash.h"
-#include "../init/init.h"
 
 // struct
 typedef struct Row{
     void **data_field;
     struct Row *next_row;
 } Row;
-
-typedef enum{
-    INT,
-    DOUBLE,
-    STRING    
-} ColType;
 
 typedef struct Col{
     char* name;
@@ -51,5 +47,7 @@ extern int table_count;
 
 
 // prototypes
-Response* create_table(Query query);
+typedef struct Response Response;  
+typedef struct Query Query;  
+Response* create_table(Query* query);
 #endif

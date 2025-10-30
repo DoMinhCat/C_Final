@@ -12,11 +12,13 @@ Group 2 ESGI 2A3
 
 #include "db.h"
 #include "helper.h"
+#include "../main.h"
+#include "../ui/parser.h"
 
-Response* create_table(Query query){
+Response* create_table(Query* query){
     Response* res = init_response();
     Table* current_table = first_table;
-    ColType* type_list = query.params.create_params.type_list;
+    ColType* type_list = query->params.create_params.type_list;
     char* new_tb_name = query.params.create_params.table_name;
     int col_count = query.params.create_params.col_count;
     char** col_list = query.params.create_params.col_list;

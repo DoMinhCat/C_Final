@@ -9,6 +9,7 @@ Group 2 ESGI 2A3
 #include <string.h>
 
 #include "init.h"
+#include "../ui/parser.h"
 
 // safely initialise Query struct
 Query* init_query(){
