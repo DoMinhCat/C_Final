@@ -33,13 +33,13 @@ unsigned int hash_int(int num_to_hash){
 
 // TODO : review input type when implement Insert function
 // need to know col index in linked list to match with data_field index of Row to hash
-unsigned int hash_all(ColType type, Row row){
-    unsigned int res;
-    if(type == STRING){
-        res = hash_string(*(char*)val_to_hash);
-    }else{
-        res = hash_int(*(int*)val_to_hash);
-    }
+// unsigned int hash_all(ColType type, Row row){
+//     unsigned int res;
+//     if(type == STRING){
+//         res = hash_string(*(char*)val_to_hash);
+//     }else{
+//         res = hash_int(*(int*)val_to_hash);
+//     }
 
-    return res;
-}
+//     return res;
+// }

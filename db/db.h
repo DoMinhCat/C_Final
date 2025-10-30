@@ -10,6 +10,8 @@ Group 2 ESGI 2A3
 #include <stdbool.h>
 
 #include "../main.h"
+#include "../hash/hash.h"
+#include "../init/init.h"
 
 // struct
 typedef struct Row{
@@ -45,6 +47,7 @@ typedef struct Table{
 extern Table* first_table;
 extern Row* first_row;
 extern Col* first_col;
+extern int table_count;
 
 
 // prototypes

@@ -21,7 +21,7 @@ int* get_fk_col_list_index(Query query){
 
     Returns NULL pointer if there is error
     */
-   int fk_count = query.params.create_params.fk_count;
+    int fk_count = query.params.create_params.fk_count;
     int* res = (int*)malloc(sizeof(int) * fk_count);
     assert(res != NULL);
     int current_index = 0;

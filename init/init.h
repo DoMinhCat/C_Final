@@ -10,6 +10,7 @@ Group 2 ESGI 2A3
 #include "../main.h"
 #include "../hash/hash.h"
 #include "../db/db.h"
+
 Query* init_query();
 Response* init_response();
 

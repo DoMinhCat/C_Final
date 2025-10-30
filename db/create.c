@@ -48,11 +48,20 @@ Response* create_table(Query query){
     }
 
     //check 1 pk
+    int pk_index = -1;
     int pk_count = 0;
     for(i=0; i<col_count; i++){
-        if(constraint_list[i] == PK) pk_count++;
+        if(constraint_list[i] == PK){ 
+            pk_index = i;
+            pk_count++;
+            if(pk_count > 1){
+                res->status = FAILURE;
+                sprintf(res->message, "Execution error : a table must not have multiple primary key columns.");
+                return res;
+            }
+        }
     }
-    if(pk_count != 1){
+    if(pk_index < 0){
         res->status = FAILURE;
         sprintf(res->message, "Execution error : a table must have a primary key column.");
         return res;
@@ -72,6 +81,13 @@ Response* create_table(Query query){
         Table* refered_table;
         Col* refered_col;
         Col* current_col;
+
+        // refering to the table itself is not allowed, since it hasn't been created yet
+        if (strcmp(new_tb_name, table_refer_list[i]) == 0) {
+            res->status = FAILURE;
+            sprintf(res->message, "Execution error : table '%s' cannot reference itself.", new_tb_name);
+            return res;
+        }
         
         // check many cols refer to same col not allowed
         for(i=0; i<fk_count-1; i++){
@@ -168,14 +184,23 @@ Response* create_table(Query query){
         }
     }
 
-    // init hash table
-
     // add table to the linked list
     if(!first_table) first_table = new_tb;
     else{
         current_table = get_last_table(first_table);
         current_table->next_table = new_tb;
     }
-    // WARNING : free new_tb if there is error after init before returning error
+    table_count++;
+    
+    // init hash table
+    HashTable* hash_table = init_hash_table();
 
+    hash_table->pk_col_index = pk_index;
+    hash_table->table_index = table_count-1;
+    // add buckets as rows are inserted, there are 67 NULL buckets reserved
+
+    // return success message
+    res->status = SUCCESS;
+    sprintf(res->message, "table '%s' created with %d column(s).", new_tb_name, col_count);
+    return res;
 }
