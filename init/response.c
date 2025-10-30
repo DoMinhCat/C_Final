@@ -8,6 +8,7 @@ Group 2 ESGI 2A3
 #include <assert.h>
 
 #include "init.h"
+#include "../ui/parser.h"
 
 // safely initialise Query struct
 Response* init_response(){

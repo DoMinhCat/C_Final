@@ -14,16 +14,20 @@ Group 2 ESGI 2A3
 #include "helper.h"
 #include "../main.h"
 #include "../ui/parser.h"
+#include "../init/init.h"
+#include "../hash/hash.h"
+#include "../global_var.h"
+
 
 Response* create_table(Query* query){
     Response* res = init_response();
     Table* current_table = first_table;
     ColType* type_list = query->params.create_params.type_list;
-    char* new_tb_name = query.params.create_params.table_name;
-    int col_count = query.params.create_params.col_count;
-    char** col_list = query.params.create_params.col_list;
+    char* new_tb_name = query->params.create_params.table_name;
+    int col_count = query->params.create_params.col_count;
+    char** col_list = query->params.create_params.col_list;
 
-    ColConstraintType* constraint_list = query.params.create_params.constraint_list;
+    ColConstraintType* constraint_list = query->params.create_params.constraint_list;
 
     int i,j;
 
@@ -70,7 +74,7 @@ Response* create_table(Query* query){
     }
 
     //check fk
-    int fk_count = query.params.create_params.fk_count;
+    int fk_count = query->params.create_params.fk_count;
 
     if(fk_count>0){
         // refer to an existing table 
@@ -78,8 +82,8 @@ Response* create_table(Query* query){
         assert(fk_list_index != NULL);
         bool refer_table_exist;
         bool refer_col_exist;
-        char** table_refer_list = query.params.create_params.table_refer_list;
-        char** col_refer_list = query.params.create_params.col_refer_list;
+        char** table_refer_list = query->params.create_params.table_refer_list;
+        char** col_refer_list = query->params.create_params.col_refer_list;
         Table* refered_table;
         Col* refered_col;
         Col* current_col;

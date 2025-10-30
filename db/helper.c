@@ -8,9 +8,11 @@ Group 2 ESGI 2A3
 #include <assert.h>
 #include <string.h>
 
-#include "../main.h"
+#include "helper.h"
+#include "../ui/parser.h"
+#include "db.h"
 
-int* get_fk_col_list_index(Query query){
+int* get_fk_col_list_index(Query* query){
     /*
     The function returns an array/pointer of index matches with col_refer_list and table_refer_list
     Use this to convert col_refer_list and table_refer_list index to col_list, type_list, or constraint_list
@@ -21,17 +23,17 @@ int* get_fk_col_list_index(Query query){
 
     Returns NULL pointer if there is error
     */
-    int fk_count = query.params.create_params.fk_count;
+    int fk_count = query->params.create_params.fk_count;
     int* res = (int*)malloc(sizeof(int) * fk_count);
     assert(res != NULL);
     int current_index = 0;
     int i;
 
-    switch (query.cmd_type)
+    switch (query->cmd_type)
     {
     case CREATE:
-        int col_count = query.params.create_params.col_count;
-        ColConstraintType* constraint_list = query.params.create_params.constraint_list;
+        int col_count = query->params.create_params.col_count;
+        ColConstraintType* constraint_list = query->params.create_params.constraint_list;
         for(i=0; i<col_count; i++){
             if(constraint_list[i] == FK){
                 res[current_index] = i;

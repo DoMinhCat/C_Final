@@ -30,12 +30,6 @@ int main(int argc, char **argv){
     Query* parser_output = NULL;
     Response* db_response = NULL;
 
-    // global variable to be extern in db.h
-    Table* first_table = NULL;
-    Row* first_row = NULL;
-    Col* first_col = NULL;
-    int table_count = 0;
-
     printf("Welcome to MiniDB !\n");
     printf("The Final Project developed in C by Minh Cat, Paco, Bamba. 2A3 ESGI 2025-2026.\n");
     printf("Please refer to README.md for all usage and all other information.\n");

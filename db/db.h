@@ -10,9 +10,6 @@ Group 2 ESGI 2A3
 
 #include <stdbool.h>
 
-
-
-
 #include "../main.h"
 
 // struct
@@ -37,17 +34,9 @@ typedef struct Table{
     struct Table *next_table;
 } Table;
 
-
-
-// defined in main.c
-extern Table* first_table;
-extern Row* first_row;
-extern Col* first_col;
-extern int table_count;
-
-
 // prototypes
 typedef struct Response Response;  
 typedef struct Query Query;  
+
 Response* create_table(Query* query);
 #endif

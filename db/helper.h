@@ -7,9 +7,11 @@ Group 2 ESGI 2A3
 #ifndef HELPER_H
 #define HELPER_H
 
-#include "../main.h"
+typedef struct Col Col; 
+typedef struct Table Table; 
+typedef struct Query Query; 
 
-int* get_fk_col_list_index(Query query);
+int* get_fk_col_list_index(Query* query);
 Col* get_last_col(Col* first_col);
 Table* get_last_table(Table* first_table);
 

@@ -8,6 +8,7 @@ Group 2 ESGI 2A3
 #include <assert.h>
 
 #include "init.h"
+#include "../db/db.h"
 
 // safely initialise Table struct
 Table* init_table(){
