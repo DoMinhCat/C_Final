@@ -223,7 +223,7 @@ void parse_create(Query** query){
             (*query)->params.create_params.type_list[i] = DOUBLE;
         else {
             (*query)->cmd_type = INVALID;
-            sprintf((*query)->syntax_message, "Invalid column type '%s' for column '%s'.", col_type, col_name);
+            sprintf((*query)->syntax_message, "Syntax error: invalid column type '%s' for column '%s'.", col_type, col_name);
             return;
         }
 
@@ -264,7 +264,7 @@ void parse_create(Query** query){
                 (*query)->params.create_params.fk_count++;
             }else {
                 (*query)->cmd_type = INVALID;
-                sprintf((*query)->syntax_message, "Invalid constraint '%s' for column '%s'.", col_constraint, col_name);
+                sprintf((*query)->syntax_message, "Syntax error: invalid constraint '%s' for column '%s'.", col_constraint, col_name);
                 return;
             }
         } else (*query)->params.create_params.constraint_list[i] = NONE;
