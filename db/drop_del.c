@@ -1,20 +1,24 @@
 #include "db.h"
+#include "../global_var.h"
+
 #include <string.h>
 #include <stdlib.h>
 
-// temporary ?
-static Table* first_table = NULL;
+// first table already set in global_var.c
 
+// could move to helper.h
 // temporary ?
 Table* get_first_table(void) {
     return first_table;
 }
 
-// temporary ?
+// could move to helper.h
+// temporary ? 
 void set_first_table(Table* table) {
     first_table = table;
 }
 
+// could move to helper.h
 Table* get_table(const char* table_name) {
     Table* current = first_table;
     while (current != NULL) {
@@ -75,6 +79,7 @@ bool delete_rows(Table* table, const char* column_name, const char* value) {
     return true;
 }
 
+// TODO : delete_rows() and drop_table() should return the structure Response
 bool drop_table(const char* table_name) {
     if (!table_name) return false;
 
