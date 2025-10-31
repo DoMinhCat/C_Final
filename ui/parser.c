@@ -9,81 +9,46 @@ Group 2 ESGI 2A3
 #include <string.h>
 #include <assert.h>
 
-#include "../main.h"
-#include "../db/db.h"
 #include "parser.h"
+#include "../init/init.h"
 
 char* read_cmd(char* cmd_buffer){
-    char* cmd_string;
-    scanf("%s", cmd_buffer);
-    assert((cmd_string = (char*)malloc(sizeof(char)*strlen(cmd_buffer)+1)) != NULL);
+    if(fgets(cmd_buffer, MAX_CMD_SIZE, stdin) == NULL) return NULL;
+
+    // remove trailing newline
+    cmd_buffer[strcspn(cmd_buffer, "\n")] = '\0';
+
+    char* cmd_string = malloc(strlen(cmd_buffer)+1);
+    assert(cmd_string != NULL);
     strcpy(cmd_string, cmd_buffer);
     return cmd_string;
-}
-
-Query* init_query(){
-    // safely initialise Query struct
-    Query* query = NULL;
-    assert((query = (Query*)malloc(sizeof(Query))) != NULL);
-    query->cmd_type = INVALID;
-    memset(&query->params, 0, sizeof(query->params));
-    query->syntax_message[0] = '\0';
-
-    return query;
 }
 
 Query* parse_cmd(char* cmd) {
     Query* query = init_query();
 
     char* token;
-    char* rest = cmd;
-    char cmd_copy[MAX_CMD_SIZE];
     char* err_msg;
-    strcpy(cmd_copy, cmd);
 
-    token = strtok(rest, " ");
+    token = strtok(cmd, " \t");
 
-    if (token == NULL){
+    if(token == NULL){
         query->cmd_type = INVALID;
         sprintf(query->syntax_message, "Command invalid, please check the syntax.\n");
-    }else if(strcmp(token, "DELETE") == 0) {
-        query->cmd_type = DELETE;
-        token = strtok(NULL, " ");
-        if (token && strcmp(token, "FROM") == 0) {
-            token = strtok(NULL, " \n");
-            if (token) {
-                strcpy(query->params.delete_params.table_name, token);
-                token = strtok(NULL, " ");
-                if (token && strcmp(token, "WHERE") == 0) {
-                    token = strtok(NULL, " =");
-                    if (token) {
-                        strcpy(query->params.delete_params.condition_column, token);
-                        token = strtok(NULL, " ");
-                        if (token) {
-                            strcpy(query->params.delete_params.condition_value, token);
-                        }
-                    }
-                }
-            }
-        }
-    } else if (strcmp(token, "DROP") == 0) {
-        query->cmd_type = DROP;
-        token = strtok(NULL, " ");
-        if (token && strcmp(token, "TABLE") == 0) {
-            token = strtok(NULL, " \n");
-            if (token) {
-                strcpy(query->params.drop_params.table_name, token);
-            }
-        }
-    }
+    } else if(strcasecmp(token, "DELETE") == 0) parse_delete(&query);
+    else if(strcasecmp(token, "DROP") == 0) parse_drop(&query);
+    else if(strcasecmp(token, "CREATE") == 0) parse_create(&query);
+    else if(strcasecmp(token, "SELECT") == 0) parse_create(&query);
+    else if(strcasecmp(token, "INSERT") == 0) parse_insert(&query);
+
 
     // exit/quit case 
-    else if(strcmp(token, "exit") == 0 || strcmp(token, "quit") == 0) query->cmd_type = EXIT;
+    else if(strcasecmp(token, "EXIT") == 0 || strcasecmp(token, "QUIT") == 0) query->cmd_type = EXIT;
     
     // first word is not one of the accepted command (create, select, insert,...)
     else {
         query->cmd_type = INVALID;
-        sprintf(query->syntax_message, "Command %s not found, please check the syntax.\n", token);
+        sprintf(query->syntax_message, "Syntax error : command %s not found, please check the syntax.", token);
     }
 
     return query;
