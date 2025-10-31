@@ -7,6 +7,7 @@ Group 2 ESGI 2A3
 #include <stdlib.h>
 
 #include "clean.h"
+#include "../ui/parser.h"
 
 
 /*IMPORTANT : 

@@ -4,4 +4,23 @@ Description : prototypes for all init functions
 Group 2 ESGI 2A3
 */
 
-#include "../main.h"
+#ifndef INIT_H
+#define INIT_H
+
+typedef struct Node Node;  
+typedef struct HashTable HashTable; 
+typedef struct Table Table;  
+typedef struct Query Query;  
+typedef struct Response Response; 
+typedef struct Col Col;  
+
+Query* init_query();
+Response* init_response();
+
+Node* init_node();
+HashTable* init_hash_table();
+
+Table* init_table();
+Col* init_col();
+
+#endif

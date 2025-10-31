@@ -51,7 +51,7 @@ void parse_insert(Query** query){
     (*query)->params.insert_params.col_count = 0;
 
     col_list = strtok(NULL, ")"); // got " col1, col2, col3 " 
-    value_keyword = strtok(NULL, " "); // got "VALUES"
+    value_keyword = strtok(NULL, " \t"); // got "VALUES"
     open_value = strtok(NULL, " \t"); // got "("
     data_list = strtok(NULL, ")"); // got "val1, val2 "
     if(!col_list || strlen(col_list) == 0){
