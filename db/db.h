@@ -1,29 +1,27 @@
 /*
 Date of creation : 17/10/2025
-Description : All structures of database are declared here
+Description : All structures of database and db prototypes are declared here
 Group 2 ESGI 2A3
 */
 
 #ifndef DB_H
 #define DB_H
+#define MAX_TABLE_COUNT 50
+
 #include <stdbool.h>
 
+#include "../main.h"
+
+// struct
 typedef struct Row{
     void **data_field;
     struct Row *next_row;
 } Row;
 
-typedef enum{
-    INT,
-    DOUBLE,
-    STRING    
-} ColType;
-
 typedef struct Col{
-    char name[30];
+    char* name;
     ColType type;
-    bool is_fk;
-    bool is_pk;
+    ColConstraintType constraint;
 
     struct Col *next_col;
 } Col;
@@ -36,16 +34,16 @@ typedef struct Table{
     struct Table *next_table;
 } Table;
 
-// Database management functions
-Table* create_table(const char* table_name, char** col_names, ColType* col_types, int col_count);
+typedef struct Response Response;  
+typedef struct Query Query;  
+
+// prototypes
+
 bool drop_table(const char* table_name);
+
+// could move to helper.h
 Table* get_table(const char* table_name);
 Table* get_first_table(void);
-void set_first_table(Table* table);
 
-// Data manipulation functions
-bool delete_rows(Table* table, const char* column_name, const char* value);
-bool insert_row(Table* table, char** values, int value_count);
-Row* select_rows(Table* table, const char* column_name, const char* value);
-
+Response* create_table(Query* query);
 #endif
