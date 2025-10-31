@@ -189,6 +189,7 @@ Response* create_table(Query* query){
             current_col->next_col = new_col;
         }
     }
+    new_tb->col_count = col_count;
 
     // add table to the linked list
     if(!first_table) first_table = new_tb;
