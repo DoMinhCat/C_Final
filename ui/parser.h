@@ -8,7 +8,7 @@ Group 2 ESGI 2A3
 #ifndef PARSER_H
 #define PARSER_H
 
-#define MAX_CMD_SIZE 1024
+#define MAX_CMD_SIZE 5//1024
 #define MAX_TOKEN_SIZE 257
 #define TABLE_NAME_MAX 101
 

@@ -12,8 +12,17 @@ Group 2 ESGI 2A3
 #include "parser.h"
 #include "../init/init.h"
 
-char* read_cmd(char* cmd_buffer){
-    if(fgets(cmd_buffer, MAX_CMD_SIZE, stdin) == NULL) return NULL;
+char* read_cmd(char* cmd_buffer){ 
+    int c;
+
+    if(fgets(cmd_buffer, MAX_CMD_SIZE, stdin) == NULL || strcmp(cmd_buffer, "\n") ==0) return NULL;
+
+    // check if cmd is too long
+    if(strlen(cmd_buffer) > 0 && cmd_buffer[strlen(cmd_buffer)-1] != '\n'){
+        while ((c = getchar()) != '\n' && c != EOF); // flush the rest of cmd in stdin if cmd too long
+        printf("Command allows %d characters at max.", MAX_CMD_SIZE-1);
+        return "long";
+    } 
 
     // remove trailing newline
     cmd_buffer[strcspn(cmd_buffer, "\n")] = '\0';
