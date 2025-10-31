@@ -10,6 +10,7 @@ Group 2 ESGI 2A3
 #include <assert.h>
 
 #include "parser.h"
+#include "../init/init.h"
 
 char* read_cmd(char* cmd_buffer){
     if(fgets(cmd_buffer, MAX_CMD_SIZE, stdin) == NULL) return NULL;
