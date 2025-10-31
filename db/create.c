@@ -110,13 +110,13 @@ Response* create_table(Query* query){
         for(i=0; i<fk_count; i++){
             refer_table_exist = false;
             refer_col_exist = false;
-            // check table refered exists
             //if it is the first table, it can't refer to anything
             if(!first_table){
                 res->status = FAILURE;
                 sprintf(res->message, "Execution error: table '%s' refered to by '%s' does not exist.", table_refer_list[i], col_list[fk_list_index[i]]);
                 return res;
             }
+            // check table refered exists
             for(current_table = first_table; current_table != NULL; current_table = current_table->next_table){
                 if(strcmp(current_table->name, table_refer_list[i]) == 0){
                     refer_table_exist = true; // flag to check if all fk refer to existing tables

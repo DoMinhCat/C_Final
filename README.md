@@ -39,3 +39,5 @@ Projet final de C à ESGI
 6. Contributors
 
 Debug includes: gcc sandbox.c ui/parser.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/select.c clean/clean.c init/query.c init/db.c init/hash_table.c init/response.c db/create.c db/helper.c global_var.c -o sb.exe
+
+To consider : replace message and syntax_message in struct Reponse and Query by a direct fprintf to stderr if message and syntax_message don't need to be processed later.

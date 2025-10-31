@@ -5,6 +5,8 @@ Group 2 ESGI 2A3
 */
 
 #include <string.h>
+#include <stdlib.h>
+
 #include "hash.h"
 #include "db.h"
 
@@ -33,13 +35,38 @@ unsigned int hash_int(int num_to_hash){
 
 // TODO : review input type when implement Insert function
 // need to know col index in linked list to match with data_field index of Row to hash
-// unsigned int hash_all(ColType type, Row row){
-//     unsigned int res;
-//     if(type == STRING){
-//         res = hash_string(*(char*)val_to_hash);
-//     }else{
-//         res = hash_int(*(int*)val_to_hash);
-//     }
+int hash_pk(Col* first_col, Row* row_to_hash, int pk_col_index){
+    ColType type;
+    Col* current_col = first_col;
 
-//     return res;
-// }
+    int res;
+    int i;
+    
+    // to do in insert : loop to get index and coltype of pk in col list, based on that index get the correct data in data_field of Row to hash
+    /*
+    for(current_col=table.first_col; current_col != NULL; current_col=current_col->next_col){
+        if(current_col->constraint == PK){
+            type = current_col->type;
+            break;
+        }
+        index++;
+    }
+        */
+
+       
+       
+    // get the type pk_col from index given
+    for(i=0; i<pk_col_index; i++) current_col=current_col->next_col;
+    type = current_col->type;
+
+    
+
+    // hash the value based on its type
+    if(type == STRING){
+        res = hash_string((char*)row_to_hash->data_field[pk_col_index]);
+    }else if(type == INT){
+        res = hash_int(atoi(row_to_hash->data_field[pk_col_index]));  // atoi converts string -> int
+    }else return -1; // safe guard if it is DOUBLE, although checked in insert()
+
+    return res;
+}
