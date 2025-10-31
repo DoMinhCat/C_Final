@@ -13,4 +13,8 @@ typedef struct Query Query;
 void free_current_cmd(char** cmd_string, Query** query);
 void free_query(Query** query);
 
+void free_col();
+void free_row();
+void free_table();
+
 #endif
