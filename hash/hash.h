@@ -17,8 +17,9 @@ typedef struct Node{
     struct Node* next_node; 
 } Node;
 
-typedef struct{
+typedef struct HashTable{
     int table_index; //hash table of which table in the linked list
+    int pk_col_index; // index of col in col_list in create_params that is pk to hash
 
     Node** bucket; // linked list of buckets, 67 buckets max -> bucket[67][linkedlist collision]
 } HashTable;

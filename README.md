@@ -10,6 +10,7 @@ Projet final de C à ESGI
 4. Features
 
 - Strings are applied directly, no need to wrap them in quotes or double quotes
+- Table and column names are case sensitive
 - Available types : int, string, and double
 - Insert: values will be inserted in the order of which columns are created and all columns must be inserted (can't insert only 4 values into a table with 5 columns)
 - The primary column value will not be automatically generated or incremented, must be manually inserted with INSERT INTO
@@ -25,7 +26,8 @@ Projet final de C à ESGI
 - "exit" or "quit" to exit the program
 
 - Max col per table = 50
-- Max chars for table/col/row name = 100
+- Max table = 50
+- Max chars for table/col name = 100
 
 5. Usage
 
@@ -36,4 +38,4 @@ Projet final de C à ESGI
 
 6. Contributors
 
-Quick start Cat: gcc sandbox.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/parser.c ui/select.c clean/clean.c init/query.c -o sandbox.exe
+Debug includes: gcc sandbox.c ui/parser.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/select.c clean/clean.c init/query.c init/db.c init/hash_table.c init/response.c db/create.c db/helper.c global_var.c -o sb.exe

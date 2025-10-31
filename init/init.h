@@ -7,12 +7,20 @@ Group 2 ESGI 2A3
 #ifndef INIT_H
 #define INIT_H
 
-#include "../main.h"
-#include "../hash/hash.h"
+typedef struct Node Node;  
+typedef struct HashTable HashTable; 
+typedef struct Table Table;  
+typedef struct Query Query;  
+typedef struct Response Response; 
+typedef struct Col Col;  
 
+Query* init_query();
+Response* init_response();
 
 Node* init_node();
 HashTable* init_hash_table();
-Query* init_query();
+
+Table* init_table();
+Col* init_col();
 
 #endif
