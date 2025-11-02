@@ -14,7 +14,7 @@ Group 2 ESGI 2A3
 
 #include "../main.h"
 
-typedef enum{
+typedef enum CommandType{
     CREATE,
     INSERT,
     DELETE,

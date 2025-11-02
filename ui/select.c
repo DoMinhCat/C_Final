@@ -9,6 +9,7 @@ Group 2 ESGI 2A3
 #include <stdlib.h>
 
 #include "parser.h"
+#include "helper_ui.h"
 
 void parse_select(Query** query){
     char* token = NULL;
@@ -43,11 +44,7 @@ void parse_select(Query** query){
 
         //check FROM
         token = strtok(NULL, " \t");
-        if(!token || strcasecmp(token, "FROM") != 0){
-            (*query)->cmd_type = INVALID;
-            fprintf(stderr, "Syntax error: missing 'FROM' after *.");
-            return;
-        }
+        if(!contain_key_word(token, "FROM", query, "*")) return;
         //check table name
         token = strtok(NULL, " \t");
         if(!token || strlen(token) == 0){
@@ -196,15 +193,15 @@ void parse_select(Query** query){
                     }
                     strncpy((*query)->params.select_params.condition_val, token, sizeof((*query)->params.select_params.condition_val) - 1);
                     
-                    // TODO : check end of command/trailing spaces
+                    token = strtok(NULL, "\n");
+                    check_end_of_cmd(token, query, "WHERE clause");
+                    return;
                 }else{
-                    // check trailing spaces
-                    (*query)->cmd_type = INVALID;
-                    fprintf(stderr, "Syntax error: invalid command '%s' after JOIN clause.", extra_of_join);
+                    check_end_of_cmd(token, query, "JOIN clause");
                     return;
                 }
             } 
-            // no where clause after join
+            // no extra clause after join
             else return; 
         }
 
