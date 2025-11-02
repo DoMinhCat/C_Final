@@ -53,12 +53,21 @@ typedef struct{
 
 typedef struct {
     char table_name[TABLE_NAME_MAX];
-    char condition_column[TABLE_NAME_MAX];
-    char condition_value[MAX_TOKEN_SIZE];
+    char condition_column[TABLE_NAME_MAX]; // need to check input length
+    char condition_value[MAX_TOKEN_SIZE]; // need to check input length
 } DeleteParams;
 
 typedef struct {
     char table_name[TABLE_NAME_MAX];
+    char table_join_name[TABLE_NAME_MAX];
+
+    char** col_list;
+    char first_col_on[TABLE_NAME_MAX];
+    char second_col_on[TABLE_NAME_MAX];
+    char condition_col[TABLE_NAME_MAX]; // need to check input length
+    char condition_val[MAX_TOKEN_SIZE]; // need to check input length
+
+    // select col_list from tab [join tab2 on col1=col2] where x=y
     
     // add more later
 } SelectParams;
