@@ -3,7 +3,6 @@ Date of creation : 27/10/2025
 Description : parse_select to analyse select command
 Group 2 ESGI 2A3
 */
-
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
@@ -12,15 +11,16 @@ Group 2 ESGI 2A3
 #include "parser.h"
 
 void parse_select(Query** query){
-    char* token;
-    char* col_list;
-    char* col_name;
-    char* from;
-    char* table;
-    char* after_table_name;
+    char* token = NULL;
+    char* col_list = NULL;
+    char* col_name = NULL;
+    char* from = NULL;
+    char* table = NULL;
+    char* after_table_name = NULL;
     int current_col_count = 0;
 
-    (*query)->cmd_type = DELETE;
+    (*query)->cmd_type = SELECT;
+    (*query)->params.select_params.col_count = 0;
 
     // check "(" or *
     token = strtok(NULL, " \t"); // got ( or *
@@ -32,9 +32,11 @@ void parse_select(Query** query){
 
     // case SELECT *
     if(strcmp(token, "*") == 0){
-        (*query)->params.create_params.col_list = (char**)malloc(sizeof(char*));
-        assert(((*query)->params.create_params.col_list) != NULL);
+        (*query)->params.select_params.col_list = (char**)malloc(sizeof(char*));
+        assert((*query)->params.select_params.col_list != NULL);
+        // no need memory allocation thanks to strdup :))
         (*query)->params.select_params.col_list[0] = strdup(token);
+        (*query)->params.select_params.col_count++;
 
         //check FROM
         token = strtok(NULL, " \t");
@@ -51,7 +53,7 @@ void parse_select(Query** query){
             return;
         }
         //put table name in param
-        strncpy((*query)->params.select_params.table_name, token, sizeof((*query)->params.create_params.table_name) - 1);
+        strncpy((*query)->params.select_params.table_name, token, sizeof((*query)->params.select_params.table_name) - 1);
         
         after_table_name = strtok(NULL, " \t");
     } 
@@ -67,17 +69,17 @@ void parse_select(Query** query){
         //get each col and put into col_list
         token = strtok(col_list, " ,\t"); // got col1
         while(token != NULL){
-            current_col_count = (*query)->params.create_params.col_count;
+            current_col_count = (*query)->params.select_params.col_count;
 
             // increase size of col_list 
-            (*query)->params.create_params.col_list = (char**)realloc((*query)->params.create_params.col_list, (current_col_count+1) * sizeof(char*));
-            assert(((*query)->params.create_params.col_list) != NULL);
+            (*query)->params.select_params.col_list = (char**)realloc((*query)->params.select_params.col_list, (current_col_count+1) * sizeof(char*));
+            assert(((*query)->params.select_params.col_list) != NULL);
             // put into col_list
-            (*query)->params.create_params.col_list[current_col_count] = strdup(token);
+            (*query)->params.select_params.col_list[current_col_count] = strdup(token);
 
-            (*query)->params.create_params.col_count++;
+            (*query)->params.select_params.col_count++;
             // get next col
-            token = strtok(NULL, ", ");
+            token = strtok(NULL, " ,\t");
         }
 
         // check from
@@ -87,17 +89,19 @@ void parse_select(Query** query){
             return;
         }
         // check table
-        if(!table || strlen(token) == 0){
+        if(!table || strlen(table) == 0){
             (*query)->cmd_type = INVALID;
             fprintf(stderr, "Syntax error: at least 1 table is required.");
             return;
         }
         //put table name in param
-        strncpy((*query)->params.select_params.table_name, token, sizeof((*query)->params.select_params.table_name) - 1);
+        strncpy((*query)->params.select_params.table_name, table, sizeof((*query)->params.select_params.table_name) - 1);
     }
 
+    // no more optional where or join
+    if(!after_table_name) return;
     // check optional where or join
-    if(after_table_name && strlen(after_table_name) != 0){
+    else {
         // case join
         if(strcasecmp(after_table_name, "JOIN") == 0){
             // check tab to join
@@ -165,7 +169,7 @@ void parse_select(Query** query){
                     token = strtok(NULL, " \t");
                     if (!token || strlen(token) == 0) {
                         (*query)->cmd_type = INVALID;
-                        fprintf(stderr, "Syntax error: missing '=' after '%s'.", (*query)->params.select_params.first_col_on);
+                        fprintf(stderr, "Syntax error: missing '=' after '%s'.", (*query)->params.select_params.condition_col);
                         return;
                     }
                     if (strcmp(token, "=") != 0) {
@@ -178,7 +182,7 @@ void parse_select(Query** query){
                     token = strtok(NULL, " \t");
                     if (!token || strlen(token) == 0) {
                         (*query)->cmd_type = INVALID;
-                        fprintf(stderr, "Syntax error: missing value in WHERE clause.", (*query)->params.select_params.first_col_on);
+                        fprintf(stderr, "Syntax error: missing value in WHERE clause.", (*query)->params.select_params.condition_col);
                         return;
                     }
                     strncpy((*query)->params.select_params.condition_val, token, sizeof((*query)->params.select_params.condition_val) - 1);
@@ -188,7 +192,9 @@ void parse_select(Query** query){
                     fprintf(stderr, "Syntax error: invalid command '%s' after JOIN.", token);
                     return;
                 }
-            }
+            } 
+            // no where clause after join
+            else return; 
         }
 
         // case where
@@ -206,7 +212,7 @@ void parse_select(Query** query){
             token = strtok(NULL, " \t");
             if (!token || strlen(token) == 0) {
                 (*query)->cmd_type = INVALID;
-                fprintf(stderr, "Syntax error: missing '=' after '%s'.", (*query)->params.select_params.first_col_on);
+                fprintf(stderr, "Syntax error: missing '=' after '%s'.", (*query)->params.select_params.condition_col);
                 return;
             }
             if (strcmp(token, "=") != 0) {
@@ -219,7 +225,7 @@ void parse_select(Query** query){
             token = strtok(NULL, " \t");
             if (!token || strlen(token) == 0) {
                 (*query)->cmd_type = INVALID;
-                fprintf(stderr, "Syntax error: missing value in WHERE clause.", (*query)->params.select_params.first_col_on);
+                fprintf(stderr, "Syntax error: missing value in WHERE clause.");
                 return;
             }
             strncpy((*query)->params.select_params.condition_val, token, sizeof((*query)->params.select_params.condition_val) - 1);
@@ -229,5 +235,5 @@ void parse_select(Query** query){
             fprintf(stderr, "Syntax error: command '%s' not found, please check the syntax.", after_table_name);
             return;
         }
-    }
+    } 
 }

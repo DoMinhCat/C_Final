@@ -67,8 +67,6 @@ typedef struct {
     char second_col_on[TABLE_NAME_MAX];
     char condition_col[TABLE_NAME_MAX]; // need to check input length
     char condition_val[MAX_TOKEN_SIZE]; // need to check input length
-
-    // select col_list from tab [join tab2 on col1=col2] where x=y
 } SelectParams;
 
 typedef struct {

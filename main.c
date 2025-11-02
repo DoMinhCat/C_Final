@@ -87,44 +87,46 @@ int main(int argc, char **argv){
             // Call create() 
             db_response = create_table(parser_output);
             break;
-        // case INSERT:
-        //     // Call insert() of db
+        case INSERT:
+            // Call insert() of db
 
-        //     //placeholder
-        //     //no need to init response, it will be init in db functions
+            //placeholder
+            //no need to init response, it will be init in db functions
             
-        //     printf("INSERT is called\n");
-        //     break;
-        // case SELECT:
-        //     // Call select() of db
+            printf("INSERT is called\n");
+            break;
+        case SELECT:
+            // Call select() of db
 
-        //     //placeholder
-        //     //no need to init response, it will be init in db functions
+            //placeholder
+            //no need to init response, it will be init in db functions
             
-        //     printf("SELECT is called\n");
-        //     break;
-        // case DELETE:
-        //     // Call delete() of db
+            printf("SELECT is called\n");
+            break;
+        case DELETE:
+            // Call delete() of db
 
-        //     //placeholder
-        //     //no need to init response, it will be init in db functions
+            //placeholder
+            //no need to init response, it will be init in db functions
             
-        //     printf("DELETE is called\n");
-        //     break;
-        // case DROP:
-        //     // Call drop() of db : 
+            printf("DELETE is called\n");
+            break;
+        case DROP:
+            // Call drop() of db : 
 
-        //     //placeholder
-        //     //no need to init response, it will be init in db functions
+            //placeholder
+            //no need to init response, it will be init in db functions
             
-        //     printf("DROP is called\n");
-        //     break;
+            printf("DROP is called\n");
+            break;
         default:
             printf("Command invalid, please check the syntax.\n");
             break;
         }
 
         // Check execution status
+
+        /*
         if(db_response->status == FAILURE && db_response->message){
             printf("%s\n", db_response->message);
             free(db_response);
@@ -133,6 +135,7 @@ int main(int argc, char **argv){
         } else if(db_response->status == SUCCESS && db_response->message){
             printf("Executed : %s\n", db_response->message);
         }
+            */
             
 
         // free before getting new command
