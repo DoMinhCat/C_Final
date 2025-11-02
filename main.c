@@ -139,6 +139,8 @@ int main(int argc, char **argv){
             
 
         // free before getting new command
+
+        db_response = init_response();//temp
         free(db_response);
         free_current_cmd(&cmd_input, &parser_output);
     }

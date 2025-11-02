@@ -15,14 +15,9 @@ void parse_drop(Query** query){
 
     // check TABLE
     token = strtok(NULL, " \t");
-    if(!token){
+    if(!token || strcasecmp(token, "TABLE") != 0){
         (*query)->cmd_type = INVALID;
-        sprintf((*query)->syntax_message, "Syntax error: missing 'TABLE' after DROP.");
-        return;
-    }
-    if(strlen(token) == 0 || strcasecmp(token, "TABLE") != 0){
-        (*query)->cmd_type = INVALID;
-        sprintf((*query)->syntax_message, "Syntax error: command '%s'not found, please check the syntax.");
+        sprintf((*query)->syntax_message, "Syntax error: expected 'TABLE' after DROP.");
         return;
     }
 
