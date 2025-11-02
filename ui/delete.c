@@ -47,7 +47,7 @@ void parse_delete(Query** query){
             
             // get "="
             token = strtok(NULL, " \t");
-            if (!token) {
+            if (!token || strlen(token) == 0) {
                 (*query)->cmd_type = INVALID;
                 sprintf((*query)->syntax_message, "Syntax error: missing '=' after '%s'.", (*query)->params.delete_params.condition_column);
                 return;

@@ -62,6 +62,7 @@ typedef struct {
     char table_join_name[TABLE_NAME_MAX];
 
     char** col_list;
+    int col_count; //to free col_list
     char first_col_on[TABLE_NAME_MAX];
     char second_col_on[TABLE_NAME_MAX];
     char condition_col[TABLE_NAME_MAX]; // need to check input length
