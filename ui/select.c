@@ -163,6 +163,7 @@ void parse_select(Query** query){
             // check optional where after join
             extra_of_join = strtok(NULL, "\n");
             if(extra_of_join){
+                token = strtok(extra_of_join, " \t");
                 if(strcasecmp(token, "WHERE") == 0){
                     //check condition column
                     token = strtok(NULL, " \t");
@@ -190,14 +191,16 @@ void parse_select(Query** query){
                     token = strtok(NULL, " \t");
                     if (!token || strlen(token) == 0) {
                         (*query)->cmd_type = INVALID;
-                        fprintf(stderr, "Syntax error: missing value in WHERE clause.", (*query)->params.select_params.condition_col);
+                        fprintf(stderr, "Syntax error: missing value for column '%s' in WHERE clause.", (*query)->params.select_params.condition_col);
                         return;
                     }
                     strncpy((*query)->params.select_params.condition_val, token, sizeof((*query)->params.select_params.condition_val) - 1);
                     
+                    // TODO : check end of command/trailing spaces
                 }else{
+                    // check trailing spaces
                     (*query)->cmd_type = INVALID;
-                    fprintf(stderr, "Syntax error: invalid command '%s' after JOIN.", token);
+                    fprintf(stderr, "Syntax error: invalid command '%s' after JOIN clause.", extra_of_join);
                     return;
                 }
             } 
