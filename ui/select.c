@@ -17,6 +17,9 @@ void parse_select(Query** query){
     char* from = NULL;
     char* table = NULL;
     char* after_table_name = NULL;
+    char* extra_clause = NULL;
+    char* extra_of_join = NULL;
+    char* extra_of_where = NULL;
     int current_col_count = 0;
 
     (*query)->cmd_type = SELECT;
@@ -55,7 +58,7 @@ void parse_select(Query** query){
         //put table name in param
         strncpy((*query)->params.select_params.table_name, token, sizeof((*query)->params.select_params.table_name) - 1);
         
-        after_table_name = strtok(NULL, " \t");
+        extra_clause = strtok(NULL, "\n");
     } 
     // case SELECT ( col1, col2 )
     else if(strcmp(token, "(") == 0){
@@ -65,7 +68,9 @@ void parse_select(Query** query){
         from = strtok(NULL, " \t");
         //get table name
         table = strtok(NULL, " \t");
-        after_table_name = strtok(NULL, " \t");
+        //check end of command
+        extra_clause = strtok(NULL, "\n");
+
         //get each col and put into col_list
         token = strtok(col_list, " ,\t"); // got col1
         while(token != NULL){
@@ -99,11 +104,12 @@ void parse_select(Query** query){
     }
 
     // no more optional where or join
-    if(!after_table_name) return;
+    if(!extra_clause) return;
     // check optional where or join
     else {
         // case join
-        if(strcasecmp(after_table_name, "JOIN") == 0){
+        token = strtok(extra_clause, " \t");
+        if(strcasecmp(token, "JOIN") == 0){
             // check tab to join
             token = strtok(NULL, " \t");
             if(!token || strlen(token) == 0){
@@ -152,9 +158,11 @@ void parse_select(Query** query){
             }
             strncpy((*query)->params.select_params.second_col_on, token, sizeof((*query)->params.select_params.second_col_on) - 1);
 
+
+
             // check optional where after join
-            token = strtok(NULL, " \t");
-            if(token){
+            extra_of_join = strtok(NULL, "\n");
+            if(extra_of_join){
                 if(strcasecmp(token, "WHERE") == 0){
                     //check condition column
                     token = strtok(NULL, " \t");
@@ -198,7 +206,7 @@ void parse_select(Query** query){
         }
 
         // case where
-        else if(strcasecmp(after_table_name, "WHERE") == 0){
+        else if(strcasecmp(token, "WHERE") == 0){
             //check condition column
             token = strtok(NULL, " \t");
             if(!token || strlen(token) == 0){
@@ -229,10 +237,19 @@ void parse_select(Query** query){
                 return;
             }
             strncpy((*query)->params.select_params.condition_val, token, sizeof((*query)->params.select_params.condition_val) - 1);
+                        
+            // check for extra invalid command
+            extra_of_where = strtok(NULL, "\n");
+            if(extra_of_where){
+                (*query)->cmd_type = INVALID;
+                fprintf(stderr, "Syntax error: invalid command '%s' after WHERE clause.", extra_of_where);
+                return;
+            }
+
             
         } else{
             (*query)->cmd_type = INVALID;
-            fprintf(stderr, "Syntax error: command '%s' not found, please check the syntax.", after_table_name);
+            fprintf(stderr, "Syntax error: invalid command '%s' after SELECT statement.", extra_clause);
             return;
         }
     } 
