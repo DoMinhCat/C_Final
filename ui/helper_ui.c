@@ -42,3 +42,12 @@ bool contain_key_word(char* token, char* keyword, Query** query, char* current_s
     }
     return true;
 }
+
+bool contain_param(char* token, Query** query, char* err_msg){
+    if(!token || strlen(token) == 0){
+        (*query)->cmd_type = INVALID;
+        fprintf(stderr, "Syntax error: %s.", err_msg);
+        return false;
+    }
+    return true;
+}

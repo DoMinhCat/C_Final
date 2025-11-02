@@ -47,11 +47,7 @@ void parse_select(Query** query){
         if(!contain_key_word(token, "FROM", query, "*")) return;
         //check table name
         token = strtok(NULL, " \t");
-        if(!token || strlen(token) == 0){
-            (*query)->cmd_type = INVALID;
-            fprintf(stderr, "Syntax error: at least 1 table is required.");
-            return;
-        }
+        if(!contain_param(token, query, "at least 1 table is required")) return;
         //put table name in param
         strncpy((*query)->params.select_params.table_name, token, sizeof((*query)->params.select_params.table_name) - 1);
         
