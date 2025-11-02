@@ -39,4 +39,5 @@ Projet final de C à ESGI
 
 6. Contributors
 
-Debug includes: gcc sandbox.c ui/parser.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/select.c clean/clean.c init/query.c init/db.c init/hash_table.c init/response.c db/create.c db/helper.c global_var.c -o sb.exe
+Current quick start :
+`gcc main.c ui/parser.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/select.c clean/cmd.c clean/db.c init/query.c init/db.c init/hash_table.c init/response.c db/create.c db/helper.c global_var.c -o sb.exe`

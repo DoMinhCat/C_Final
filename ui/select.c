@@ -6,6 +6,9 @@ Group 2 ESGI 2A3
 
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
+#include <stdlib.h>
+
 #include "parser.h"
 
 void parse_select(Query** query){
@@ -29,17 +32,19 @@ void parse_select(Query** query){
 
     // case SELECT *
     if(strcmp(token, "*") == 0){
-        (*query)->params.select_params.col_list = strdup(token);
+        (*query)->params.create_params.col_list = (char**)malloc(sizeof(char*));
+        assert(((*query)->params.create_params.col_list) != NULL);
+        (*query)->params.select_params.col_list[0] = strdup(token);
 
         //check FROM
-        token = strok(NULL, " \t");
+        token = strtok(NULL, " \t");
         if(!token || strcasecmp(token, "FROM") != 0){
             (*query)->cmd_type = INVALID;
             fprintf(stderr, "Syntax error: missing 'FROM' after *.");
             return;
         }
         //check table name
-        token = strok(NULL, " \t");
+        token = strtok(NULL, " \t");
         if(!token || strlen(token) == 0){
             (*query)->cmd_type = INVALID;
             fprintf(stderr, "Syntax error: at least 1 table is required.");
