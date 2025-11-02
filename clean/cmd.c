@@ -1,6 +1,6 @@
 /*
 Date of creation : 18/10/2025
-Description : Free functions for all pointers to call before exit
+Description : Free functions for Response and Query pointers to call before exit
 Group 2 ESGI 2A3
 */
 
@@ -93,4 +93,5 @@ void free_current_cmd(char** cmd_string, Query** query){
     free(*cmd_string);
     *cmd_string = NULL;
     free_query(query);
+    query = NULL;
 }

@@ -54,6 +54,13 @@ int main(int argc, char **argv){
         // put the command in cmd_input
         printf(">>> ");
         cmd_input = read_cmd(cmd_buffer);
+        // if nothing or command too long (read_cmd returns NULL)
+        if (cmd_input == NULL){
+            continue;
+        } else if(strcmp("long", cmd_input) == 0){
+            printf("\n");
+            continue;
+        }
 
         // Call parser from ui folder analyze command
         parser_output = parse_cmd(cmd_input);
