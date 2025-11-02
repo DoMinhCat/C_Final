@@ -125,12 +125,12 @@ void parse_select(Query** query){
             token = strtok(NULL, " \t");
             if (!token || strlen(token) == 0) {
                 (*query)->cmd_type = INVALID;
-                sprintf((*query)->syntax_message, "Syntax error: missing '=' after '%s'.", (*query)->params.select_params.first_col_on);
+                fprintf(stderr, "Syntax error: missing '=' after '%s'.", (*query)->params.select_params.first_col_on);
                 return;
             }
             if (strcmp(token, "=") != 0) {
                 (*query)->cmd_type = INVALID;
-                sprintf((*query)->syntax_message, "Syntax error: command '%s' not found, please check the syntax.", token);
+                fprintf(stderr, "Syntax error: command '%s' not found, please check the syntax.", token);
                 return;
             }
 
@@ -144,11 +144,80 @@ void parse_select(Query** query){
             strncpy((*query)->params.select_params.second_col_on, token, sizeof((*query)->params.select_params.second_col_on) - 1);
 
             // check optional where after join
+            token = strtok(NULL, " \t");
+            if(token){
+                if(strcasecmp(token, "WHERE") == 0){
+                    //check condition column
+                    token = strtok(NULL, " \t");
+                    if(!token || strlen(token) == 0){
+                        (*query)->cmd_type = INVALID;
+                        fprintf(stderr, "Syntax error: at least 1 column is required after WHERE.");
+                        return;
+                    }
+                    strncpy((*query)->params.select_params.condition_col, token, sizeof((*query)->params.select_params.condition_col) - 1);
 
+                    //check =
+                    token = strtok(NULL, " \t");
+                    if (!token || strlen(token) == 0) {
+                        (*query)->cmd_type = INVALID;
+                        fprintf(stderr, "Syntax error: missing '=' after '%s'.", (*query)->params.select_params.first_col_on);
+                        return;
+                    }
+                    if (strcmp(token, "=") != 0) {
+                        (*query)->cmd_type = INVALID;
+                        fprintf(stderr, "Syntax error: command '%s' not found, please check the syntax.", token);
+                        return;
+                    }
+
+                    //check condition value of where
+                    token = strtok(NULL, " \t");
+                    if (!token || strlen(token) == 0) {
+                        (*query)->cmd_type = INVALID;
+                        fprintf(stderr, "Syntax error: missing value in WHERE clause.", (*query)->params.select_params.first_col_on);
+                        return;
+                    }
+                    strncpy((*query)->params.select_params.condition_val, token, sizeof((*query)->params.select_params.condition_val) - 1);
+                    
+                }else{
+                    (*query)->cmd_type = INVALID;
+                    fprintf(stderr, "Syntax error: invalid command '%s' after JOIN.", token);
+                    return;
+                }
+            }
         }
 
         // case where
         else if(strcasecmp(after_table_name, "WHERE") == 0){
+            //check condition column
+            token = strtok(NULL, " \t");
+            if(!token || strlen(token) == 0){
+                (*query)->cmd_type = INVALID;
+                fprintf(stderr, "Syntax error: at least 1 column is required after WHERE.");
+                return;
+            }
+            strncpy((*query)->params.select_params.condition_col, token, sizeof((*query)->params.select_params.condition_col) - 1);
+
+            //check =
+            token = strtok(NULL, " \t");
+            if (!token || strlen(token) == 0) {
+                (*query)->cmd_type = INVALID;
+                fprintf(stderr, "Syntax error: missing '=' after '%s'.", (*query)->params.select_params.first_col_on);
+                return;
+            }
+            if (strcmp(token, "=") != 0) {
+                (*query)->cmd_type = INVALID;
+                fprintf(stderr, "Syntax error: command '%s' not found, please check the syntax.", token);
+                return;
+            }
+
+            //check condition value of where
+            token = strtok(NULL, " \t");
+            if (!token || strlen(token) == 0) {
+                (*query)->cmd_type = INVALID;
+                fprintf(stderr, "Syntax error: missing value in WHERE clause.", (*query)->params.select_params.first_col_on);
+                return;
+            }
+            strncpy((*query)->params.select_params.condition_val, token, sizeof((*query)->params.select_params.condition_val) - 1);
             
         } else{
             (*query)->cmd_type = INVALID;
@@ -156,8 +225,4 @@ void parse_select(Query** query){
             return;
         }
     }
-
-
-
-
 }

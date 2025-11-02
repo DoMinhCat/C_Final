@@ -69,8 +69,6 @@ typedef struct {
     char condition_val[MAX_TOKEN_SIZE]; // need to check input length
 
     // select col_list from tab [join tab2 on col1=col2] where x=y
-    
-    // add more later
 } SelectParams;
 
 typedef struct {
