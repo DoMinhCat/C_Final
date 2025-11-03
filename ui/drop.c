@@ -24,4 +24,6 @@ void parse_drop(Query** query){
     token = strtok(NULL, " \n");
     if(!contain_param(token, query, "at least 1 table is required for DROP statement")) return;
     strncpy((*query)->params.drop_params.table_name, token, sizeof((*query)->params.drop_params.table_name)-1);
+    (*query)->params.drop_params.table_name[sizeof((*query)->params.drop_params.table_name)-1] = '\0';
+
 }

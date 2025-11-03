@@ -19,29 +19,17 @@ void parse_insert(Query** query){
 
     // check "INTO"
     token = strtok(NULL, " \t");
-    if(!token || strcasecmp(token, "INTO") != 0){
-        (*query)->cmd_type = INVALID;
-        sprintf((*query)->syntax_message, "Syntax error: missing 'INTO' after INSERT.");
-        return;
-    }
+    if(!contain_key_word(token, "INTO", query, "INSERT statement")) return;
 
     // get table name
     token = strtok(NULL, " \t");
-    if(!token || strlen(token) == 0){
-        (*query)->cmd_type = INVALID;
-        sprintf((*query)->syntax_message, "Syntax error: missing table name after INTO.");
-        return;
-    }
+    if(!contain_param(token, query, "1 table is required for INSERT statement")) return;
     strncpy((*query)->params.insert_params.table_name, token, sizeof((*query)->params.insert_params.table_name)-1);
     (*query)->params.insert_params.table_name[sizeof((*query)->params.insert_params.table_name)-1] = '\0';
  
     // check '('
     token = strtok(NULL, " \t");
-    if (!token || token[0] != '(') {
-        (*query)->cmd_type = INVALID;
-        sprintf((*query)->syntax_message, "Syntax error: missing '(' after table name.");
-        return;
-    }
+    if(!contain_key_word(token, ")", query, (*query)->params.insert_params.table_name)) return;
 
     // get col_list : ( col1, col2 )
     char* col_list;
@@ -55,11 +43,8 @@ void parse_insert(Query** query){
     value_keyword = strtok(NULL, " \t"); // got "VALUES"
     open_value = strtok(NULL, " \t"); // got "("
     data_list = strtok(NULL, ")"); // got "val1, val2 "
-    if(!col_list || strlen(col_list) == 0){
-        (*query)->cmd_type = INVALID;
-        sprintf((*query)->syntax_message, "Syntax error: at least 1 column is required.");
-        return;
-    }
+
+    if(!contain_param(col_list, query, "at least 1 column is required for INSERT statement")) return;
 
     // get each col by trimming "," and " "
     token = strtok(col_list, " ,\t"); // got col1
@@ -78,26 +63,14 @@ void parse_insert(Query** query){
     }
 
     // check for "VALUES"
-    if(!value_keyword || strcasecmp(value_keyword, "VALUES") != 0){
-        (*query)->cmd_type = INVALID;
-        sprintf((*query)->syntax_message, "Syntax error: missing 'VALUES' after column list.");
-        return;
-    }
+    if(!contain_key_word(value_keyword, "VALUE", query, "column list in INSERT statement")) return;
 
     // check '('
-    if (!open_value || open_value[0] != '(') {
-        (*query)->cmd_type = INVALID;
-        sprintf((*query)->syntax_message, "Syntax error: missing '(' after VALUES.");
-        return;
-    }
+    if(!contain_key_word(open_value, "(", query, "VALUES")) return;
 
     // get data_list : ( val1, val2 )
     int val_count = 0;
-    if(!data_list || strlen(data_list) == 0){
-        (*query)->cmd_type = INVALID;
-        sprintf((*query)->syntax_message, "Syntax error: at least 1 value is required.");
-        return;
-    }
+    if(!contain_param(data_list, query, "at least 1 value is required for INSERT statement")) return;
 
     // get each col by trimming "," and " "
     token = strtok(data_list, " ,\t"); // got val1
@@ -116,7 +89,7 @@ void parse_insert(Query** query){
     // check number of values passed and number of columns passed
     if(val_count != (*query)->params.insert_params.col_count){
         (*query)->cmd_type = INVALID;
-        sprintf((*query)->syntax_message, "Syntax error: %d value(s) provided for %d column(s).", val_count, (*query)->params.insert_params.col_count);
+        fprintf(stderr, "Syntax error: %d value(s) provided for %d column(s).", val_count, (*query)->params.insert_params.col_count);
         return;
     }
 }
