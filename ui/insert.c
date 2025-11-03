@@ -25,10 +25,11 @@ void parse_insert(Query** query){
     token = strtok(NULL, " \t");
     if(!contain_param(token, query, "1 table is required for INSERT statement")) return;
     (*query)->params.insert_params.table_name = strdup(token);
+    assert((*query)->params.insert_params.table_name != NULL);
  
     // check '('
     token = strtok(NULL, " \t");
-    if(!contain_key_word(token, ")", query, (*query)->params.insert_params.table_name)) return;
+    if(!contain_key_word(token, "(", query, (*query)->params.insert_params.table_name)) return;
 
     // get col_list : ( col1, col2 )
     char* col_list = NULL;
@@ -57,6 +58,7 @@ void parse_insert(Query** query){
         assert(((*query)->params.insert_params.col_list) != NULL);
         // put into col_list
         (*query)->params.insert_params.col_list[current_col_count] = strdup(token);
+        assert((*query)->params.insert_params.col_list[current_col_count] != NULL);
 
         (*query)->params.insert_params.col_count++;
         // get next col
@@ -64,7 +66,7 @@ void parse_insert(Query** query){
     }
 
     // check for "VALUES"
-    if(!contain_key_word(value_keyword, "VALUE", query, "column list in INSERT statement")) return;
+    if(!contain_key_word(value_keyword, "VALUES", query, "column list in INSERT statement")) return;
 
     // check '('
     if(!contain_key_word(open_value, "(", query, "VALUES")) return;
@@ -77,10 +79,11 @@ void parse_insert(Query** query){
     token = strtok(data_list, " ,\t"); // got val1
     while(token != NULL){
         // increase size of data_list 
-        (*query)->params.insert_params.data_list = (void**)realloc((*query)->params.insert_params.data_list, (val_count+1) * sizeof(void*)); 
+        (*query)->params.insert_params.data_list = (char**)realloc((*query)->params.insert_params.data_list, (val_count+1) * sizeof(char*)); 
         assert(((*query)->params.insert_params.data_list) != NULL);
         // set value
         (*query)->params.insert_params.data_list[val_count] = strdup(token);
+        assert((*query)->params.insert_params.data_list[val_count] != NULL);
 
         val_count++;
         // get next value
