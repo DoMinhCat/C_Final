@@ -18,7 +18,6 @@ Query* init_query(){
     
     query->cmd_type = INVALID;
     memset(&query->params, 0, sizeof(query->params));
-    query->syntax_message[0] = '\0';
 
     return query;
 }
