@@ -157,6 +157,7 @@ int main(int argc, char **argv){
 
     
     // Call to functions in clean.c to free all db struct before exit
+    // free al table()
 
     printf("Goodbye !");
     exit(EXIT_SUCCESS);

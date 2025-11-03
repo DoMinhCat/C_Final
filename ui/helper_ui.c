@@ -109,4 +109,26 @@ bool exceed_max_len(char* token, Query** query, int max_len, char* current_str){
     }
     return false;
 }
-// todo : check identifier not containing banned chars/keyword
+
+bool is_valid_identifier(char* token, Query** query){
+    char* banned_name_list[] = {"SELECT", "INSERT", "VALUES", "DROP", "DELETE", "TABLE", "FROM", "INTO", "WHERE", "JOIN", "ON", "INT", "STRING", "DOUBLE"};
+    int i;
+
+    for(i=0; i<sizeof(banned_name_list) / sizeof(banned_name_list[0]); i++){
+        if(strcasecmp(token, banned_name_list[i]) == 0){
+            (*query)->cmd_type = INVALID;
+            fprintf(stderr, "Syntax error: '%s' is a reserved keyword.", token);
+            return false;
+        }
+    }
+    // check no special character allowed
+    for(i=0; i<strlen(token); i++){
+        if(!isalnum(token[i]) && token[i] != '_'){
+            (*query)->cmd_type = INVALID;
+            fprintf(stderr, "Syntax error: special character '%c' is not allowed.", token[i]);
+            return false;
+        }
+    }
+
+    return true;
+}

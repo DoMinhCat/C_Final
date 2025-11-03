@@ -3,7 +3,6 @@ Date of creation : 27/10/2025
 Description : parse_create to analyse create command
 Group 2 ESGI 2A3
 */
-//todo : check col/tab name
 
 #include <string.h>
 #include <stdio.h>
@@ -16,7 +15,6 @@ Group 2 ESGI 2A3
 
 void parse_create(Query** query){
     char* token;
-    char* banned_name_list[] = {"SELECT", "INSERT", "VALUES", "DROP", "DELETE", "TABLE", "FROM", "INTO", "WHERE", "JOIN", "ON", "INT", "STRING", "DOUBLE"};
     
     int i;
     (*query)->cmd_type = CREATE;
@@ -32,22 +30,9 @@ void parse_create(Query** query){
     //check max length
     if(exceed_max_len(token, query, TABLE_NAME_MAX, "table name")) return;
 
-    // check reserved keyword
-    for(i=0; i<sizeof(banned_name_list) / sizeof(banned_name_list[0]); i++){
-        if(strcasecmp(token, banned_name_list[i]) == 0){
-            (*query)->cmd_type = INVALID;
-            fprintf(stderr, "Syntax error: '%s' is a reserved keyword.", token);
-            return;
-        }
-    }
-    // check no special character allowed
-    for(i=0; i<strlen(token); i++){
-        if(!isalnum(token[i]) && token[i] != '_'){
-            (*query)->cmd_type = INVALID;
-            fprintf(stderr, "Syntax error: special character '%c' is not allowed.", token[i]);
-            return;
-        }
-    }
+    // check reserved keyword and special chars
+    if(!is_valid_identifier(token, query)) return;
+
     (*query)->params.create_params.table_name = strdup(token);
 
     // check '('
@@ -88,22 +73,9 @@ void parse_create(Query** query){
         // check len of col name
         if(exceed_max_len(col_name, query, TABLE_NAME_MAX, "column name")) return;
         
-        // check reserved keyword
-        for(i=0; i<sizeof(banned_name_list) / sizeof(banned_name_list[0]); i++){
-            if(strcasecmp(col_name, banned_name_list[i]) == 0){
-                (*query)->cmd_type = INVALID;
-                fprintf(stderr, "Syntax error: '%s' is a reserved keyword.", col_name);
-                return;
-            }
-        }
-        // check no special character allowed
-        for(i=0; i<strlen(col_name); i++){
-            if(!isalnum(col_name[i]) && col_name[i] != '_'){
-                (*query)->cmd_type = INVALID;
-                fprintf(stderr, "Syntax error: special character '%c' is not allowed.", col_name[i]);
-                return;
-            }
-        }
+        // check reserved keyword and special chars
+        if(!is_valid_identifier(col_name, query)) return;
+        
         //set col name to col_list
         (*query)->params.create_params.col_list = (char**)realloc((*query)->params.create_params.col_list, (col_count + 1) * sizeof(char*));
         assert((*query)->params.create_params.col_list != NULL);
