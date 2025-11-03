@@ -101,5 +101,12 @@ void check_where(char* token, Query** query){
     }
 }
 
-// todo: check length of input
+bool exceed_max_len(char* token, Query** query, int max_len, char* current_str){
+    if (strlen(token)>max_len){
+        (*query)->cmd_type = INVALID;
+        fprintf(stderr, "Syntax error: %d characters maximum allowed for %s.", max_len, current_str);
+        return true;
+    }
+    return false;
+}
 // todo : check identifier not containing banned chars/keyword

@@ -30,11 +30,8 @@ void parse_create(Query** query){
     if(!contain_param(token, query, "1 table name is required for CREATE statement")) return;
 
     //check max length
-    if (strlen(token)>(TABLE_NAME_MAX-1)){
-        (*query)->cmd_type = INVALID;
-        fprintf(stderr, "Syntax error: 100 characters maximum allowed for table name.");
-        return;
-    }
+    if(exceed_max_len(token, query, TABLE_NAME_MAX, "table name")) return;
+
     // check reserved keyword
     for(i=0; i<sizeof(banned_name_list) / sizeof(banned_name_list[0]); i++){
         if(strcasecmp(token, banned_name_list[i]) == 0){
@@ -88,11 +85,9 @@ void parse_create(Query** query){
         col_name = strtok(col_def, " \t");
         if(!contain_param(col_name, query, "at least 1 column is required for CREATE statement")) return;
         
-        if(strlen(col_name)>(TABLE_NAME_MAX-1)){
-            (*query)->cmd_type = INVALID;
-            fprintf(stderr, "Syntax error: 100 characters maximum allowed for column name.");
-            return;
-        }
+        // check len of col name
+        if(exceed_max_len(col_name, query, TABLE_NAME_MAX, "column name")) return;
+        
         // check reserved keyword
         for(i=0; i<sizeof(banned_name_list) / sizeof(banned_name_list[0]); i++){
             if(strcasecmp(col_name, banned_name_list[i]) == 0){

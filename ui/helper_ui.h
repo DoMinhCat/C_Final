@@ -17,4 +17,7 @@ void check_end_of_cmd(char* last_token, Query** query, char* current_stmt);
 bool contain_key_word(char* token, char* keyword, Query** query, char* current_stmt);
 bool contain_param(char* token, Query** query, char* err_msg);
 void check_where(char* token, Query** query);
+bool exceed_max_len(char* token, Query** query, int max_len, char* current_str);
+
+
 #endif
