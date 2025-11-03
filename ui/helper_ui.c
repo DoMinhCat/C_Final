@@ -82,7 +82,11 @@ void check_where(char* token, Query** query){
 
     //check =
     token = strtok(NULL, " \t");
-    if(!contain_key_word(token, "=", query, (*query)->params.select_params.condition_col)) return;
+    if((*query)->cmd_type == SELECT){
+        if(!contain_key_word(token, "=", query, (*query)->params.select_params.condition_col)) return;
+    } else if((*query)->cmd_type == DELETE){
+        if(!contain_key_word(token, "=", query, (*query)->params.delete_params.condition_column)) return;
+    }
 
     //check condition value of where
     token = strtok(NULL, " \t");
