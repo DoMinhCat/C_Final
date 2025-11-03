@@ -36,6 +36,7 @@ void parse_drop(Query** query){
         (*query)->params.drop_params.table_list = (char**)realloc((*query)->params.drop_params.table_list, (table_count+1) * sizeof(char*));
         assert((*query)->params.drop_params.table_list != NULL);
         (*query)->params.drop_params.table_list[table_count] = strdup(token);
+        assert((*query)->params.drop_params.table_list[table_count] != NULL);
         
         (*query)->params.drop_params.table_count++;
         token = strtok(NULL, " ,\t");

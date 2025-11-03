@@ -54,6 +54,7 @@ void parse_create(Query** query){
     }
 
     (*query)->params.create_params.table_name = strdup(token);
+    assert((*query)->params.create_params.table_name != NULL);
 
     // check '('
     token = strtok(NULL, " \t");
@@ -78,6 +79,8 @@ void parse_create(Query** query){
         fk_count = (*query)->params.create_params.fk_count;
 
         tmp_col_def = strdup(col_def);
+        assert(tmp_col_def != NULL);
+
 
         col_name = strtok_r(tmp_col_def, " \t", &saveptr2);
         if(!contain_param(col_name, query, "at least 1 column is required for CREATE statement")){
@@ -98,6 +101,7 @@ void parse_create(Query** query){
         (*query)->params.create_params.col_list = (char**)realloc((*query)->params.create_params.col_list, ((*query)->params.create_params.col_count + 1) * sizeof(char*));
         assert((*query)->params.create_params.col_list != NULL);
         (*query)->params.create_params.col_list[(*query)->params.create_params.col_count] = strdup(col_name);
+        assert((*query)->params.create_params.col_list[(*query)->params.create_params.col_count] != NULL);
         (*query)->params.create_params.col_count++;
 
         col_type = strtok_r(NULL, " \t", &saveptr2);
@@ -150,6 +154,7 @@ void parse_create(Query** query){
                 (*query)->params.create_params.table_refer_list = (char**)realloc((*query)->params.create_params.table_refer_list, (fk_count + 1) * sizeof(char*));
                 assert(((*query)->params.create_params.table_refer_list) != NULL);
                 (*query)->params.create_params.table_refer_list[fk_count] = strdup(token);
+                assert((*query)->params.create_params.table_refer_list[fk_count] != NULL);
 
                 token = strtok_r(NULL, " \t", &saveptr2);
                 sprintf(err_msg, "1 column is required for table '%s' in REFERNCES clause", (*query)->params.create_params.table_refer_list[fk_count]);
@@ -157,6 +162,8 @@ void parse_create(Query** query){
                 (*query)->params.create_params.col_refer_list = (char**)realloc((*query)->params.create_params.col_refer_list, (fk_count + 1) * sizeof(char*));
                 assert(((*query)->params.create_params.col_refer_list) != NULL);
                 (*query)->params.create_params.col_refer_list[fk_count] = strdup(token);
+                assert((*query)->params.create_params.col_refer_list[fk_count] != NULL);
+
                 (*query)->params.create_params.fk_count++;
 
                 token = strtok_r(NULL, " \t", &saveptr2);

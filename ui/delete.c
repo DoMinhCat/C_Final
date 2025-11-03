@@ -6,6 +6,7 @@ Group 2 ESGI 2A3
 
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 
 #include "parser.h"
 #include "helper_ui.h"
@@ -25,6 +26,7 @@ void parse_delete(Query** query){
     token = strtok(NULL, " \n");
     if(!contain_param(token, query, "1 table is required for DELETE statement")) return;
     (*query)->params.delete_params.table_name = strdup(token);
+    assert((*query)->params.delete_params.table_name != NULL);
 
     // get WHERE (optional)
     extra_where_clause = strtok(NULL, "\n");
