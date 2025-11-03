@@ -34,22 +34,8 @@ void parse_delete(Query** query){
         if(strcasecmp(token, "WHERE") == 0){
             // get col name
             token = strtok(NULL, " \t");
-            if(!contain_param(token, query, "at least 1 column is required for WHERE clause")) return;
-            strncpy((*query)->params.delete_params.condition_column, token, sizeof((*query)->params.delete_params.condition_column) - 1);
-            
-            // get "="
-            token = strtok(NULL, " \t");
-            if(!contain_key_word(token, "=", query, (*query)->params.delete_params.condition_column)) return;
-
-            // get condition value
-            token = strtok(NULL, " \t");
-            sprintf(error_msg, "1 value is required for column '%s' in WHERE clause", (*query)->params.delete_params.condition_column);
-            if(!contain_param(token, query, error_msg)) return; 
-            strncpy((*query)->params.delete_params.condition_value, token, sizeof((*query)->params.delete_params.condition_value) - 1);
-
-            token = strtok(NULL, "\n");
-            check_end_of_cmd(token, query, "WHERE clause");
-            return;
+            check_where(token, query);
+            if((*query)->cmd_type == INVALID) return;
         } else{
             check_end_of_cmd(token, query, "DELETE statement");
             return;
