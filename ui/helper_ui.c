@@ -9,6 +9,7 @@ Group 2 ESGI 2A3
 #include <stdbool.h>
 #include <ctype.h>
 #include <string.h>
+#include <assert.h>
 
 #include "helper_ui.h"
 #include "parser.h"
@@ -62,22 +63,50 @@ void check_where(char* token, Query** query){
     // when using this, need to check if cmd_type is INVALID at the end, if yes then return query
 
     char error_msg[200];
-    char* condition_col = NULL;
-    char* condition_val = NULL;
 
     //check condition column
     if(!contain_param(token, query, "at least 1 column is required for WHERE clause")) return;
-    condition_col =  strdup(token);
+    if((*query)->cmd_type == SELECT) {
+        (*query)->params.select_params.condition_col = strdup(token);
+        assert((*query)->params.select_params.condition_col != NULL);
+    }
+    else if((*query)->cmd_type == DELETE) {
+        (*query)->params.delete_params.condition_column = strdup(token);
+        assert((*query)->params.delete_params.condition_column != NULL);
+    }
+    else{
+        (*query)->cmd_type = INVALID;
+        fprintf(stderr, "Syntax error: invalid use of WHERE clause.\n");
+        return;
+    }
 
     //check =
     token = strtok(NULL, " \t");
-    if(!contain_key_word(token, "=", query, (*query)->params.select_params.condition_col)) return;
+    if((*query)->cmd_type == SELECT){
+        if(!contain_key_word(token, "=", query, (*query)->params.select_params.condition_col)) return;
+    } else if((*query)->cmd_type == DELETE){
+        if(!contain_key_word(token, "=", query, (*query)->params.delete_params.condition_column)) return;
+    }
 
     //check condition value of where
     token = strtok(NULL, " \t");
-    sprintf(error_msg, "1 value is required for column '%s' in WHERE clause", (*query)->params.select_params.condition_col);
+    if((*query)->cmd_type == SELECT) sprintf(error_msg, "1 value is required for column '%s' in WHERE clause", (*query)->params.select_params.condition_col);
+    else if((*query)->cmd_type == DELETE) sprintf(error_msg, "1 value is required for column '%s' in WHERE clause", (*query)->params.delete_params.condition_column);
     if(!contain_param(token, query, error_msg)) return; 
-    condition_val =  strdup(token);
+    
+    if((*query)->cmd_type == SELECT) {
+        (*query)->params.select_params.condition_val = strdup(token);
+        assert((*query)->params.select_params.condition_val != NULL);
+    }
+    else if((*query)->cmd_type == DELETE) {
+        (*query)->params.delete_params.condition_value = strdup(token);
+        assert((*query)->params.delete_params.condition_value != NULL);
+    }
+    else{
+        (*query)->cmd_type = INVALID;
+        fprintf(stderr, "Syntax error: invalid use of WHERE clause.\n");
+        return;
+    }
                 
     // check for extra invalid command
     token = strtok(NULL, "\n");
@@ -85,22 +114,6 @@ void check_where(char* token, Query** query){
         check_end_of_cmd(token, query, "WHERE clause");
         if((*query)->cmd_type == INVALID) return;
     } else return;
-
-    // all check done, now assign to appropriate param
-    switch ((*query)->cmd_type)
-    {
-    case SELECT:
-        (*query)->params.select_params.condition_col = strdup(condition_col);
-        (*query)->params.select_params.condition_val = strdup(condition_val);
-        break;
-    case DELETE:
-        (*query)->params.delete_params.condition_column = strdup(condition_col);
-        (*query)->params.delete_params.condition_value = strdup(condition_val);
-        break;
-    default:
-        fprintf(stderr, "Syntax error: invalid use of WHERE clause.\n");
-        break;
-    }
 }
 
 bool exceed_max_len(char* token, Query** query, int max_len, char* current_str){

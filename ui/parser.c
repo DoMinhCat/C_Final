@@ -37,7 +37,6 @@ Query* parse_cmd(char* cmd) {
     Query* query = init_query();
 
     char* token;
-    char* err_msg;
 
     token = strtok(cmd, " \t");
 

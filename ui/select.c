@@ -28,9 +28,14 @@ void parse_select(Query** query){
 
     // check "(" or *
     token = strtok(NULL, " \t"); // got ( or *
-    if(!token || (strcmp(token, "(") != 0) && strcmp(token, "*") != 0){
+    if(!token || strlen(token) == 0){
         (*query)->cmd_type = INVALID;
-        fprintf(stderr, "Syntax error: missing '(' or '*' after SELECT.\n");
+        fprintf(stderr, "Syntax error: missing '(' or '*' after 'SELECT statement'.\n");
+        return;
+    } 
+    if((strcmp(token, "(") != 0) && strcmp(token, "*") != 0){
+        (*query)->cmd_type = INVALID;
+        fprintf(stderr, "Syntax error: invalid command '%s' after 'SELECT statement'.\n", token);
         return;
     } 
 
@@ -40,6 +45,8 @@ void parse_select(Query** query){
         assert((*query)->params.select_params.col_list != NULL);
         // no need memory allocation thanks to strdup :))
         (*query)->params.select_params.col_list[0] = strdup(token);
+        assert((*query)->params.select_params.col_list[0] != NULL);
+
         (*query)->params.select_params.col_count++;
 
         //check FROM
@@ -50,6 +57,7 @@ void parse_select(Query** query){
         if(!contain_param(token, query, "at least 1 table is required")) return;
         //put table name in param
         (*query)->params.select_params.table_name = strdup(token);
+        assert((*query)->params.select_params.table_name != NULL);
         
         extra_clause = strtok(NULL, "\n");
     } 
@@ -76,6 +84,7 @@ void parse_select(Query** query){
             assert(((*query)->params.select_params.col_list) != NULL);
             // put into col_list
             (*query)->params.select_params.col_list[current_col_count] = strdup(token);
+            assert((*query)->params.select_params.col_list[current_col_count] != NULL);
 
             (*query)->params.select_params.col_count++;
             // get next col
@@ -90,6 +99,7 @@ void parse_select(Query** query){
 
         //put table name in param
         (*query)->params.select_params.table_name = strdup(table);
+        assert((*query)->params.select_params.table_name != NULL);
     }
 
     // check optional where or join
@@ -102,7 +112,8 @@ void parse_select(Query** query){
             token = strtok(NULL, " \t");
             if(!contain_param(token, query, "at least 1 table is required for JOIN clause")) return;
             (*query)->params.select_params.table_join_name = strdup(token);
-    
+            assert((*query)->params.select_params.table_join_name != NULL);
+            
             //check ON
             token = strtok(NULL, " \t");
             if(!contain_key_word(token, "ON", query, (*query)->params.select_params.table_join_name)) return;
@@ -111,6 +122,7 @@ void parse_select(Query** query){
             token = strtok(NULL, " \t");
             if(!contain_param(token, query, "2 columns are required for ON clause")) return;
             (*query)->params.select_params.first_col_on = strdup(token);
+            assert((*query)->params.select_params.first_col_on != NULL);
     
             //check =
             token = strtok(NULL, " \t");
@@ -120,6 +132,7 @@ void parse_select(Query** query){
             token = strtok(NULL, " \t");
             if(!contain_param(token, query, "2 columns are required for ON clause")) return;
             (*query)->params.select_params.second_col_on = strdup(token);
+            assert((*query)->params.select_params.second_col_on != NULL);
 
             // check optional where after join
             extra_of_join = strtok(NULL, "\n");

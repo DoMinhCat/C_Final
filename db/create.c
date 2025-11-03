@@ -168,6 +168,7 @@ Response* create_table(Query* query){
 
     // set table name
     new_tb->name = strdup(new_tb_name);
+    assert(new_tb->name != NULL);
 
     // add col
     Col* current_col;
@@ -176,6 +177,7 @@ Response* create_table(Query* query){
         // set basic info
         new_col = init_col();
         new_col->name = strdup(col_list[i]);
+        assert(new_col->name != NULL);
         new_col->type = type_list[i];
         new_col->constraint = constraint_list[i];
         
