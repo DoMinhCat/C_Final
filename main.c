@@ -84,7 +84,9 @@ int main(int argc, char **argv){
         {
         case CREATE:
             // Call create() 
-            db_response = create_table(parser_output);
+            //db_response = create_table(parser_output);
+
+            printf("CREATE is called\n");
             break;
         case INSERT:
             // Call insert() of db
