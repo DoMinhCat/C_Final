@@ -96,7 +96,7 @@ void parse_create(Query** query){
             (*query)->params.create_params.type_list[col_count] = DOUBLE;
         else {
             (*query)->cmd_type = INVALID;
-            fprintf(stderr, "Syntax error: invalid type '%s' for column '%s'.", (*query)->params.create_params.type_list[col_count], (*query)->params.create_params.col_list[col_count]);
+            fprintf(stderr, "Syntax error: invalid type '%s' for column '%s'.\n", (*query)->params.create_params.type_list[col_count], (*query)->params.create_params.col_list[col_count]);
             return;
         }
 
