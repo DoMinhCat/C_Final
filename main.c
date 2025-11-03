@@ -14,6 +14,7 @@ Group 2 ESGI 2A3
 #include "db/db.h"
 #include "clean/clean.h"
 #include "init/init.h"
+#include "global_var.h"
 
 void print_divider(){
     for(int i=0; i<20; i++) printf("-");
@@ -159,7 +160,7 @@ int main(int argc, char **argv){
 
     
     // Call to functions in clean.c to free all db struct before exit
-    // free al table()
+    free_db(first_table);
 
     printf("Goodbye !");
     exit(EXIT_SUCCESS);
