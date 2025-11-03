@@ -49,7 +49,7 @@ void parse_select(Query** query){
         token = strtok(NULL, " \t");
         if(!contain_param(token, query, "at least 1 table is required")) return;
         //put table name in param
-        strncpy((*query)->params.select_params.table_name, token, sizeof((*query)->params.select_params.table_name) - 1);
+        (*query)->params.select_params.table_name = strdup(token);
         
         extra_clause = strtok(NULL, "\n");
     } 
@@ -89,7 +89,7 @@ void parse_select(Query** query){
         if(!contain_param(table, query, "at least 1 table is required for SELECT statement")) return;
 
         //put table name in param
-        strncpy((*query)->params.select_params.table_name, table, sizeof((*query)->params.select_params.table_name) - 1);
+        (*query)->params.select_params.table_name = strdup(table);
     }
 
     // check optional where or join
@@ -101,7 +101,7 @@ void parse_select(Query** query){
             // check tab to join
             token = strtok(NULL, " \t");
             if(!contain_param(token, query, "at least 1 table is required for JOIN clause")) return;
-            strncpy((*query)->params.select_params.table_join_name, token, sizeof((*query)->params.select_params.table_join_name) - 1);
+            (*query)->params.select_params.table_join_name = strdup(token);
     
             //check ON
             token = strtok(NULL, " \t");
@@ -110,7 +110,7 @@ void parse_select(Query** query){
             //check first col of ON
             token = strtok(NULL, " \t");
             if(!contain_param(token, query, "2 columns are required for ON clause")) return;
-            strncpy((*query)->params.select_params.first_col_on, token, sizeof((*query)->params.select_params.first_col_on) - 1);
+            (*query)->params.select_params.first_col_on = strdup(token);
     
             //check =
             token = strtok(NULL, " \t");
@@ -119,8 +119,8 @@ void parse_select(Query** query){
             //check second col on
             token = strtok(NULL, " \t");
             if(!contain_param(token, query, "2 columns are required for ON clause")) return;
-            strncpy((*query)->params.select_params.second_col_on, token, sizeof((*query)->params.select_params.second_col_on) - 1);
-    
+            (*query)->params.select_params.second_col_on = strdup(token);
+
             // check optional where after join
             extra_of_join = strtok(NULL, "\n");
             if(extra_of_join){

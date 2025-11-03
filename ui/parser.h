@@ -55,15 +55,15 @@ typedef struct {
 } DeleteParams;
 
 typedef struct {
-    char table_name[TABLE_NAME_MAX];
-    char table_join_name[TABLE_NAME_MAX];
+    char* table_name; // need to check input length
+    char* table_join_name; // need to check input length
 
     char** col_list;
     int col_count; //to free col_list
-    char first_col_on[TABLE_NAME_MAX];
-    char second_col_on[TABLE_NAME_MAX];
-    char condition_col[TABLE_NAME_MAX]; // need to check input length
-    char condition_val[MAX_TOKEN_SIZE]; // need to check input length
+    char* first_col_on;
+    char* second_col_on;
+    char* condition_col; // need to check input length
+    char* condition_val; // need to check input length
 } SelectParams;
 
 typedef struct {

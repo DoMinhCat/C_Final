@@ -88,8 +88,8 @@ void check_where(char* token, Query** query){
     switch ((*query)->cmd_type)
     {
     case SELECT:
-        strcpy((*query)->params.select_params.condition_col, condition_col);
-        strcpy((*query)->params.select_params.condition_val, condition_val);
+        (*query)->params.select_params.condition_col = strdup(condition_col);
+        (*query)->params.select_params.condition_val = strdup(condition_val);
         break;
     case DELETE:
         (*query)->params.delete_params.condition_column = strdup(condition_col);
