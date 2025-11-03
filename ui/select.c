@@ -20,7 +20,6 @@ void parse_select(Query** query){
     char* after_table_name = NULL;
     char* extra_clause = NULL;
     char* extra_of_join = NULL;
-    char* extra_of_where = NULL;
     char error_msg[200];
     int current_col_count = 0;
 
@@ -50,7 +49,7 @@ void parse_select(Query** query){
         token = strtok(NULL, " \t");
         if(!contain_param(token, query, "at least 1 table is required")) return;
         //put table name in param
-        strncpy((*query)->params.select_params.table_name, token, sizeof((*query)->params.select_params.table_name) - 1);
+        (*query)->params.select_params.table_name = strdup(token);
         
         extra_clause = strtok(NULL, "\n");
     } 
@@ -90,7 +89,7 @@ void parse_select(Query** query){
         if(!contain_param(table, query, "at least 1 table is required for SELECT statement")) return;
 
         //put table name in param
-        strncpy((*query)->params.select_params.table_name, table, sizeof((*query)->params.select_params.table_name) - 1);
+        (*query)->params.select_params.table_name = strdup(table);
     }
 
     // check optional where or join
@@ -102,7 +101,7 @@ void parse_select(Query** query){
             // check tab to join
             token = strtok(NULL, " \t");
             if(!contain_param(token, query, "at least 1 table is required for JOIN clause")) return;
-            strncpy((*query)->params.select_params.table_join_name, token, sizeof((*query)->params.select_params.table_join_name) - 1);
+            (*query)->params.select_params.table_join_name = strdup(token);
     
             //check ON
             token = strtok(NULL, " \t");
@@ -111,7 +110,7 @@ void parse_select(Query** query){
             //check first col of ON
             token = strtok(NULL, " \t");
             if(!contain_param(token, query, "2 columns are required for ON clause")) return;
-            strncpy((*query)->params.select_params.first_col_on, token, sizeof((*query)->params.select_params.first_col_on) - 1);
+            (*query)->params.select_params.first_col_on = strdup(token);
     
             //check =
             token = strtok(NULL, " \t");
@@ -120,8 +119,8 @@ void parse_select(Query** query){
             //check second col on
             token = strtok(NULL, " \t");
             if(!contain_param(token, query, "2 columns are required for ON clause")) return;
-            strncpy((*query)->params.select_params.second_col_on, token, sizeof((*query)->params.select_params.second_col_on) - 1);
-    
+            (*query)->params.select_params.second_col_on = strdup(token);
+
             // check optional where after join
             extra_of_join = strtok(NULL, "\n");
             if(extra_of_join){
@@ -131,22 +130,8 @@ void parse_select(Query** query){
                 if(strcasecmp(token, "WHERE") == 0){
                     //check condition column
                     token = strtok(NULL, " \t");
-                    if(!contain_param(token, query, "at least 1 column is required for WHERE clause")) return;
-                    strncpy((*query)->params.select_params.condition_col, token, sizeof((*query)->params.select_params.condition_col) - 1);
-    
-                    //check =
-                    token = strtok(NULL, " \t");
-                    if(!contain_key_word(token, "=", query, (*query)->params.select_params.condition_col)) return;
-    
-                    //check condition value of where
-                    token = strtok(NULL, " \t");
-                    sprintf(error_msg, "1 value is required for column '%s' in WHERE clause", (*query)->params.select_params.condition_col);
-                    if(!contain_param(token, query, error_msg)) return; 
-                    strncpy((*query)->params.select_params.condition_val, token, sizeof((*query)->params.select_params.condition_val) - 1);
-                    
-                    token = strtok(NULL, "\n");
-                    check_end_of_cmd(token, query, "WHERE clause");
-                    return;
+                    check_where(token, query);
+                    if((*query)->cmd_type == INVALID) return;
                 }else{
                     check_end_of_cmd(token, query, "JOIN clause");
                     return;
@@ -159,22 +144,8 @@ void parse_select(Query** query){
         }else if(strcasecmp(token, "WHERE") == 0){
             //check condition column
             token = strtok(NULL, " \t");
-            if(!contain_param(token, query, "at least 1 column is required for WHERE clause")) return;
-            strncpy((*query)->params.select_params.condition_col, token, sizeof((*query)->params.select_params.condition_col) - 1);
-
-            //check =
-            token = strtok(NULL, " \t");
-            if(!contain_key_word(token, "=", query, (*query)->params.select_params.condition_col)) return;
-
-            //check condition value of where
-            token = strtok(NULL, " \t");
-            sprintf(error_msg, "1 value is required for column '%s' in WHERE clause", (*query)->params.select_params.condition_col);
-            if(!contain_param(token, query, error_msg)) return; 
-            strncpy((*query)->params.select_params.condition_val, token, sizeof((*query)->params.select_params.condition_val) - 1);
-                        
-            // check for extra invalid command
-            extra_of_where = strtok(NULL, "\n");
-            check_end_of_cmd(extra_of_where, query, "WHERE clause");
+            check_where(token, query);
+            if((*query)->cmd_type == INVALID) return;
         }else{
             check_end_of_cmd(token, query, "SELECT statement");
             return;
