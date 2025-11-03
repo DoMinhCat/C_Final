@@ -13,7 +13,7 @@ Group 2 ESGI 2A3
 #define TABLE_NAME_MAX 101
 
 #include "../main.h"
-
+// todo :  switch all static char to char* to use strdup, no need to add \0 at the end IMPORTANT : update free and init
 typedef enum CommandType{
     CREATE,
     INSERT,

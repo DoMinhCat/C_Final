@@ -16,4 +16,5 @@ bool contains_visible_char(char* str_to_check);
 void check_end_of_cmd(char* last_token, Query** query, char* current_stmt);
 bool contain_key_word(char* token, char* keyword, Query** query, char* current_stmt);
 bool contain_param(char* token, Query** query, char* err_msg);
+void check_where(char* token, Query** query);
 #endif
