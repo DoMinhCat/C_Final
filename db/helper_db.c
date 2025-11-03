@@ -8,7 +8,7 @@ Group 2 ESGI 2A3
 #include <assert.h>
 #include <string.h>
 
-#include "helper.h"
+#include "helper_db.h"
 #include "../ui/parser.h"
 #include "db.h"
 

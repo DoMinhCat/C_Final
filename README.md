@@ -31,11 +31,13 @@ Projet final de C à ESGI
 
 5. Usage
 
-- `delete from tab1 where col1 = 6`
+- `delete from tab1 [where col1 = 6]`
 - `drop table tab1`
 - `create table tab1 ( col1 int pk, col2 string fk references tab_to_refer col_to_refer, col3 double )`, spaces between parentheses are obligated for the program to parse the command correctly
 - `insert into tab1 ( col1, col2 ) values ( val1, val2 )`
+- `select ( col1, col2, col3 )/* from tab1 [join tab2 on col1 = col2] [where col1 = xyz]`
 
 6. Contributors
 
-Debug includes: gcc sandbox.c ui/parser.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/select.c clean/clean.c init/query.c init/db.c init/hash_table.c init/response.c db/create.c db/helper.c global_var.c -o sb.exe
+Current quick start :
+`gcc main.c ui/parser.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/select.c ui/helper_ui.c clean/cmd.c clean/db.c init/query.c init/db.c init/hash_table.c init/response.c db/create.c db/helper_db.c global_var.c -o sb.exe`

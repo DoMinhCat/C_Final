@@ -73,7 +73,7 @@ void parse_insert(Query** query){
 
         (*query)->params.insert_params.col_count++;
         // get next col
-        token = strtok(NULL, ", ");
+        token = strtok(NULL, "\t, ");
     }
 
     // check for "VALUES"
@@ -109,7 +109,7 @@ void parse_insert(Query** query){
 
         val_count++;
         // get next value
-        token = strtok(NULL, ", ");
+        token = strtok(NULL, "\t, ");
     }
 
     // check number of values passed and number of columns passed

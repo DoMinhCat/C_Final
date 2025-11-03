@@ -8,13 +8,13 @@ Group 2 ESGI 2A3
 #ifndef PARSER_H
 #define PARSER_H
 
-#define MAX_CMD_SIZE 5//1024
+#define MAX_CMD_SIZE 1024
 #define MAX_TOKEN_SIZE 257
 #define TABLE_NAME_MAX 101
 
 #include "../main.h"
 
-typedef enum{
+typedef enum CommandType{
     CREATE,
     INSERT,
     DELETE,
@@ -62,14 +62,11 @@ typedef struct {
     char table_join_name[TABLE_NAME_MAX];
 
     char** col_list;
+    int col_count; //to free col_list
     char first_col_on[TABLE_NAME_MAX];
     char second_col_on[TABLE_NAME_MAX];
     char condition_col[TABLE_NAME_MAX]; // need to check input length
     char condition_val[MAX_TOKEN_SIZE]; // need to check input length
-
-    // select col_list from tab [join tab2 on col1=col2] where x=y
-    
-    // add more later
 } SelectParams;
 
 typedef struct {
