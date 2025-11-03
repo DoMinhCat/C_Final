@@ -11,69 +11,48 @@ Group 2 ESGI 2A3
 #include "helper_ui.h"
 
 void parse_delete(Query** query){
-    char* token;
+    char* token = NULL;
+    char* extra_where_clause = NULL;
+    char error_msg[200];
 
     (*query)->cmd_type = DELETE;
 
     // check FROM
     token = strtok(NULL, " \t");
-    if (!token || strcasecmp(token, "FROM") != 0) {
-        (*query)->cmd_type = INVALID;
-        sprintf((*query)->syntax_message, "Syntax error: expected 'FROM' after DELETE.");
-        return;
-    }
+    if(!contain_key_word(token, "FROM", query, "DELETE")) return;
 
     // check table name
     token = strtok(NULL, " \n");
-    if (!token || strlen(token) == 0) {
-        (*query)->cmd_type = INVALID;
-        sprintf((*query)->syntax_message, "Syntax error: missing table name after FROM.");
-        return;
-    }
-
-    // get table name
+    if(!contain_param(token, query, "1 table is required for DELETE statement")) return;
     strncpy((*query)->params.delete_params.table_name, token, sizeof((*query)->params.delete_params.table_name) - 1);
 
     // get WHERE (optional)
-    token = strtok(NULL, " \t");
-    if (token) {
+    extra_where_clause = strtok(NULL, "\n");
+
+    if (extra_where_clause) {
+        token = strtok(extra_where_clause, " \t");
         if(strcasecmp(token, "WHERE") == 0){
             // get col name
             token = strtok(NULL, " \t");
-            if (!token || strlen(token) == 0) {
-                (*query)->cmd_type = INVALID;
-                sprintf((*query)->syntax_message, "Syntax error: missing column name in WHERE clause.");
-                return;
-            }
+            if(!contain_param(token, query, "at least 1 column is required for WHERE clause")) return;
             strncpy((*query)->params.delete_params.condition_column, token, sizeof((*query)->params.delete_params.condition_column) - 1);
             
             // get "="
             token = strtok(NULL, " \t");
-            if (!token || strlen(token) == 0) {
-                (*query)->cmd_type = INVALID;
-                sprintf((*query)->syntax_message, "Syntax error: missing '=' after '%s'.", (*query)->params.delete_params.condition_column);
-                return;
-            }
-            if (strcmp(token, "=") != 0) {
-                (*query)->cmd_type = INVALID;
-                sprintf((*query)->syntax_message, "Syntax error: command '%s' not found, please check the syntax.", token);
-                return;
-            }
+            if(!contain_key_word(token, "=", query, (*query)->params.delete_params.condition_column)) return;
 
             // get condition value
-            token = strtok(NULL, " \n\t");
-            if (!token || strlen(token) == 0) {
-                (*query)->cmd_type = INVALID;
-                sprintf((*query)->syntax_message, "Syntax error: missing value in WHERE clause.");
-                return;
-            }
-            // strip newline from fgets because this is the end of cmd when user hit enter
-            token[strcspn(token, "\n")] = '\0';
+            token = strtok(NULL, " \t");
+            sprintf(error_msg, "1 value is required for column '%s' in WHERE clause", (*query)->params.delete_params.condition_column);
+            if(!contain_param(token, query, error_msg)) return; 
             strncpy((*query)->params.delete_params.condition_value, token, sizeof((*query)->params.delete_params.condition_value) - 1);
+
+            token = strtok(NULL, "\n");
+            check_end_of_cmd(token, query, "WHERE clause");
+            return;
         } else{
-            (*query)->cmd_type = INVALID;
-            sprintf((*query)->syntax_message, "Syntax error : command '%s' not found, please check the syntax.", token);
+            check_end_of_cmd(token, query, "DELETE statement");
             return;
         }
-    }
+    }else return;
 }
