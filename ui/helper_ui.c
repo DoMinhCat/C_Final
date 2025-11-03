@@ -134,12 +134,3 @@ bool is_valid_identifier(char* token, Query** query){
 
     return true;
 }
-
-void free_create_parser(char* list_to_free[], int size){
-    int i;
-
-    for(i=0; i<size; i++){
-        free(list_to_free[i]);
-        list_to_free[i] = NULL;
-    }
-}
