@@ -13,7 +13,6 @@ Group 2 ESGI 2A3
 #define TABLE_NAME_MAX 101
 
 #include "../main.h"
-// todo :  switch all static char to char* to use strdup, no need to add \0 at the end IMPORTANT : update free and init
 typedef enum CommandType{
     CREATE,
     INSERT,
@@ -26,7 +25,7 @@ typedef enum CommandType{
 
 // For Create table function
 typedef struct{
-    char table_name[TABLE_NAME_MAX];
+    char* table_name;
 
     char **col_list; // list of column names passed in the query
     int col_count;          // number of columns

@@ -51,9 +51,7 @@ void parse_create(Query** query){
             return;
         }
     }
-
-    strncpy((*query)->params.create_params.table_name, token, sizeof((*query)->params.create_params.table_name)-1);
-    (*query)->params.create_params.table_name[sizeof((*query)->params.create_params.table_name)-1] = '\0';
+    (*query)->params.create_params.table_name = strdup(token);
 
     // check '('
     token = strtok(NULL, " \t");

@@ -21,6 +21,9 @@ void free_query(Query** query){
     switch ((*query)->cmd_type)
     {
     case CREATE:
+        // free table_name
+        free((*query)->params.create_params.table_name);
+        (*query)->params.create_params.table_name = NULL;
         //free col_list
         for(i=0; i<(*query)->params.create_params.col_count; i++){
             free((*query)->params.create_params.col_list[i]);
