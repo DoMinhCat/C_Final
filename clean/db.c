@@ -15,7 +15,8 @@ void free_col(Col* col){
     free(col);
     col = NULL;
 }
-    void free_row(Row* row, int col_count){
+
+void free_row(Row* row, int col_count){
     int i;
     
     for(i=0; i<col_count; i++){
@@ -28,6 +29,7 @@ void free_col(Col* col){
     free(row);
     row = NULL;
 }
+
 void free_table(Table* table){
     // this is to clean only 1 table
     int i;
@@ -47,6 +49,7 @@ void free_table(Table* table){
         
         free_col(tmp_col);   
     }
+
     //free row 
     while(current_row != NULL){
         tmp_row = current_row;
@@ -60,6 +63,18 @@ void free_table(Table* table){
     table = NULL;
 } 
 
-//TODO : free all table
+void free_db(Table* first_table){
+    // this func free all tables
+    Table* current_table = first_table;
+    Table* tmp_table = NULL;
+
+    while(current_table!=NULL){
+        tmp_table = current_table;
+        current_table = current_table->next_table;
+
+        free_table(tmp_table);
+        tmp_table = NULL;
+    }
+}
 
 // WARNING : must not free pointer to the next one
