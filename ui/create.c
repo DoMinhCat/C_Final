@@ -3,6 +3,7 @@ Date of creation : 27/10/2025
 Description : parse_create to analyse create command
 Group 2 ESGI 2A3
 */
+//todo : check col/tab name
 
 #include <string.h>
 #include <stdio.h>
@@ -31,14 +32,14 @@ void parse_create(Query** query){
     //check max length
     if (strlen(token)>(TABLE_NAME_MAX-1)){
         (*query)->cmd_type = INVALID;
-        sprintf((*query)->syntax_message, "Syntax error: 100 characters maximum allowed for table name.");
+        fprintf(stderr, "Syntax error: 100 characters maximum allowed for table name.");
         return;
     }
     // check reserved keyword
     for(i=0; i<sizeof(banned_name_list) / sizeof(banned_name_list[0]); i++){
         if(strcasecmp(token, banned_name_list[i]) == 0){
             (*query)->cmd_type = INVALID;
-            sprintf((*query)->syntax_message, "Syntax error: '%s' is a reserved keyword.", token);
+            fprintf(stderr, "Syntax error: '%s' is a reserved keyword.", token);
             return;
         }
     }
@@ -46,7 +47,7 @@ void parse_create(Query** query){
     for(i=0; i<strlen(token); i++){
         if(!isalnum(token[i]) && token[i] != '_'){
             (*query)->cmd_type = INVALID;
-            sprintf((*query)->syntax_message, "Syntax error: special character '%c' is not allowed.", token[i]);
+            fprintf(stderr, "Syntax error: special character '%c' is not allowed.", token[i]);
             return;
         }
     }
@@ -91,14 +92,14 @@ void parse_create(Query** query){
         
         if(strlen(col_name)>(TABLE_NAME_MAX-1)){
             (*query)->cmd_type = INVALID;
-            sprintf((*query)->syntax_message, "Syntax error: 100 characters maximum allowed for column name.");
+            fprintf(stderr, "Syntax error: 100 characters maximum allowed for column name.");
             return;
         }
         // check reserved keyword
         for(i=0; i<sizeof(banned_name_list) / sizeof(banned_name_list[0]); i++){
             if(strcasecmp(col_name, banned_name_list[i]) == 0){
                 (*query)->cmd_type = INVALID;
-                sprintf((*query)->syntax_message, "Syntax error: '%s' is a reserved keyword.", col_name);
+                fprintf(stderr, "Syntax error: '%s' is a reserved keyword.", col_name);
                 return;
             }
         }
@@ -106,7 +107,7 @@ void parse_create(Query** query){
         for(i=0; i<strlen(col_name); i++){
             if(!isalnum(col_name[i]) && col_name[i] != '_'){
                 (*query)->cmd_type = INVALID;
-                sprintf((*query)->syntax_message, "Syntax error: special character '%c' is not allowed.", col_name[i]);
+                fprintf(stderr, "Syntax error: special character '%c' is not allowed.", col_name[i]);
                 return;
             }
         }
@@ -117,7 +118,6 @@ void parse_create(Query** query){
 
         //check col type
         col_type = strtok(NULL, " \t");
-        sprintf(err_msg, "missing type for column '%s'", (*query)->params.create_params.col_list[col_count]);
         if(!contain_param(token, query, err_msg)) return;
         //set col type
         (*query)->params.create_params.type_list = (ColType*)realloc((*query)->params.create_params.type_list, (col_count + 1) * sizeof(ColType));
