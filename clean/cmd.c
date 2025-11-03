@@ -84,7 +84,6 @@ void free_query(Query** query){
         // free table_name
         free((*query)->params.delete_params.table_name);
         (*query)->params.delete_params.table_name = NULL;
-
         // free condition_col 
         free((*query)->params.delete_params.condition_column);
         (*query)->params.delete_params.condition_column = NULL;

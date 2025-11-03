@@ -8,13 +8,17 @@ Group 2 ESGI 2A3
 #define CLEAN_H
 
 typedef struct Response Response;  
-typedef struct Query Query;  
+typedef struct Query Query;
+typedef struct Col Col;
+typedef struct Row Row;
+typedef struct Table Table;  
 
 void free_current_cmd(char** cmd_string, Query** query);
 void free_query(Query** query);
 
-void free_col();
-void free_row();
-void free_table();
+void free_col(Col* col);
+void free_row(Row* row, int col_count);
+void free_table(Table* table);
+void free_db(Table* first_table);
 
 #endif
