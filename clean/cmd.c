@@ -92,6 +92,15 @@ void free_query(Query** query){
         free((*query)->params.delete_params.condition_value);
         (*query)->params.delete_params.condition_value = NULL;
         break;
+    case DROP:
+        //free table_list
+        for(i=0; i<(*query)->params.drop_params.table_count; i++){
+            free((*query)->params.drop_params.table_list[i]);
+            (*query)->params.drop_params.table_list[i] = NULL;
+        }
+        free((*query)->params.drop_params.table_list);
+        (*query)->params.drop_params.table_list = NULL;
+        break;
     case SELECT:
         // free table_name 
         free((*query)->params.select_params.table_name);
