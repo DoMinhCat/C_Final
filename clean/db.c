@@ -29,7 +29,7 @@ void free_col(Col* col){
     row = NULL;
 }
 void free_table(Table* table){
-    // this is to clean only 1 table, for all table need to free from last table to first
+    // this is to clean only 1 table
     int i;
     Col* current_col = table->first_col;
     Col* tmp_col; // temporary to free current col
@@ -59,5 +59,7 @@ void free_table(Table* table){
     free(table);
     table = NULL;
 } 
+
+//TODO : free all table
 
 // WARNING : must not free pointer to the next one

@@ -84,7 +84,9 @@ int main(int argc, char **argv){
         {
         case CREATE:
             // Call create() 
-            db_response = create_table(parser_output);
+            //db_response = create_table(parser_output);
+
+            printf("CREATE is called\n");
             break;
         case INSERT:
             // Call insert() of db
@@ -157,6 +159,7 @@ int main(int argc, char **argv){
 
     
     // Call to functions in clean.c to free all db struct before exit
+    // free al table()
 
     printf("Goodbye !");
     exit(EXIT_SUCCESS);

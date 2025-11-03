@@ -95,9 +95,6 @@ typedef struct Query
         DropParams drop_params;
         SelectParams select_params;
     } params;
-
-    // set this if there is a syntax error that the parser detected
-    char syntax_message[100];
 } Query;
 
 

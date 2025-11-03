@@ -41,10 +41,8 @@ Query* parse_cmd(char* cmd) {
 
     token = strtok(cmd, " \t");
 
-    if(token == NULL){
-        query->cmd_type = INVALID;
-        sprintf(query->syntax_message, "Command invalid, please check the syntax.\n");
-    } else if(strcasecmp(token, "DELETE") == 0) parse_delete(&query);
+    // no need to handle null cmd, already handled in main.c
+    if(strcasecmp(token, "DELETE") == 0) parse_delete(&query);
     else if(strcasecmp(token, "DROP") == 0) parse_drop(&query);
     else if(strcasecmp(token, "CREATE") == 0) parse_create(&query);
     else if(strcasecmp(token, "SELECT") == 0) parse_select(&query);
@@ -57,7 +55,7 @@ Query* parse_cmd(char* cmd) {
     // first word is not one of the accepted command (create, select, insert,...)
     else {
         query->cmd_type = INVALID;
-        sprintf(query->syntax_message, "Syntax error : command '%s' not found, please check the syntax.", token);
+        fprintf(stderr, "Syntax error: command '%s' not found, please check the syntax.\n", token);
     }
 
     return query;
