@@ -11,7 +11,7 @@ Group 2 ESGI 2A3
 #include <stdbool.h>
 
 #include "db.h"
-#include "helper.h"
+#include "helper_db.h"
 #include "../main.h"
 #include "../ui/parser.h"
 #include "../init/init.h"
