@@ -24,8 +24,7 @@ void parse_insert(Query** query){
     // get table name
     token = strtok(NULL, " \t");
     if(!contain_param(token, query, "1 table is required for INSERT statement")) return;
-    strncpy((*query)->params.insert_params.table_name, token, sizeof((*query)->params.insert_params.table_name)-1);
-    (*query)->params.insert_params.table_name[sizeof((*query)->params.insert_params.table_name)-1] = '\0';
+    (*query)->params.insert_params.table_name = strdup(token);
  
     // check '('
     token = strtok(NULL, " \t");

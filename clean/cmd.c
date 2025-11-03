@@ -60,6 +60,9 @@ void free_query(Query** query){
         (*query)->params.create_params.fk_count = 0;
         break;
     case INSERT:
+        // free table_name
+        free((*query)->params.insert_params.table_name);
+        (*query)->params.insert_params.table_name = NULL;
         //free col_list
         for(i=0; i<(*query)->params.insert_params.col_count; i++){
             free((*query)->params.insert_params.col_list[i]);

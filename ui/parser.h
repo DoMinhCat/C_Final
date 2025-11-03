@@ -40,14 +40,12 @@ typedef struct{
 
 // For Insert function
 typedef struct{
-    char table_name[TABLE_NAME_MAX];
+    char* table_name;
 
     char **col_list; // list of column names passed in the query
-    int col_count;          // number of columns for free operation
+    int col_count;          // number of columns to free col_list and data_list
 
     void **data_list; // list of input for each column
-    
-    // TODO: define other necessary params
 } InsertParams;
 
 typedef struct {
