@@ -11,6 +11,7 @@ Group 2 ESGI 2A3
 #include <ctype.h>
 
 #include "parser.h"
+#include "helper_ui.h"
 
 void parse_create(Query** query){
     char* token;

@@ -56,3 +56,5 @@ bool contain_param(char* token, Query** query, char* err_msg){
     }
     return true;
 }
+
+// todo: check where

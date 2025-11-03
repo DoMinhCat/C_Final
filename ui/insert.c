@@ -10,6 +10,7 @@ Group 2 ESGI 2A3
 #include <assert.h>
 
 #include "parser.h"
+#include "helper_ui.h"
 
 void parse_insert(Query** query){
     char* token;

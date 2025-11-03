@@ -6,7 +6,9 @@ Group 2 ESGI 2A3
 
 #include <string.h>
 #include <stdio.h>
+
 #include "parser.h"
+#include "helper_ui.h"
 
 void parse_drop(Query** query){
     char* token;
