@@ -72,8 +72,7 @@ int main(int argc, char **argv){
         }
 
         // Check invalid syntax
-        if(parser_output->cmd_type == INVALID && parser_output->syntax_message){
-            printf("%s\n", parser_output->syntax_message);
+        if(parser_output->cmd_type == INVALID){
             free_current_cmd(&cmd_input, &parser_output);
             continue;
         }

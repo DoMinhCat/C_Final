@@ -10,6 +10,7 @@ Group 2 ESGI 2A3
 #include "parser.h"
 #include "helper_ui.h"
 
+// todo : table list to drop
 void parse_drop(Query** query){
     char* token;
 
@@ -17,18 +18,10 @@ void parse_drop(Query** query){
 
     // check TABLE
     token = strtok(NULL, " \t");
-    if(!token || strcasecmp(token, "TABLE") != 0){
-        (*query)->cmd_type = INVALID;
-        sprintf((*query)->syntax_message, "Syntax error: expected 'TABLE' after DROP.");
-        return;
-    }
+    if(!contain_key_word(token, "TABLE", query, "DROP")) return;
 
     // get table name to drop
     token = strtok(NULL, " \n");
-    if (!token || strlen(token) == 0) {
-        (*query)->cmd_type = INVALID;
-        sprintf((*query)->syntax_message, "Syntax error: missing table name after TABLE.");
-        return;
-    }
+    if(!contain_param(token, query, "at least 1 table is required for DROP statement")) return;
     strncpy((*query)->params.drop_params.table_name, token, sizeof((*query)->params.drop_params.table_name)-1);
 }
