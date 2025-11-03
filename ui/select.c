@@ -175,6 +175,7 @@ void parse_select(Query** query){
             // check for extra invalid command
             extra_of_where = strtok(NULL, "\n");
             check_end_of_cmd(extra_of_where, query, "WHERE clause");
+            return;
         }else{
             check_end_of_cmd(token, query, "SELECT statement");
             return;
