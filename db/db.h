@@ -41,4 +41,5 @@ typedef struct Response Response;
 typedef struct Query Query;  
 
 Response* create_table(Query* query);
+Response* drop_table(Query* query);
 #endif
