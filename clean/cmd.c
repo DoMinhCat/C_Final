@@ -81,7 +81,16 @@ void free_query(Query** query){
         (*query)->params.insert_params.data_list = NULL;
         break;
     case DELETE:
-        // no dynamic array for now
+        // free table_name
+        free((*query)->params.delete_params.table_name);
+        (*query)->params.delete_params.table_name = NULL;
+
+        // free condition_col 
+        free((*query)->params.delete_params.condition_column);
+        (*query)->params.delete_params.condition_column = NULL;
+        // free condition_val 
+        free((*query)->params.delete_params.condition_value);
+        (*query)->params.delete_params.condition_value = NULL;
         break;
     case SELECT:
         // free table_name 
