@@ -113,9 +113,11 @@ void parse_create(Query** query){
                 
                 // check for invalid extra cmd
                 token =  strtok(NULL, " \t");
-                sprintf(err_msg, "constraint declaration of column '%s'", (*query)->params.create_params.col_list[col_count]);
-                check_end_of_cmd(token, query, err_msg);
-                return;
+                if(token){
+                    sprintf(err_msg, "constraint declaration of column '%s'", (*query)->params.create_params.col_list[col_count]);
+                    check_end_of_cmd(token, query, err_msg);
+                    return;
+                } else return;
             }
             else if (strcasecmp(col_constraint, "FK") == 0){
                 (*query)->params.create_params.constraint_list[fk_count] = FK;
@@ -144,8 +146,10 @@ void parse_create(Query** query){
 
                 //check extra invalid cmd
                 token = strtok(NULL, " \t");
-                check_end_of_cmd(token, query, "REFERENCES clause");
-                return;
+                if(token){
+                    check_end_of_cmd(token, query, "REFERENCES clause");
+                    return;
+                } else return;
             }else{
                 sprintf(err_msg, "type declaration of column '%s'", (*query)->params.create_params.col_list[col_count]);
                 check_end_of_cmd(col_constraint, query, err_msg);

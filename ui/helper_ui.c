@@ -81,8 +81,10 @@ void check_where(char* token, Query** query){
                 
     // check for extra invalid command
     token = strtok(NULL, "\n");
-    check_end_of_cmd(token, query, "WHERE clause");
-    if((*query)->cmd_type == INVALID) return;
+    if(token){
+        check_end_of_cmd(token, query, "WHERE clause");
+        if((*query)->cmd_type == INVALID) return;
+    } else return;
 
     // all check done, now assign to appropriate param
     switch ((*query)->cmd_type)

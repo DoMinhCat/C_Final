@@ -31,10 +31,11 @@ void parse_insert(Query** query){
     if(!contain_key_word(token, ")", query, (*query)->params.insert_params.table_name)) return;
 
     // get col_list : ( col1, col2 )
-    char* col_list;
-    char* value_keyword;
-    char* open_value;
-    char* data_list;
+    char* col_list = NULL;
+    char* value_keyword = NULL;
+    char* open_value = NULL;
+    char* data_list = NULL;
+    char* extra_cmd = NULL;
     int current_col_count;
     (*query)->params.insert_params.col_count = 0;
 
@@ -42,6 +43,7 @@ void parse_insert(Query** query){
     value_keyword = strtok(NULL, " \t"); // got "VALUES"
     open_value = strtok(NULL, " \t"); // got "("
     data_list = strtok(NULL, ")"); // got "val1, val2 "
+    extra_cmd = strtok(NULL, "\n");
 
     if(!contain_param(col_list, query, "at least 1 column is required for INSERT statement")) return;
 
@@ -83,6 +85,12 @@ void parse_insert(Query** query){
         val_count++;
         // get next value
         token = strtok(NULL, "\t, ");
+    }
+
+    //check extra invalid cmd
+    if(extra_cmd){
+        check_end_of_cmd(extra_cmd, query, "INSERT statement");
+        return;
     }
 
     // check number of values passed and number of columns passed
