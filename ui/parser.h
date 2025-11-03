@@ -70,7 +70,8 @@ typedef struct {
 } SelectParams;
 
 typedef struct {
-    char table_name[TABLE_NAME_MAX];
+    char** table_list;
+    int table_count; // to free table_list
 } DropParams;
 
 typedef enum{
