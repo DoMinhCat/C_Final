@@ -24,7 +24,7 @@ bool contains_visible_char(char* str_to_check){
         if(!isspace(str_to_check[i])) return true;
     }
 
-    return false;
+    return false; // all is white spaces
 }
 
 void check_end_of_cmd(char* last_token, Query** query, char* current_stmt){
@@ -35,9 +35,14 @@ void check_end_of_cmd(char* last_token, Query** query, char* current_stmt){
 }
 
 bool contain_key_word(char* token, char* keyword, Query** query, char* current_stmt){
-    if(!token || strcasecmp(token, keyword) != 0){
+    if(!token){
         (*query)->cmd_type = INVALID;
-        fprintf(stderr, "Syntax error: missing '%s' after %s.", keyword, current_stmt);
+        fprintf(stderr, "Syntax error: missing '%s' after '%s'.", keyword, current_stmt);
+        return false;
+    }
+    if(strcasecmp(token, keyword) != 0){
+        (*query)->cmd_type = INVALID;
+        fprintf(stderr, "Syntax error: invalid command '%s' after '%s'.", token, current_stmt);
         return false;
     }
     return true;
