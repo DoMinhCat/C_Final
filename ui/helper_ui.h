@@ -19,5 +19,5 @@ bool contain_param(char* token, Query** query, char* err_msg);
 void check_where(char* token, Query** query);
 bool exceed_max_len(char* token, Query** query, int max_len, char* current_str);
 bool is_valid_identifier(char* token, Query** query);
-
+void free_create_parser(char* token, char* col_list, char* col_def, char* tmp_col_def, char* col_name, char* col_type, char* col_constraint, char* reference_keyword, char* extra_cmd);
 #endif

@@ -134,3 +134,25 @@ bool is_valid_identifier(char* token, Query** query){
 
     return true;
 }
+
+void free_create_parser(char* token, char* col_list, char* col_def, char* tmp_col_def, char* col_name, char* col_type, char* col_constraint, char* reference_keyword, char* extra_cmd){
+    free(token);
+    free(col_list);
+    free(col_def);
+    free(tmp_col_def);
+    free(col_name);
+    free(col_type);
+    free(col_constraint);
+    free(reference_keyword);
+    free(extra_cmd);
+
+    token = NULL;
+    col_list = NULL;
+    col_def = NULL;
+    tmp_col_def = NULL;
+    col_name = NULL;
+    col_type = NULL;
+    col_constraint = NULL;
+    reference_keyword = NULL;
+    extra_cmd = NULL;
+}
