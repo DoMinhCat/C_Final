@@ -43,15 +43,15 @@ typedef struct{
     char* table_name;
 
     char **col_list; // list of column names passed in the query
-    int col_count;          // number of columns to free col_list and data_list
+    int col_count;          // number of columns to free col_list and
 
     void **data_list; // list of input for each column
 } InsertParams;
 
 typedef struct {
-    char table_name[TABLE_NAME_MAX];
-    char condition_column[TABLE_NAME_MAX]; // need to check input length
-    char condition_value[MAX_TOKEN_SIZE]; // need to check input length
+    char* table_name;
+    char* condition_column; // need to check input length
+    char* condition_value; // need to check input length
 } DeleteParams;
 
 typedef struct {

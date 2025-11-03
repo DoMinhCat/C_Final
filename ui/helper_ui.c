@@ -62,13 +62,13 @@ void check_where(char* token, Query** query){
     // when using this, need to check if cmd_type is INVALID at the end, if yes then return query
 
     char error_msg[200];
-    char condition_col[TABLE_NAME_MAX];
-    char condition_val[MAX_TOKEN_SIZE];
+    char* condition_col = NULL;
+    char* condition_val = NULL;
 
-    
     //check condition column
     if(!contain_param(token, query, "at least 1 column is required for WHERE clause")) return;
-    strcpy(condition_col, token);
+    condition_col =  strdup(token);
+
     //check =
     token = strtok(NULL, " \t");
     if(!contain_key_word(token, "=", query, (*query)->params.select_params.condition_col)) return;
@@ -77,7 +77,7 @@ void check_where(char* token, Query** query){
     token = strtok(NULL, " \t");
     sprintf(error_msg, "1 value is required for column '%s' in WHERE clause", (*query)->params.select_params.condition_col);
     if(!contain_param(token, query, error_msg)) return; 
-    strcpy(condition_val, token);
+    condition_val =  strdup(token);
                 
     // check for extra invalid command
     token = strtok(NULL, "\n");
@@ -92,8 +92,8 @@ void check_where(char* token, Query** query){
         strcpy((*query)->params.select_params.condition_val, condition_val);
         break;
     case DELETE:
-        strcpy((*query)->params.delete_params.condition_column, condition_col);
-        strcpy((*query)->params.delete_params.condition_value, condition_val);
+        (*query)->params.delete_params.condition_column = strdup(condition_col);
+        (*query)->params.delete_params.condition_value = strdup(condition_val);
         break;
     default:
         fprintf(stderr, "Syntax error: invalid use of WHERE clause.");

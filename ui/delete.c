@@ -24,7 +24,7 @@ void parse_delete(Query** query){
     // check table name
     token = strtok(NULL, " \n");
     if(!contain_param(token, query, "1 table is required for DELETE statement")) return;
-    strncpy((*query)->params.delete_params.table_name, token, sizeof((*query)->params.delete_params.table_name) - 1);
+    (*query)->params.delete_params.table_name = strdup(token);
 
     // get WHERE (optional)
     extra_where_clause = strtok(NULL, "\n");
