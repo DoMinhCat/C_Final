@@ -28,6 +28,7 @@ int main(int argc, char **argv){
     char cmd_buffer[MAX_CMD_SIZE];
     char* cmd_input = NULL;
     char confirm;
+    int c; // to consume extra char
 
     Query* parser_output = NULL;
     Response* db_response = NULL;
@@ -57,6 +58,7 @@ int main(int argc, char **argv){
         cmd_input = read_cmd(cmd_buffer);
         // if nothing or command too long (read_cmd returns NULL)
         if (cmd_input == NULL){
+            printf("\n");
             continue;
         } else if(strcmp("long", cmd_input) == 0){
             printf("\n");
@@ -109,8 +111,12 @@ int main(int argc, char **argv){
             if(!parser_output->params.delete_params.condition_column){
                 printf("Confirm deletion of all rows from '%s' table, press 'y' to proceed (cancel on default): ", parser_output->params.delete_params.table_name);
                 confirm = getchar();
-                // flush extra chars
-                while ((getchar()) != '\n' && getchar() != EOF);
+                //flush extra chars
+                c = getchar();
+                if (c != '\n' && c != EOF) {
+                    while ((c = getchar()) != '\n' && c != EOF);
+                }
+                
                 if(confirm == 'y'){
                     // call delete
                     printf("DELETE is called\n");
@@ -127,8 +133,11 @@ int main(int argc, char **argv){
         // ask for confirmation
             printf("Confirm deletion of %d %s, press 'y' to proceed (cancel on default): ", parser_output->params.drop_params.table_count, parser_output->params.drop_params.table_count>1?"tables":"table");
             confirm = getchar();
-            // flush extra chars
-            while ((getchar()) != '\n' && getchar() != EOF);
+            //flush extra chars
+            c = getchar();
+            if (c != '\n' && c != EOF) {
+                while ((c = getchar()) != '\n' && c != EOF);
+            }
 
             if(confirm == 'y'){
                 // call to drop
