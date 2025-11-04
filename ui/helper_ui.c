@@ -43,7 +43,7 @@ bool contain_key_word(char* token, char* keyword, Query** query, char* current_s
     }
     if(strcasecmp(token, keyword) != 0){
         (*query)->cmd_type = INVALID;
-        fprintf(stderr, "Syntax error: invalid command '%s' after '%s'.\n", token, current_stmt);
+        fprintf(stderr, "Syntax error: missing '%s' after '%s'.\n", keyword, current_stmt);
         return false;
     }
     return true;

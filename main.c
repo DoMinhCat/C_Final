@@ -52,7 +52,6 @@ int main(int argc, char **argv){
 
     // Infinite loop to get user's command
     while(1){
-        
         // put the command in cmd_input
         printf(">>> ");
         cmd_input = read_cmd(cmd_buffer);
@@ -109,28 +108,32 @@ int main(int argc, char **argv){
             // without WHERE clause
             if(!parser_output->params.delete_params.condition_column){
                 printf("Confirm deletion of all rows from '%s' table, press 'y' to proceed (cancel on default): ", parser_output->params.delete_params.table_name);
-                scanf("%c", &confirm);
+                confirm = getchar();
+                // flush extra chars
+                while ((getchar()) != '\n' && getchar() != EOF);
                 if(confirm == 'y'){
                     // call delete
-                    printf("DELETE is called");
-                }else printf("Execution of DELETE statement aborted.");
+                    printf("DELETE is called\n");
+                }else printf("Execution of DELETE statement aborted.\n");
             }
             // execute normally if there is WHERE
             else{
                 // call delete
-                printf("DELETE is called");
+                printf("DELETE is called\n");
             }
             break;
 
         case DROP:
         // ask for confirmation
             printf("Confirm deletion of %d %s, press 'y' to proceed (cancel on default): ", parser_output->params.drop_params.table_count, parser_output->params.drop_params.table_count>1?"tables":"table");
-            scanf("%c", &confirm);
+            confirm = getchar();
+            // flush extra chars
+            while ((getchar()) != '\n' && getchar() != EOF);
 
             if(confirm == 'y'){
                 // call to drop
-                printf("DROP is called");
-            }else printf("Execution of DROP statement aborted.");
+                printf("DROP is called\n");
+            }else printf("Execution of DROP statement aborted.\n");
             break;
         default:
             printf("Invalid command, please check the syntax.\n");
