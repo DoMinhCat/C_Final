@@ -20,13 +20,18 @@ void print_divider(){
     for(int i=0; i<20; i++) printf("-");
     printf("\n");
 }
+void flush_extra(){
+    int c = getchar();
+    if (c != '\n' && c != EOF) {
+        while ((c = getchar()) != '\n' && c != EOF);
+    }
+}
 
 int main(int argc, char **argv){
-    char import_export_line[5];
-    char import_confirm;
-    char export_confirm;
+    char import_export_choice;
     char cmd_buffer[MAX_CMD_SIZE];
     char* cmd_input = NULL;
+    char confirm;
 
     Query* parser_output = NULL;
     Response* db_response = NULL;
@@ -37,12 +42,16 @@ int main(int argc, char **argv){
     print_divider();
 
     // Prompt for file import
-    printf("Do you want to import an existing database, do it now or never (y/n) : ");
-    fgets(import_export_line, sizeof(import_export_line), stdin);
-    import_confirm = import_export_line[0];
+    do{
+        printf("Do you want to import an existing database, do it now or never (y/n) : ");
+        scanf(" %c", &import_export_choice);
+        flush_extra();
+    } while (import_export_choice != 'y' && import_export_choice != 'Y' && import_export_choice != 'n' && import_export_choice != 'N');
     
-    if(import_confirm == 'y' || import_confirm == 'Y'){
+    
+    if(import_export_choice == 'y' || import_export_choice == 'Y'){
         // Call import function from file folder
+        printf("Import confirmed");
     }else {
         print_divider();
         printf("Database importation aborted.\n");
@@ -51,12 +60,12 @@ int main(int argc, char **argv){
 
     // Infinite loop to get user's command
     while(1){
-        
         // put the command in cmd_input
         printf(">>> ");
         cmd_input = read_cmd(cmd_buffer);
         // if nothing or command too long (read_cmd returns NULL)
         if (cmd_input == NULL){
+            printf("\n");
             continue;
         } else if(strcmp("long", cmd_input) == 0){
             printf("\n");
@@ -78,17 +87,15 @@ int main(int argc, char **argv){
             continue;
         }
 
-
-        // Execute command
-        
-        switch (parser_output->cmd_type)
-        {
+        // Execute commands
+        switch (parser_output->cmd_type){
         case CREATE:
             // Call create() 
             //db_response = create_table(parser_output);
 
             printf("CREATE is called\n");
             break;
+
         case INSERT:
             // Call insert() of db
 
@@ -97,6 +104,7 @@ int main(int argc, char **argv){
             
             printf("INSERT is called\n");
             break;
+
         case SELECT:
             // Call select() of db
 
@@ -106,23 +114,37 @@ int main(int argc, char **argv){
             printf("SELECT is called\n");
             break;
         case DELETE:
-            // Call delete() of db
-
-            //placeholder
-            //no need to init response, it will be init in db functions
-            
-            printf("DELETE is called\n");
+            // without WHERE clause
+            if(!parser_output->params.delete_params.condition_column){
+                printf("Confirm deletion of all rows from '%s' table, press 'y' to proceed (cancel on default): ", parser_output->params.delete_params.table_name);
+                confirm = getchar();
+                flush_extra();
+                
+                if(confirm == 'y'){
+                    // call delete
+                    printf("DELETE is called\n");
+                }else printf("Execution of DELETE statement aborted.\n");
+            }
+            // execute normally if there is WHERE
+            else{
+                // call delete
+                printf("DELETE is called\n");
+            }
             break;
-        case DROP:
-            // Call drop() of db : 
 
-            //placeholder
-            //no need to init response, it will be init in db functions
-            
-            printf("DROP is called\n");
+        case DROP:
+        // ask for confirmation
+            printf("Confirm deletion of %d %s, press 'y' to proceed (cancel on default): ", parser_output->params.drop_params.table_count, parser_output->params.drop_params.table_count>1?"tables":"table");
+            confirm = getchar();
+            flush_extra();
+
+            if(confirm == 'y'){
+                // call to drop
+                printf("DROP is called\n");
+            }else printf("Execution of DROP statement aborted.\n");
             break;
         default:
-            printf("Command invalid, please check the syntax.\n");
+            printf("Invalid command, please check the syntax.\n");
             break;
         }
 
@@ -142,16 +164,21 @@ int main(int argc, char **argv){
 
         // free before getting new command
 
-        db_response = init_response();//temp
-        free(db_response);
+        if(db_response) free(db_response); // in case no confirm for DROP/DELETE
         free_current_cmd(&cmd_input, &parser_output);
     }
 
-    printf("Do you want to export the database, do it now or never (y/n) : ");
-    fgets(import_export_line, sizeof(import_export_line), stdin);
-    export_confirm = import_export_line[0];
-    if(export_confirm == 'y' || export_confirm == 'Y'){
+    // Prompt for db export
+    do
+    {
+        printf("Do you want to import export the current database, do it now or never (y/n) : ");
+        scanf(" %c", &import_export_choice);
+        flush_extra();
+    } while (import_export_choice != 'y' && import_export_choice != 'Y' && import_export_choice != 'n' && import_export_choice != 'N');
+
+    if(import_export_choice == 'y' || import_export_choice == 'Y'){
         // Call export func from file folder
+        printf("Export confirmed\n");
     }else {
         print_divider();
         printf("Database exportation aborted.\n");
