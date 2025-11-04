@@ -1,8 +1,6 @@
 #ifndef GLOBAL_VAR_H
 #define GLOBAL_VAR_H
 
-#include "global_var.h"
-
 typedef struct Col Col; 
 typedef struct Table Table; 
 typedef struct Row Row;

@@ -11,267 +11,182 @@ Group 2 ESGI 2A3
 #include <ctype.h>
 
 #include "parser.h"
+#include "helper_ui.h"
 
 void parse_create(Query** query){
     char* token;
-    char* banned_name_list[] = {"SELECT", "INSERT", "VALUES", "DROP", "DELETE", "TABLE", "FROM", "INTO", "WHERE", "JOIN", "ON", "INT", "STRING", "DOUBLE"};
-    
-    int i;
+    // get column names, type, pk/fk
+    char* col_list = NULL;
+    char* col_def = NULL;        // single column definition (e.g., "col int pk")
+    char* tmp_col_def = NULL;
+    char* col_name = NULL;
+    char* col_type = NULL;
+    char* col_constraint = NULL;
+    char* reference_keyword = NULL;
+    char* extra_cmd = NULL;
+    int fk_count;
+    char err_msg[200];
+
+    char *saveptr1, *saveptr2;
+
     (*query)->cmd_type = CREATE;
 
     // check TABLE
     token = strtok(NULL, " \t");
-    if(!token || strcasecmp(token, "TABLE") != 0){
-        (*query)->cmd_type = INVALID;
-        sprintf((*query)->syntax_message, "Syntax error: missing 'TABLE' after CREATE.");
+    if(!contain_key_word(token, "TABLE", query, "CREATE")){
         return;
     }
 
     // get table name to create
     token = strtok(NULL, " \t");
-    if (!token || strlen(token) == 0) {
-        (*query)->cmd_type = INVALID;
-        sprintf((*query)->syntax_message, "Syntax error: missing table name after TABLE.");
+    if(!contain_param(token, query, "1 table name is required for CREATE statement")){
         return;
-    }
-    //check max length
-    if (strlen(token)>(TABLE_NAME_MAX-1)){
-        (*query)->cmd_type = INVALID;
-        sprintf((*query)->syntax_message, "Syntax error: 100 characters maximum allowed for table name.");
-        return;
-    }
-    // check reserved keyword
-    for(i=0; i<sizeof(banned_name_list) / sizeof(banned_name_list[0]); i++){
-        if(strcasecmp(token, banned_name_list[i]) == 0){
-            (*query)->cmd_type = INVALID;
-            sprintf((*query)->syntax_message, "Syntax error: '%s' is a reserved keyword.", token);
-            return;
-        }
-    }
-    // check no special character allowed
-    for(i=0; i<strlen(token); i++){
-        if(!isalnum(token[i]) && token[i] != '_'){
-            (*query)->cmd_type = INVALID;
-            sprintf((*query)->syntax_message, "Syntax error: special character '%c' is not allowed.", token[i]);
-            return;
-        }
     }
 
-    strncpy((*query)->params.create_params.table_name, token, sizeof((*query)->params.create_params.table_name)-1);
-    (*query)->params.create_params.table_name[sizeof((*query)->params.create_params.table_name)-1] = '\0';
+    //check max length
+    if(exceed_max_len(token, query, TABLE_NAME_MAX, "table name")){
+        return;
+    }
+
+    // check reserved keyword and special chars
+    if(!is_valid_identifier(token, query)){
+        return;
+    }
+
+    (*query)->params.create_params.table_name = strdup(token);
+    assert((*query)->params.create_params.table_name != NULL);
 
     // check '('
     token = strtok(NULL, " \t");
-    if (!token || token[0] != '(') {
-        (*query)->cmd_type = INVALID;
-        sprintf((*query)->syntax_message, "Syntax error: missing '(' after table name.");
+    if(!contain_key_word(token, "(", query, (*query)->params.create_params.table_name)){
         return;
     }
-
-    // get column names, type, pk/fk
-    char* col_def;        // single column definition (e.g., "col int pk")
-    char* col_name;
-    char* col_type;
-    char* col_constraint;
-    char* reference_keyword;
-    char* table_name_refer;
-    char* col_name_refer;
-    int fk_count;
 
     (*query)->params.create_params.fk_count = 0;
     (*query)->params.create_params.col_count = 0;
-
-    // get first column definition inside parentheses
-    col_def = strtok(NULL, ")");
-    if (!col_def || strlen(col_def) == 0){
-        (*query)->cmd_type = INVALID;
-        sprintf((*query)->syntax_message, "Syntax error: at least 1 column is required.");
+    
+    // get col_list
+    col_list = strtok(NULL, ")");
+    extra_cmd = strtok(NULL, "\n");
+    if(!contain_param(col_list, query, "at least 1 column is required for CREATE statement")){
         return;
-    }
+    } 
 
-    // split each column by ','
-    token = strtok(col_def, ",");
-    while(token != NULL){
-        // Trim spaces
-        while(*token == ' ' || *token == '\t') token++;
-        char* end = token + strlen(token) - 1;
-        while(end > token && (*end == ' ' || *end == '\t')) { *end = '\0'; end--; }
-        
-        col_name = token;
-        
-        // Find first space/tab to separate name from type
-        col_type = NULL;
-        col_constraint = NULL;
-        reference_keyword = NULL;
-        table_name_refer = NULL;
-        col_name_refer = NULL;
-        
-        char* p = token;
-        while(*p && *p != ' ' && *p != '\t') p++;
-        
-        if(*p) {
-            *p = '\0'; 
-            p++;
-            while(*p == ' ' || *p == '\t') p++;  // Skip spaces
-            
-            if(*p) {
-                col_type = p;
-                // Find next space for constraint
-                while(*p && *p != ' ' && *p != '\t') p++;
-                
-                if(*p) {
-                    *p = '\0';  // Terminate col_type
-                    p++;
-                    while(*p == ' ' || *p == '\t') p++;  // Skip spaces
-                    
-                    if(*p) {
-                        col_constraint = p;
-                        // Find next space for REFERENCES
-                        while(*p && *p != ' ' && *p != '\t') p++;
+    // get column definitions inside parentheses
+    col_def = strtok_r(col_list, ",", &saveptr1);
 
-                        if(*p){
-                            *p = '\0';  // Terminate constraint
-                            p++;  
-                            while(*p == ' ' || *p == '\t') p++;  // Skip spaces
+    while(col_def != NULL){
+        fk_count = (*query)->params.create_params.fk_count;
 
-                            if(*p){
-                                reference_keyword = p;
-                                // Find next space for refer table name
-                                while(*p && *p != ' ' && *p != '\t') p++;
+        tmp_col_def = strdup(col_def);
+        assert(tmp_col_def != NULL);
 
-                                if(*p){
-                                    *p = '\0';  // Terminate REFERENCES
-                                    p++;  
-                                    while(*p == ' ' || *p == '\t') p++;  // Skip spaces
 
-                                    if(*p){
-                                        table_name_refer = p;
-                                        // Find next space for refer col name
-                                        while(*p && *p != ' ' && *p != '\t') p++;
-
-                                        if(*p){
-                                            *p = '\0';  // Terminate refer table name
-                                            p++;  
-                                            while(*p == ' ' || *p == '\t') p++;  // Skip spaces
-
-                                            if(*p){
-                                                col_name_refer = p;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
-        // Validate
-        if (!col_name || strlen(col_name) == 0){
-            (*query)->cmd_type = INVALID;
-            sprintf((*query)->syntax_message, "Syntax error: at least 1 column is required.");
+        col_name = strtok_r(tmp_col_def, " \t", &saveptr2);
+        if(!contain_param(col_name, query, "at least 1 column is required for CREATE statement")){
+            free(tmp_col_def);
             return;
-        }
-        if(strlen(col_name)>(TABLE_NAME_MAX-1)){
-            (*query)->cmd_type = INVALID;
-            sprintf((*query)->syntax_message, "Syntax error: 100 characters maximum allowed for column name.");
+        } 
+        
+        if(exceed_max_len(col_name, query, TABLE_NAME_MAX, "column name")){
+            free(tmp_col_def);
             return;
-        }
-        // check reserved keyword
-        for(i=0; i<sizeof(banned_name_list) / sizeof(banned_name_list[0]); i++){
-            if(strcasecmp(col_name, banned_name_list[i]) == 0){
-                (*query)->cmd_type = INVALID;
-                sprintf((*query)->syntax_message, "Syntax error: '%s' is a reserved keyword.", col_name);
-                return;
-            }
-        }
-        // check no special character allowed
-        for(i=0; i<strlen(col_name); i++){
-            if(!isalnum(col_name[i]) && col_name[i] != '_'){
-                (*query)->cmd_type = INVALID;
-                sprintf((*query)->syntax_message, "Syntax error: special character '%c' is not allowed.", col_name[i]);
-                return;
-            }
-        }
-
-        if (!col_type || strlen(col_type) == 0){
-            (*query)->cmd_type = INVALID;
-            sprintf((*query)->syntax_message, "Syntax error: missing type for column '%s'.", col_name);
+        } 
+        
+        if(!is_valid_identifier(col_name, query)){
+            free(tmp_col_def);
             return;
-        }
-
-        //TODO : check col_name != SELECT, INSERT,... or contains special chars
-        // expand list size 
-        i = (*query)->params.create_params.col_count;
-
-        (*query)->params.create_params.col_list = (char**)realloc((*query)->params.create_params.col_list, (i + 1) * sizeof(char*));
-        (*query)->params.create_params.type_list = (ColType*)realloc((*query)->params.create_params.type_list, (i + 1) * sizeof(ColType));
-        (*query)->params.create_params.constraint_list = (ColConstraintType*)realloc((*query)->params.create_params.constraint_list, (i + 1) * sizeof(ColConstraintType));
+        } 
+        
+        (*query)->params.create_params.col_list = (char**)realloc((*query)->params.create_params.col_list, ((*query)->params.create_params.col_count + 1) * sizeof(char*));
         assert((*query)->params.create_params.col_list != NULL);
-        assert((*query)->params.create_params.type_list != NULL);
-        assert((*query)->params.create_params.constraint_list != NULL);
-
-        // set params
-        (*query)->params.create_params.col_list[i] = strdup(col_name);
-
-        if (strcasecmp(col_type, "INT") == 0)
-            (*query)->params.create_params.type_list[i] = INT;
-        else if (strcasecmp(col_type, "STRING") == 0 || strcasecmp(col_type, "STR") == 0)
-            (*query)->params.create_params.type_list[i] = STRING;
-        else if (strcasecmp(col_type, "DOUBLE") == 0)
-            (*query)->params.create_params.type_list[i] = DOUBLE;
-        else {
-            (*query)->cmd_type = INVALID;
-            sprintf((*query)->syntax_message, "Syntax error: invalid column type '%s' for column '%s'.", col_type, col_name);
-            return;
-        }
-
-        // validate constraint
-        if (col_constraint){
-            if (strcasecmp(col_constraint, "PK") == 0)
-                (*query)->params.create_params.constraint_list[i] = PK;
-            else if (strcasecmp(col_constraint, "FK") == 0){
-                (*query)->params.create_params.constraint_list[i] = FK;
-                // check for REFERENCES table col for fk
-                if (!reference_keyword  || strlen(reference_keyword) == 0){
-                    (*query)->cmd_type = INVALID;
-                    sprintf((*query)->syntax_message, "Syntax error: missing 'REFERENCES' after FK.");
-                    return;
-                }
-                if (!table_name_refer || strlen(table_name_refer) == 0){
-                    (*query)->cmd_type = INVALID;
-                    sprintf((*query)->syntax_message, "Syntax error: missing table name to refer to after REFERENCES.");
-                    return;
-                }
-                if (!col_name_refer || strlen(col_name_refer) == 0){
-                    (*query)->cmd_type = INVALID;
-                    sprintf((*query)->syntax_message, "Syntax error: missing column name to refer to after table name.");
-                    return;
-                }
-
-                // allocate table_refer_list and col_name_refer TODO
-                fk_count = (*query)->params.create_params.fk_count;
-
-                (*query)->params.create_params.table_refer_list = (char**)realloc((*query)->params.create_params.table_refer_list, (fk_count + 1) * sizeof(char*));
-                (*query)->params.create_params.col_refer_list = (char**)realloc((*query)->params.create_params.col_refer_list, (fk_count + 1) * sizeof(char*));
-                assert(((*query)->params.create_params.table_refer_list) != NULL);
-                assert(((*query)->params.create_params.col_refer_list) != NULL);
-                // set table and col refered to
-                (*query)->params.create_params.table_refer_list[fk_count] = strdup(table_name_refer);
-                (*query)->params.create_params.col_refer_list[fk_count] = strdup(col_name_refer);
-
-                (*query)->params.create_params.fk_count++;
-            }else {
-                (*query)->cmd_type = INVALID;
-                sprintf((*query)->syntax_message, "Syntax error: invalid constraint '%s' for column '%s'.", col_constraint, col_name);
-                return;
-            }
-        } else (*query)->params.create_params.constraint_list[i] = NONE;
-
+        (*query)->params.create_params.col_list[(*query)->params.create_params.col_count] = strdup(col_name);
+        assert((*query)->params.create_params.col_list[(*query)->params.create_params.col_count] != NULL);
         (*query)->params.create_params.col_count++;
 
-        // next column
-        token = strtok(NULL, ",");
+        col_type = strtok_r(NULL, " \t", &saveptr2);
+        sprintf(err_msg, "missing type for column '%s'", (*query)->params.create_params.col_list[(*query)->params.create_params.col_count - 1]);
+        if(!contain_param(col_type, query, err_msg)){
+            free(tmp_col_def);
+            return;
+        } 
+
+        (*query)->params.create_params.type_list = (ColType*)realloc((*query)->params.create_params.type_list, (*query)->params.create_params.col_count * sizeof(ColType));
+        assert((*query)->params.create_params.type_list != NULL);
+
+        if (strcasecmp(col_type, "INT") == 0)
+            (*query)->params.create_params.type_list[(*query)->params.create_params.col_count - 1] = INT;
+        else if (strcasecmp(col_type, "STRING") == 0 || strcasecmp(col_type, "STR") == 0)
+            (*query)->params.create_params.type_list[(*query)->params.create_params.col_count - 1] = STRING;
+        else if (strcasecmp(col_type, "DOUBLE") == 0)
+            (*query)->params.create_params.type_list[(*query)->params.create_params.col_count - 1] = DOUBLE;
+        else {
+            (*query)->cmd_type = INVALID;
+            fprintf(stderr, "Syntax error: invalid type '%s' for column '%s'.\n", col_type, (*query)->params.create_params.col_list[(*query)->params.create_params.col_count - 1]);
+            free(tmp_col_def);
+            return;
+        }
+
+        col_constraint = strtok_r(NULL, " \t", &saveptr2);
+        (*query)->params.create_params.constraint_list = (ColConstraintType*)realloc((*query)->params.create_params.constraint_list, (*query)->params.create_params.col_count * sizeof(ColConstraintType));
+        assert((*query)->params.create_params.constraint_list != NULL);
+
+        if(col_constraint){
+            if (strcasecmp(col_constraint, "PK") == 0){
+                (*query)->params.create_params.constraint_list[(*query)->params.create_params.col_count - 1] = PK;
+                token = strtok_r(NULL, " \t", &saveptr2);
+                if(token){
+                    sprintf(err_msg, "constraint declaration of column '%s'", (*query)->params.create_params.col_list[(*query)->params.create_params.col_count - 1]);
+                    check_end_of_cmd(token, query, err_msg);
+                }
+            }
+            else if (strcasecmp(col_constraint, "FK") == 0){
+                (*query)->params.create_params.constraint_list[(*query)->params.create_params.col_count - 1] = FK;
+
+                token = strtok_r(NULL, " \t", &saveptr2);
+                if(!contain_key_word(token, "REFERENCES", query, "FK")) { 
+                    free(tmp_col_def); 
+                    return; 
+                }
+
+                token = strtok_r(NULL, " \t", &saveptr2);
+                if(!contain_param(token, query, "1 table is required for REFERENCES clause")) { free(tmp_col_def); return; }
+                (*query)->params.create_params.table_refer_list = (char**)realloc((*query)->params.create_params.table_refer_list, (fk_count + 1) * sizeof(char*));
+                assert(((*query)->params.create_params.table_refer_list) != NULL);
+                (*query)->params.create_params.table_refer_list[fk_count] = strdup(token);
+                assert((*query)->params.create_params.table_refer_list[fk_count] != NULL);
+
+                token = strtok_r(NULL, " \t", &saveptr2);
+                sprintf(err_msg, "1 column is required for table '%s' in REFERNCES clause", (*query)->params.create_params.table_refer_list[fk_count]);
+                if(!contain_param(token, query, err_msg)) { free(tmp_col_def); return; }
+                (*query)->params.create_params.col_refer_list = (char**)realloc((*query)->params.create_params.col_refer_list, (fk_count + 1) * sizeof(char*));
+                assert(((*query)->params.create_params.col_refer_list) != NULL);
+                (*query)->params.create_params.col_refer_list[fk_count] = strdup(token);
+                assert((*query)->params.create_params.col_refer_list[fk_count] != NULL);
+
+                (*query)->params.create_params.fk_count++;
+
+                token = strtok_r(NULL, " \t", &saveptr2);
+                if(token) check_end_of_cmd(token, query, "REFERENCES clause");
+            }
+            else {
+                sprintf(err_msg, "column '%s'", (*query)->params.create_params.col_list[(*query)->params.create_params.col_count - 1]);
+                check_end_of_cmd(col_constraint, query, err_msg);
+            }
+        }
+        else {
+            (*query)->params.create_params.constraint_list[(*query)->params.create_params.col_count - 1] = NONE;
+        }
+
+        free(tmp_col_def);
+        col_def = strtok_r(NULL, ",", &saveptr1);
     }
+
+    if(extra_cmd){
+        check_end_of_cmd(extra_cmd, query, "CREATE statement");
+        return;
+    }
+    else return;
+
+    if((*query)->cmd_type == INVALID) return;
 }

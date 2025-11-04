@@ -13,8 +13,7 @@ Group 2 ESGI 2A3
 #define TABLE_NAME_MAX 101
 
 #include "../main.h"
-
-typedef enum{
+typedef enum CommandType{
     CREATE,
     INSERT,
     DELETE,
@@ -26,7 +25,7 @@ typedef enum{
 
 // For Create table function
 typedef struct{
-    char table_name[TABLE_NAME_MAX];
+    char* table_name;
 
     char **col_list; // list of column names passed in the query
     int col_count;          // number of columns
@@ -41,30 +40,35 @@ typedef struct{
 
 // For Insert function
 typedef struct{
-    char table_name[TABLE_NAME_MAX];
+    char* table_name;
 
     char **col_list; // list of column names passed in the query
-    int col_count;          // number of columns for free operation
+    int col_count;          // number of columns to free col_list and
 
     void **data_list; // list of input for each column
-    
-    // TODO: define other necessary params
 } InsertParams;
 
 typedef struct {
-    char table_name[TABLE_NAME_MAX];
-    char condition_column[TABLE_NAME_MAX];
-    char condition_value[MAX_TOKEN_SIZE];
+    char* table_name;
+    char* condition_column; // need to check input length
+    char* condition_value; // need to check input length
 } DeleteParams;
 
 typedef struct {
-    char table_name[TABLE_NAME_MAX];
-    
-    // add more later
+    char* table_name; // need to check input length
+    char* table_join_name; // need to check input length
+
+    char** col_list;
+    int col_count; //to free col_list
+    char* first_col_on;
+    char* second_col_on;
+    char* condition_col; // need to check input length
+    char* condition_val; // need to check input length
 } SelectParams;
 
 typedef struct {
-    char table_name[TABLE_NAME_MAX];
+    char** table_list;
+    int table_count; // to free table_list
 } DropParams;
 
 typedef enum{
@@ -91,9 +95,6 @@ typedef struct Query
         DropParams drop_params;
         SelectParams select_params;
     } params;
-
-    // set this if there is a syntax error that the parser detected
-    char syntax_message[100];
 } Query;
 
 

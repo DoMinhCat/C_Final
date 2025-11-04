@@ -14,6 +14,7 @@ Group 2 ESGI 2A3
 #include "db/db.h"
 #include "clean/clean.h"
 #include "init/init.h"
+#include "global_var.h"
 
 void print_divider(){
     for(int i=0; i<20; i++) printf("-");
@@ -54,6 +55,13 @@ int main(int argc, char **argv){
         // put the command in cmd_input
         printf(">>> ");
         cmd_input = read_cmd(cmd_buffer);
+        // if nothing or command too long (read_cmd returns NULL)
+        if (cmd_input == NULL){
+            continue;
+        } else if(strcmp("long", cmd_input) == 0){
+            printf("\n");
+            continue;
+        }
 
         // Call parser from ui folder analyze command
         parser_output = parse_cmd(cmd_input);
@@ -65,8 +73,7 @@ int main(int argc, char **argv){
         }
 
         // Check invalid syntax
-        if(parser_output->cmd_type == INVALID && parser_output->syntax_message){
-            printf("%s\n", parser_output->syntax_message);
+        if(parser_output->cmd_type == INVALID){
             free_current_cmd(&cmd_input, &parser_output);
             continue;
         }
@@ -78,46 +85,50 @@ int main(int argc, char **argv){
         {
         case CREATE:
             // Call create() 
-            db_response = create_table(parser_output);
+            //db_response = create_table(parser_output);
+
+            printf("CREATE is called\n");
             break;
-        // case INSERT:
-        //     // Call insert() of db
+        case INSERT:
+            // Call insert() of db
 
-        //     //placeholder
-        //     //no need to init response, it will be init in db functions
+            //placeholder
+            //no need to init response, it will be init in db functions
             
-        //     printf("INSERT is called\n");
-        //     break;
-        // case SELECT:
-        //     // Call select() of db
+            printf("INSERT is called\n");
+            break;
+        case SELECT:
+            // Call select() of db
 
-        //     //placeholder
-        //     //no need to init response, it will be init in db functions
+            //placeholder
+            //no need to init response, it will be init in db functions
             
-        //     printf("SELECT is called\n");
-        //     break;
-        // case DELETE:
-        //     // Call delete() of db
+            printf("SELECT is called\n");
+            break;
+        case DELETE:
+            // Call delete() of db
 
-        //     //placeholder
-        //     //no need to init response, it will be init in db functions
+            //placeholder
+            //no need to init response, it will be init in db functions
             
-        //     printf("DELETE is called\n");
-        //     break;
-        // case DROP:
-        //     // Call drop() of db : 
+            printf("DELETE is called\n");
+            break;
+        case DROP:
+            // Call drop() of db : 
 
-        //     //placeholder
-        //     //no need to init response, it will be init in db functions
+            //placeholder
+            //no need to init response, it will be init in db functions
             
-        //     printf("DROP is called\n");
-        //     break;
+            printf("DROP is called\n");
+            break;
         default:
             printf("Command invalid, please check the syntax.\n");
             break;
         }
 
         // Check execution status
+
+        /*
         if(db_response->status == FAILURE && db_response->message){
             printf("%s\n", db_response->message);
             free(db_response);
@@ -126,9 +137,12 @@ int main(int argc, char **argv){
         } else if(db_response->status == SUCCESS && db_response->message){
             printf("Executed : %s\n", db_response->message);
         }
+            */
             
 
         // free before getting new command
+
+        db_response = init_response();//temp
         free(db_response);
         free_current_cmd(&cmd_input, &parser_output);
     }
@@ -146,6 +160,7 @@ int main(int argc, char **argv){
 
     
     // Call to functions in clean.c to free all db struct before exit
+    free_db(first_table);
 
     printf("Goodbye !");
     exit(EXIT_SUCCESS);

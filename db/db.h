@@ -31,6 +31,8 @@ typedef struct Table{
     Row *first_row;
     Col *first_col;
 
+    int col_count; // to free row and col
+
     struct Table *next_table;
 } Table;
 

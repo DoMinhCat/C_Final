@@ -19,6 +19,7 @@ Table* init_table(){
     table->first_row = NULL;
     table->first_col = NULL;
     table->next_table = NULL;
+    table->col_count = 0;
 
     return table;
 }

@@ -4,8 +4,8 @@ Description : Helper functions protypes are declared here
 Group 2 ESGI 2A3
 */
 
-#ifndef HELPER_H
-#define HELPER_H
+#ifndef HELPER_DB_H
+#define HELPER_DB_H
 
 typedef struct Col Col; 
 typedef struct Table Table; 
