@@ -27,6 +27,7 @@ int main(int argc, char **argv){
     char export_confirm;
     char cmd_buffer[MAX_CMD_SIZE];
     char* cmd_input = NULL;
+    char confirm;
 
     Query* parser_output = NULL;
     Response* db_response = NULL;
@@ -78,17 +79,15 @@ int main(int argc, char **argv){
             continue;
         }
 
-
-        // Execute command
-        
-        switch (parser_output->cmd_type)
-        {
+        // Execute commands
+        switch (parser_output->cmd_type){
         case CREATE:
             // Call create() 
             //db_response = create_table(parser_output);
 
             printf("CREATE is called\n");
             break;
+
         case INSERT:
             // Call insert() of db
 
@@ -97,6 +96,7 @@ int main(int argc, char **argv){
             
             printf("INSERT is called\n");
             break;
+
         case SELECT:
             // Call select() of db
 
@@ -106,23 +106,34 @@ int main(int argc, char **argv){
             printf("SELECT is called\n");
             break;
         case DELETE:
-            // Call delete() of db
-
-            //placeholder
-            //no need to init response, it will be init in db functions
-            
-            printf("DELETE is called\n");
+            // without WHERE clause
+            if(!parser_output->params.delete_params.condition_column){
+                printf("Confirm deletion of all rows from '%s' table, press 'y' to proceed (cancel on default): ", parser_output->params.delete_params.table_name);
+                scanf("%c", &confirm);
+                if(confirm == 'y'){
+                    // call delete
+                    printf("DELETE is called");
+                }else printf("Execution of DELETE statement aborted.");
+            }
+            // execute normally if there is WHERE
+            else{
+                // call delete
+                printf("DELETE is called");
+            }
             break;
-        case DROP:
-            // Call drop() of db : 
 
-            //placeholder
-            //no need to init response, it will be init in db functions
-            
-            printf("DROP is called\n");
+        case DROP:
+        // ask for confirmation
+            printf("Confirm deletion of %d %s, press 'y' to proceed (cancel on default): ", parser_output->params.drop_params.table_count, parser_output->params.drop_params.table_count>1?"tables":"table");
+            scanf("%c", &confirm);
+
+            if(confirm == 'y'){
+                // call to drop
+                printf("DROP is called");
+            }else printf("Execution of DROP statement aborted.");
             break;
         default:
-            printf("Command invalid, please check the syntax.\n");
+            printf("Invalid command, please check the syntax.\n");
             break;
         }
 
@@ -142,8 +153,7 @@ int main(int argc, char **argv){
 
         // free before getting new command
 
-        db_response = init_response();//temp
-        free(db_response);
+        if(db_response) free(db_response); // in case no confirm for DROP/DELETE
         free_current_cmd(&cmd_input, &parser_output);
     }
 
