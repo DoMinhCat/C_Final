@@ -10,11 +10,12 @@ Group 2 ESGI 2A3
 #include <assert.h>
 
 #include "db.h"
-#include "helper_db.h"
+//#include "helper_db.h"  dont need this for now
 #include "../main.h"
 #include "../ui/parser.h"
 #include "../init/init.h"
 #include "../global_var.h"
+#include "../clean/clean.h"
 
 Response* drop_table(Query* query) {
     Response* res = init_response();
@@ -29,21 +30,40 @@ Response* drop_table(Query* query) {
     char* table_name = NULL;
 
     int i;
+    int found = -1; // not found by default
     int table_count = query->params.drop_params.table_count;
     
-    // Cat's note : remove check for non existing table, this is already checked in parser
+    // Cat's note : removed check for non existing table, this is already checked in parser
 
+    // Check if all table in the list provided exist
     for(i=0; i<table_count; i++){
-        // Find the table to drop
         table_name = query->params.drop_params.table_list[i];
+        /* Cat's note : maybe I will write a helper function to get the index of the table with a given name
+        This function takes the name (and other inputs?), search the list of all tables
+        Return position of found table in the list, return -1 if not found
+        */
+
+        // table not found, return error
+        if(found == -1){
+            res->status = FAILURE;
+            fprintf(stderr, "Execution error: table '%s' not found.", table_name);
+            return res;
+        }
+    }
+
+    // When we are here, all table provided exist, continue with other checks
+    for(i=0; i<table_count; i++){
+        table_name = query->params.drop_params.table_list[i];
+
+        // Loop through all tables to find table to drop
         while(current_table != NULL) {
             if(strcmp(current_table->name, table_name) == 0) {
                 // First, free all rows
+
                 current_row = current_table->first_row;
                 while(current_row != NULL) {
                     next_row = current_row->next_row;
-                    free(current_row->data_field);
-                    free(current_row);
+                    free_row(current_row, current_table->col_count);
                     current_row = next_row;
                 }
 
@@ -51,8 +71,7 @@ Response* drop_table(Query* query) {
                 current_col = current_table->first_col;
                 while(current_col != NULL) {
                     next_col = current_col->next_col;
-                    free(current_col->name);
-                    free(current_col);
+                    free_col(current_col);
                     current_col = next_col;
                 }
 
@@ -73,6 +92,7 @@ Response* drop_table(Query* query) {
                 sprintf(res->message, "Table '%s' dropped successfully.", table_name);
                 return res;
             }
+            // go to next table to check
             prev_table = current_table;
             current_table = current_table->next_table;
         }
