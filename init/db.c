@@ -16,7 +16,7 @@ Table* init_table(){
 
     assert((table = (Table*)malloc(sizeof(Table))) != NULL);
     table->name = NULL;
-    table->first_row = NULL;
+    table->first_row = init_row();
     table->first_col = init_col();
     table->next_table = NULL;
     table->col_count = 0;

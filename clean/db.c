@@ -8,6 +8,7 @@ Group 2 ESGI 2A3
 
 #include "clean.h"
 #include "../db/db.h"
+#include "../hash/hash.h"
 
 void free_col(Col* col){
     free(col->name);
@@ -35,6 +36,40 @@ void free_row(Row* row, int col_count){
 
     free(row);
     row = NULL;
+}
+
+void free_node(Node* node, int col_count){
+    free_row(node->row, col_count);
+    node->row = NULL;
+
+    free(node);
+    node = NULL;
+}
+
+void free_hash_table(HashTable* hash_table, int col_count){
+    int i;
+    Node* current_node = NULL;
+    Node* tmp_node = NULL;
+
+    free(hash_table->table_name);
+    hash_table->table_name = NULL;
+    free(hash_table->pk_col_name);
+    hash_table->pk_col_name = NULL;
+
+    // free Node linked list of each bucket
+    for(i=0; i<HASH_TABLE_SIZE; i++){
+        current_node = hash_table->bucket[i];
+        while(current_node != NULL){
+            tmp_node = current_node;
+            // save pointer to next col, then free current pointer
+            current_node =current_node->next_node;
+            
+            free_node(tmp_node, col_count);   
+        }
+    }
+
+    free(hash_table);
+    hash_table = NULL;
 }
 
 void free_table(Table* table){
@@ -65,6 +100,8 @@ void free_table(Table* table){
         
         free_row(tmp_row, table->col_count);   
     }
+
+    // free the associated hash table
 
     free(table);
     table = NULL;
