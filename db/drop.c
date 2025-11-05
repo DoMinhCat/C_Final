@@ -28,7 +28,6 @@ Response* drop_table(Query* query) {
     Table* check_table = NULL;
     Col* check_col = NULL;
     char* table_name = NULL;
-    char* success_msg = NULL;
     char* table_string = NULL;
 
     int i;
@@ -45,7 +44,8 @@ Response* drop_table(Query* query) {
         This function takes the name (and other inputs?), search the list of all tables
         Return position of found table in the list, return -1 if not found
         */
-
+        //table_index[i] = find_table_blabla return table_index()
+    
         // table not found, return error
         if(found == -1){
             res->status = FAILURE;
@@ -58,9 +58,32 @@ Response* drop_table(Query* query) {
     for(i=0; i<table_count; i++){
         table_name = query->params.drop_params.table_list[i];
 
-        // Loop through all tables to find table to drop
+        // Check if any other table has a foreign key col references to current table
+        while(current_table != NULL) {
+            // no need to check itself
+            if(strcmp(current_table->name, table_name) == 0){
+                current_table = current_table->next_table;
+                continue;
+            } 
+            // loop through all col of the table 
+            current_col = current_table->first_col;
+            while(current_col != NULL) {
+                if(current_col->constraint == FK) {
+                    // return error if col refer to table to delete
+                    //if (strcmp(current_col.table_refer,table_name) == 0) then raise error
+                    // However, the reference information is only available during creation
+                    // Cat's note: i forgot that, will add a table and col reference in struct Col and update create db to set them upon table creation
+                    current_col = current_col->next_col;
+                    continue;
+                }
+                current_col = current_col->next_col;
+            }
+            current_table = current_table->next_table;
+        }
+
         // Cat's note :  maybe dont need to loop all again, we can store indexes of tables given from the check if all tables exist above
         // then free them one by one, no loop -> more efficient
+        current_table = first_table;
         while(current_table != NULL) {
             if(strcmp(current_table->name, table_name) == 0) {
                 // First, free all rows
@@ -100,9 +123,7 @@ Response* drop_table(Query* query) {
                     table_name = query->params.drop_params.table_list[i];
                     sprintf(table_string, "'%s', '%s'", table_string, table_name); // "'table','table', ..."
                 }
-
-                sprintf(success_msg, "%s %s", table_count>1?"tables":"table", table_string); // table(s) 'table','table', ...
-                fprintf(stdout, "Executed: %s dropped successfully.\n", success_msg);
+                fprintf(stdout, "Executed: %s %s dropped successfully.\n", table_count>1?"tables":"table", table_string);
 
                 // free before return
                 free(table_string);
