@@ -18,7 +18,7 @@ Group 2 ESGI 2A3
 #include "../hash/hash.h"
 #include "../global_var.h"
 
-// IMPORTANT : once a pointer is declared and allocated, must free after done using before return/exit function
+// IMPORTANT : once a pointer is declared and allocated (malloc, realloc, calloc, strdup,...), must free after done using before return/exit function, ask chatGPT to be sure :))
 
 // TODO : put all these helper functions in helper_db.c and their prototypes in helper_db.h
 // TODO : add comments so that we know what these heper func do
