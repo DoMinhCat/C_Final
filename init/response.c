@@ -16,7 +16,5 @@ Response* init_response(){
 
     assert((res = (Response*)malloc(sizeof(Response))) != NULL);
     res->status = FAILURE;
-    res->message[0] = '\0';
-
     return res;
 }

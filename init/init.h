@@ -13,6 +13,7 @@ typedef struct Table Table;
 typedef struct Query Query;  
 typedef struct Response Response; 
 typedef struct Col Col;  
+typedef struct Row Row;  
 
 Query* init_query();
 Response* init_response();
