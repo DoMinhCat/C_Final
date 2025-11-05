@@ -22,5 +22,6 @@ HashTable* init_hash_table();
 
 Table* init_table();
 Col* init_col();
+Row* init_row();
 
 #endif

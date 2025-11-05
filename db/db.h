@@ -14,7 +14,7 @@ Group 2 ESGI 2A3
 
 // struct
 typedef struct Row{
-    void **data_field;
+    void **data_field; // double pointer in case data is string 
     struct Row *next_row;
 } Row;
 
@@ -22,6 +22,9 @@ typedef struct Col{
     char* name;
     ColType type;
     ColConstraintType constraint;
+
+    char* refer_table; // table that fk col references
+    char* refer_col; // col of table that fk col references
 
     struct Col *next_col;
 } Col;
