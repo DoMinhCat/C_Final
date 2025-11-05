@@ -22,28 +22,8 @@ Response* drop_table(Query* query) {
     Table* prev_table = NULL;
     
     // Use the first table name in the list
-    if (query->params.drop_params.table_count < 1) {
-        strcpy(res->message, "No table name provided for DROP operation");
-        res->status = FAILURE;
-        return res;
-    }
+    // Cat's note : remove check for non existing table, this is already checked in parser
     char* table_name = query->params.drop_params.table_list[0];
-
-    // Check if any other table has a foreign key reference to this table
-    Table* check_table = first_table;
-    while(check_table != NULL) {
-        Col* check_col = check_table->first_col;
-        while(check_col != NULL) {
-            if(check_col->constraint == FK) {
-                // We need to check if this FK points to our table
-                // However, the reference information is only available during creation
-                check_col = check_col->next_col;
-                continue;
-            }
-            check_col = check_col->next_col;
-        }
-        check_table = check_table->next_table;
-    }
 
     // Find the table to drop
     while(current_table != NULL) {
@@ -87,7 +67,24 @@ Response* drop_table(Query* query) {
         current_table = current_table->next_table;
     }
 
+    // Check if any other table has a foreign key reference to this table
+    Table* check_table = first_table;
+    while(check_table != NULL) {
+        Col* check_col = check_table->first_col;
+        while(check_col != NULL) {
+            if(check_col->constraint == FK) {
+                // We need to check if this FK points to our table
+                // However, the reference information is only available during creation
+                check_col = check_col->next_col;
+                continue;
+            }
+            check_col = check_col->next_col;
+        }
+        check_table = check_table->next_table;
+    }
+
+    // loop through all table, didn't find the current table
     res->status = FAILURE;
-    sprintf(res->message, "Execution error: table '%s' does not exist.", table_name);
+    sprintf(res->message, "Execution error: table '%s' not found.", table_name);
     return res;
 }
