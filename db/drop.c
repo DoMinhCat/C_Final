@@ -10,7 +10,7 @@ Group 2 ESGI 2A3
 #include <assert.h>
 
 #include "db.h"
-//#include "helper_db.h"  dont need this for now
+#include "helper_db.h"
 #include "../main.h"
 #include "../ui/parser.h"
 #include "../init/init.h"
@@ -28,10 +28,13 @@ Response* drop_table(Query* query) {
     Table* check_table = NULL;
     Col* check_col = NULL;
     char* table_name = NULL;
+    char* success_msg = NULL;
+    char* table_string = NULL;
 
     int i;
     int found = -1; // not found by default
     int table_count = query->params.drop_params.table_count;
+    int table_index[table_count];
     
     // Cat's note : removed check for non existing table, this is already checked in parser
 
@@ -56,6 +59,8 @@ Response* drop_table(Query* query) {
         table_name = query->params.drop_params.table_list[i];
 
         // Loop through all tables to find table to drop
+        // Cat's note :  maybe dont need to loop all again, we can store indexes of tables given from the check if all tables exist above
+        // then free them one by one, no loop -> more efficient
         while(current_table != NULL) {
             if(strcmp(current_table->name, table_name) == 0) {
                 // First, free all rows
@@ -86,36 +91,28 @@ Response* drop_table(Query* query) {
                 free(current_table->name);
                 free(current_table);
 
-                table_count--;
-
                 res->status = SUCCESS;
-                sprintf(res->message, "Table '%s' dropped successfully.", table_name);
+                // construct message 
+                table_string = strdup(query->params.drop_params.table_list[0]); // "table"
+                assert(table_string != NULL);
+
+                for(i=1; i<table_count; i++){
+                    table_name = query->params.drop_params.table_list[i];
+                    sprintf(table_string, "'%s', '%s'", table_string, table_name); // "'table','table', ..."
+                }
+
+                sprintf(success_msg, "%s %s", table_count>1?"tables":"table", table_string); // table(s) 'table','table', ...
+                fprintf(stdout, "Executed: %s dropped successfully.\n", success_msg);
+
+                // free before return
+                free(table_string);
+                table_string = NULL;
+
                 return res;
             }
             // go to next table to check
             prev_table = current_table;
             current_table = current_table->next_table;
         }
-
-        // Check if any other table has a foreign key reference to this table
-        check_table = first_table;
-        while(check_table != NULL) {
-            check_col = check_table->first_col;
-            while(check_col != NULL) {
-                if(check_col->constraint == FK) {
-                    // We need to check if this FK points to our table
-                    // However, the reference information is only available during creation
-                    check_col = check_col->next_col;
-                    continue;
-                }
-                check_col = check_col->next_col;
-            }
-            check_table = check_table->next_table;
-        }
-
-        // loop through all table, didn't find the current table
-        res->status = FAILURE;
-        sprintf(res->message, "Execution error: table '%s' not found.", table_name);
-        return res;
     }
 }
