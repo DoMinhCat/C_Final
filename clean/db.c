@@ -12,6 +12,13 @@ Group 2 ESGI 2A3
 void free_col(Col* col){
     free(col->name);
     col->name = NULL;
+    
+    free(col->refer_table);
+    col->refer_table = NULL;
+
+    free(col->refer_col);
+    col->refer_col = NULL;
+    
     free(col);
     col = NULL;
 }

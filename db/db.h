@@ -23,8 +23,8 @@ typedef struct Col{
     ColType type;
     ColConstraintType constraint;
 
-    char** refer_table; // table that fk col references
-    char** refer_col; // col of table that fk col references
+    char* refer_table; // table that fk col references
+    char* refer_col; // col of table that fk col references
 
     struct Col *next_col;
 } Col;

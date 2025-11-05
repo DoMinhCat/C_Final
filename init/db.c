@@ -29,6 +29,8 @@ Col* init_col(){
 
     assert((col = (Col*)malloc(sizeof(Col))) != NULL);
     col->name = NULL;
+    col->refer_col = NULL;
+    col->refer_table = NULL;
     col->constraint = NONE;
     col->type = INT;
     col->next_col = NULL;
