@@ -49,7 +49,7 @@ Response* drop_table(Query* query) {
         // table not found, return error
         if(found == -1){
             res->status = FAILURE;
-            fprintf(stderr, "Execution error: table '%s' not found.", table_name);
+            fprintf(stderr, "Execution error: table '%s' not found.\n", table_name);
             return res;
         }
     }

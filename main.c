@@ -178,7 +178,7 @@ int main(int argc, char **argv){
 
     if(import_export_choice == 'y' || import_export_choice == 'Y'){
         // Call export func from file folder
-        printf("Export confirmed\n");
+        printf("Export confirmed.\n");
     }else {
         print_divider();
         printf("Database exportation aborted.\n");

@@ -233,7 +233,7 @@ Response* create_table(Query* query){
 
     // return success message
     res->status = SUCCESS;
-    fprintf(stdout, "table '%s' created with %d column(s).\n", new_tb_name, col_count);
+    fprintf(stdout, "table '%s' created successfuly with %d column(s).\n", new_tb_name, col_count);
     free(pk_col_name);
     pk_col_name = NULL;
     return res;
