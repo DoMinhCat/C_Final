@@ -11,6 +11,7 @@ Group 2 ESGI 2A3
 #include "helper_db.h"
 #include "../ui/parser.h"
 #include "db.h"
+#include "../global_var.h"
 
 int* get_fk_col_list_index(Query* query){
     /*
@@ -71,4 +72,32 @@ Col* get_last_col(Col* first_col){
         current_col = current_col->next_col;
     }
     return current_col;
+}
+
+Table* get_table_by_name(const char* table_name) {
+    // this func return pointer to the table having input name
+    Table* current = first_table;
+
+    while (current != NULL) {
+        if (strcmp(current->name, table_name) == 0) {
+            return current;
+        }
+        current = current->next_table;
+    }
+    return NULL;
+}
+
+Col* get_col_by_name(Table* table, const char* col_name) {
+    // return pointer to column with input name of a given table
+    if (table == NULL || col_name == NULL) return NULL;
+
+    Col* current = table->first_col;
+    
+    while (current != NULL) {
+        if (strcmp(current->name, col_name) == 0) {
+            return current;
+        }
+        current = current->next_col;
+    }
+    return NULL;
 }
