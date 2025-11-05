@@ -1,6 +1,6 @@
 /*
-last update  :
-Description : Code for select_data function
+Date of creation : 17/10/2025
+Description : Code for SELECT operation
 Group 2 ESGI 2A3
 */
 
@@ -18,19 +18,23 @@ Group 2 ESGI 2A3
 #include "../hash/hash.h"
 #include "../global_var.h"
 
-int get_col_index(Table* table, const char* col_name) {
-if (table == NULL || col_name == NULL) return -1;
+// IMPORTANT : once a pointer is declared and allocated, must free after done using before return/exit function
 
-Col* current = table->first_col;
-int index = 0;
-while (current != NULL) {
-    if (strcmp(current->name, col_name) == 0) {
-        return index;
+// TODO : put all these helper functions in helper_db.c and their prototypes in helper_db.h
+// TODO : add comments so that we know what these heper func do
+int get_col_index(Table* table, const char* col_name) {
+    if (table == NULL || col_name == NULL) return -1;
+
+    Col* current = table->first_col;
+    int index = 0;
+    while (current != NULL) {
+        if (strcmp(current->name, col_name) == 0) {
+            return index;
+        }
+        current = current->next_col;
+        index++;
     }
-    current = current->next_col;
-    index++;
-}
-return -1;
+    return -1;
 }
 
 bool compare_values(ColType type, void* value1, const char* value2_str) {
@@ -111,7 +115,11 @@ void get_col_value_from_row(Table* table, Row* row, const char* col_name, char* 
     format_value(buffer, buffer_size, col->type, row->data_field[col_index]);
 }
 
-Response* select_data(Query* query) {
+
+
+
+// keep only this func in select.c but comment out the part that implement WHERE and JOIN
+Response* select(Query* query) {
     Response* res = init_response();
     SelectParams* params = &query->params.select_params;
     Table* main_table = get_table_by_name(params->table_name);

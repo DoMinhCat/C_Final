@@ -41,5 +41,5 @@ typedef struct Response Response;
 typedef struct Query Query;  
 
 Response* create_table(Query* query);
-Response* select_data(Query* query);
+Response* select(Query* query);
 #endif
