@@ -68,10 +68,10 @@ Response* drop_table(Query* query) {
             // loop through all col of the table 
             current_col = current_table->first_col;
             while(current_col != NULL) {
-                // return error if col refer to table to delete
+                // TODO : return error if col refer to table to delete
                 if(current_col->constraint == FK) { // && strcmp(current_col.table_refer,table_name) == 0
                     // However, the reference information is only available during creation
-                    // Cat's note: i forgot that, will add a table and col reference in struct Col and update create db to set them upon table creation
+                    // Cat's note: i forgot that, I added a table and col reference in struct Col and update create db to set them upon table creation
                 }
                 current_col = current_col->next_col;
             }
