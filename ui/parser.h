@@ -79,7 +79,6 @@ typedef enum{
 // DB functions return this struct for error/success in db operations
 typedef struct Response{
     ResponseStatus status;
-    char message[100];
 } Response;
 
 typedef struct Query

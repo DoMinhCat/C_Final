@@ -21,6 +21,6 @@ void free_col(Col* col);
 void free_row(Row* row, int col_count);
 void free_table(Table* table);
 void free_db(Table* first_table);
-void free_hash_table(HashTable* hash_table);
+void free_hash_table(HashTable* hash_table, int col_count);
 
 #endif
