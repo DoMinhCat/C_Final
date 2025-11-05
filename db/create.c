@@ -190,6 +190,9 @@ Response* create_table(Query* query){
             // last col points to a new col
             current_col->next_col = new_col;
         }
+
+        new_tb->first_col = new_col;
+        
     }
     new_tb->col_count = col_count;
 

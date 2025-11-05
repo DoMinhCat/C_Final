@@ -14,7 +14,7 @@ Group 2 ESGI 2A3
 
 // struct
 typedef struct Row{
-    void **data_field;
+    void **data_field; // double pointer in case data is string 
     struct Row *next_row;
 } Row;
 
