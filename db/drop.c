@@ -18,8 +18,7 @@ Group 2 ESGI 2A3
 #include "../global_var.h"
 #include "../clean/clean.h"
 
-Response* drop_table(Query* query) {
-    Response* res = init_response();
+void drop_table(Query* query) {
     Table* current_table;
     Table* prev_table = NULL;
     Row* current_row = NULL;
@@ -53,9 +52,8 @@ Response* drop_table(Query* query) {
             current_table = current_table->next_table;
         }
         if(!table_exist){
-            res->status = FAILURE;
             fprintf(stderr, "Execution error: table '%s' not found.\n", table_name);
-            return res;
+            return;
         }
 
         // Check if any other table has a foreign key col references to current table
@@ -71,9 +69,8 @@ Response* drop_table(Query* query) {
             while(current_col != NULL) {
                 // return error if col refer to table to delete
                 if(current_col->constraint == FK && strcmp(current_col->refer_table, table_name) == 0) {
-                    res->status = FAILURE;
                     fprintf(stderr, "Execution error: '%s' 'is referenced by column '%s' of table '%s.\n", table_name, current_col->name, current_table->name);
-                    return res;
+                    return;
                 }
                 current_col = current_col->next_col;
             }
@@ -94,7 +91,6 @@ Response* drop_table(Query* query) {
                 free(current_table);
                 current_table = NULL;
 
-                res->status = SUCCESS;
                 // construct message 
                 table_string = strdup(query->params.drop_params.table_list[0]); // "table"
                 assert(table_string != NULL);
@@ -109,7 +105,7 @@ Response* drop_table(Query* query) {
                 free(table_string);
                 table_string = NULL;
 
-                return res;
+                return;
             }
             // go to next table to check
             prev_table = current_table;

@@ -19,8 +19,7 @@ Group 2 ESGI 2A3
 #include "../global_var.h"
 
 
-Response* create_table(Query* query){
-    Response* res = init_response();
+void create_table(Query* query){
     Table* current_table = first_table;
 
     ColType* type_list = query->params.create_params.type_list;
@@ -36,9 +35,8 @@ Response* create_table(Query* query){
     // check table name
     while(current_table){
         if(strcmp(current_table->name, new_tb_name) == 0){
-            res->status = FAILURE;
             fprintf(stderr, "Execution error: table '%s' already exist.\n", new_tb_name);
-            return res;
+            return;
         }
         current_table = current_table->next_table;
     }
@@ -47,9 +45,8 @@ Response* create_table(Query* query){
     for(i=0; i<(col_count-1); i++){
         for(j=i+1; j<col_count; j++){
             if(strcmp(col_list[i], col_list[j]) == 0){
-                res->status = FAILURE;
                 fprintf(stderr, "Execution error: duplicated columns '%s' in table '%s'.\n", col_list[i], new_tb_name);
-                return res;
+                return;
             }
         }
     }
@@ -68,20 +65,18 @@ Response* create_table(Query* query){
 
             pk_count++;
             if(pk_count > 1){
-                res->status = FAILURE;
                 fprintf(stderr, "Execution error: a table must not have multiple primary key columns.\n");
                 free(pk_col_name);
                 pk_col_name = NULL;
-                return res;
+                return;
             }
         }
     }
     if(pk_count != 1){
-        res->status = FAILURE;
         fprintf(stderr, "Execution error: a table must have a primary key column.\n");
         free(pk_col_name);
         pk_col_name = NULL;
-        return res;
+        return;
     }
 
     //check fk
@@ -101,22 +96,20 @@ Response* create_table(Query* query){
 
         // refering to the table itself is not allowed, since it hasn't been created yet
         if (strcmp(new_tb_name, table_refer_list[i]) == 0) {
-            res->status = FAILURE;
             fprintf(stderr, "Execution error: table '%s' cannot reference itself.\n", new_tb_name);
             free(pk_col_name);
             pk_col_name = NULL;
-            return res;
+            return;
         }
         
         // check many cols refer to same col not allowed
         for(i=0; i<fk_count-1; i++){
             for(j=i+1; j<fk_count; j++){
                 if(strcmp(col_refer_list[i],col_refer_list[j]) == 0 && strcmp(table_refer_list[i], table_refer_list[j]) == 0){
-                    res->status = FAILURE;
                     fprintf(stderr, "Execution error: many columns refering to a same column '%s' of table '%s' is not allowed.\n", col_refer_list[i], table_refer_list[i]);
                     free(pk_col_name);
                     pk_col_name = NULL;
-                    return res;
+                    return;
                 }
             }
         }
@@ -128,11 +121,10 @@ Response* create_table(Query* query){
             // check table refered exists
             //if it is the first table, it can't refer to anything
             if(!first_table){
-                res->status = FAILURE;
                 fprintf(stderr, "Execution error: table '%s' refered to by '%s' does not exist.\n", table_refer_list[i], col_list[fk_list_index[i]]);
                 free(pk_col_name);
                 pk_col_name = NULL;
-                return res;
+                return;
             }
             for(current_table = first_table; current_table != NULL; current_table = current_table->next_table){
                 if(strcmp(current_table->name, table_refer_list[i]) == 0){
@@ -143,11 +135,10 @@ Response* create_table(Query* query){
             }
             // if a table refered to doesn't exist, return error
             if(!refer_table_exist){
-                res->status = FAILURE;
                 fprintf(stderr, "Execution error: table '%s' refered to by '%s' does not exist.\n", table_refer_list[i], col_list[fk_list_index[i]]);
                 free(pk_col_name);
                 pk_col_name = NULL;
-                return res;
+                return;
             }
 
             // table exist, check for col refered to exists in that table
@@ -160,29 +151,26 @@ Response* create_table(Query* query){
             }
             // if col doesn't exist, return error
             if(!refer_col_exist){
-                res->status = FAILURE;
                 fprintf(stderr, "Execution error: column '%s' does not exist in table '%s' refered to.\n", col_refer_list[i], table_refer_list[i]);
                 free(pk_col_name);
                 pk_col_name = NULL;
-                return res;
+                return;
             }
 
             // check if col is pk ?
             if(refered_col->constraint != PK){
-                res->status = FAILURE;
                 fprintf(stderr, "Execution error: column '%s' in table '%s' refered to is not a primary key.\n", col_refer_list[i], table_refer_list[i]);
                 free(pk_col_name);
                 pk_col_name = NULL;
-                return res;
+                return;
             }
 
             // check if col type is the same as col that refer to it
             if(refered_col->type != type_list[fk_list_index[i]]){
-                res->status = FAILURE;
                 fprintf(stderr, "Execution error: column '%s' in table '%s' refered to is not the same type as column '%s'.\n", col_refer_list[i], table_refer_list[i], col_list[fk_list_index[i]]);
                 free(pk_col_name);
                 pk_col_name = NULL;
-                return res;
+                return;
             }
         }
     }
@@ -246,10 +234,8 @@ Response* create_table(Query* query){
     // set hash table of this table
     new_tb->hash_table = hash_table;
 
-    // return success message
-    res->status = SUCCESS;
+    // prints success message
     fprintf(stdout, "table '%s' created successfuly with %d column(s).\n", new_tb_name, col_count);
     free(pk_col_name);
     pk_col_name = NULL;
-    return res;
 }

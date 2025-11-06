@@ -16,7 +16,6 @@ typedef struct Col Col;
 typedef struct Row Row;  
 
 Query* init_query();
-Response* init_response();
 
 Node* init_node();
 HashTable* init_hash_table();

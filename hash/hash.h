@@ -7,7 +7,10 @@ Group 2 ESGI 2A3
 #ifndef HASH_H
 #define HASH_H
 #define HASH_TABLE_SIZE 67 // prime number size for better key distribution
-#include "../db/db.h"
+
+#include "../main.h"
+typedef struct Row Row;
+
 
 //linked list of nodes in a bucket
 typedef struct Node{

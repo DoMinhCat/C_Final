@@ -13,6 +13,7 @@ typedef struct Col Col;
 typedef struct Row Row;
 typedef struct Table Table; 
 typedef struct HashTable HashTable;  
+typedef struct Node Node;  
 
 void free_current_cmd(char** cmd_string, Query** query);
 void free_query(Query** query);

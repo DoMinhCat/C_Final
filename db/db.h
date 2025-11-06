@@ -12,6 +12,8 @@ Group 2 ESGI 2A3
 
 #include "../main.h"
 
+typedef struct HashTable HashTable;
+
 // struct
 typedef struct Row{
     void **data_field; // double pointer in case data is string 
@@ -44,6 +46,6 @@ typedef struct Table{
 typedef struct Response Response;  
 typedef struct Query Query;  
 
-Response* create_table(Query* query);
-Response* drop_table(Query* query);
+void create_table(Query* query);
+void drop_table(Query* query);
 #endif
