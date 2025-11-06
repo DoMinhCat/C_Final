@@ -22,12 +22,14 @@ Group 2 ESGI 2A3
 Response* create_table(Query* query){
     Response* res = init_response();
     Table* current_table = first_table;
+
     ColType* type_list = query->params.create_params.type_list;
     char* new_tb_name = query->params.create_params.table_name;
     int col_count = query->params.create_params.col_count;
     char** col_list = query->params.create_params.col_list;
-
     ColConstraintType* constraint_list = query->params.create_params.constraint_list;
+    char** refer_table_list =  query->params.create_params.table_refer_list;
+    char** refer_col_list =  query->params.create_params.col_refer_list;
 
     int i,j;
 
@@ -195,6 +197,7 @@ Response* create_table(Query* query){
 
     // add col
     Col* current_col;
+    int refer_list_index=0;
     // through through the col list and add them in the linked list
     for(i=0; i<col_count; i++){
         // set basic info
@@ -203,7 +206,17 @@ Response* create_table(Query* query){
         assert(new_col->name != NULL);
         new_col->type = type_list[i];
         new_col->constraint = constraint_list[i];
-        
+
+        // TODO : if col to add is fk, set table and col it refers to
+        if(new_col->constraint == FK){
+            new_col->refer_table = strdup(refer_table_list[refer_list_index]);
+            assert(new_col->refer_table!=NULL);
+
+            new_col->refer_col = strdup(refer_col_list[refer_list_index]);
+            assert(new_col->refer_col!=NULL);
+
+            refer_list_index++;
+        }
         // set pointer to next col
         if(!new_tb->first_col){
             new_tb->first_col = new_col;
@@ -232,7 +245,7 @@ Response* create_table(Query* query){
 
     // set hash table of this table
     new_tb->hash_table = hash_table;
-    
+
     // return success message
     res->status = SUCCESS;
     fprintf(stdout, "table '%s' created successfuly with %d column(s).\n", new_tb_name, col_count);
