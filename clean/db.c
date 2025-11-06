@@ -25,15 +25,18 @@ void free_col(Col* col){
 }
 
 void free_row(Row* row, int col_count){
+    if (!row) return;
+
     int i;
     
-    for(i=0; i<col_count; i++){
-        free(row->data_field[i]);
-        row->data_field[i] = NULL;
+    if (row->data_field) {
+        for(i=0; i<col_count; i++){
+            free(row->data_field[i]);
+            row->data_field[i] = NULL;
+        }
+        free(row->data_field);
+        row->data_field = NULL;
     }
-    free(row->data_field);
-    row->data_field = NULL;
-
     free(row);
     row = NULL;
 }
@@ -45,6 +48,8 @@ void free_node(Node* node, int col_count){
 }
 
 void free_hash_table(HashTable* hash_table, int col_count){
+    if (!hash_table) return; 
+
     int i;
     Node* current_node = NULL;
     Node* tmp_node = NULL;

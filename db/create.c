@@ -17,6 +17,7 @@ Group 2 ESGI 2A3
 #include "../init/init.h"
 #include "../hash/hash.h"
 #include "../global_var.h"
+#include "../clean/clean.h"
 
 
 void create_table(Query* query){
@@ -30,7 +31,7 @@ void create_table(Query* query){
     char** refer_table_list =  query->params.create_params.table_refer_list;
     char** refer_col_list =  query->params.create_params.col_refer_list;
 
-    int i,j;
+    int i,j,k;
 
     // check table name
     while(current_table){
@@ -90,23 +91,25 @@ void create_table(Query* query){
         bool refer_col_exist;
         char** table_refer_list = query->params.create_params.table_refer_list;
         char** col_refer_list = query->params.create_params.col_refer_list;
-        Table* refered_table;
-        Col* refered_col;
-        Col* current_col;
+        Table* refered_table = NULL;
+        Col* refered_col = NULL;
+        Col* current_col = NULL;
 
         // refering to the table itself is not allowed, since it hasn't been created yet
-        if (strcmp(new_tb_name, table_refer_list[i]) == 0) {
-            fprintf(stderr, "Execution error: table '%s' cannot reference itself.\n", new_tb_name);
-            free(pk_col_name);
-            pk_col_name = NULL;
-            return;
+        for(j=0; j<fk_count; j++){
+            if (strcmp(new_tb_name, table_refer_list[j]) == 0) {
+                fprintf(stderr, "Execution error: table '%s' cannot reference itself.\n", new_tb_name);
+                free(pk_col_name);
+                pk_col_name = NULL;
+                return;
+            }
         }
         
         // check many cols refer to same col not allowed
-        for(i=0; i<fk_count-1; i++){
-            for(j=i+1; j<fk_count; j++){
-                if(strcmp(col_refer_list[i],col_refer_list[j]) == 0 && strcmp(table_refer_list[i], table_refer_list[j]) == 0){
-                    fprintf(stderr, "Execution error: many columns refering to a same column '%s' of table '%s' is not allowed.\n", col_refer_list[i], table_refer_list[i]);
+        for(j=0; j<fk_count-1; j++){
+            for(k=j+1; k<fk_count; k++){
+                if(strcmp(col_refer_list[j],col_refer_list[k]) == 0 && strcmp(table_refer_list[j], table_refer_list[k]) == 0){
+                    fprintf(stderr, "Execution error: many columns refering to a same column '%s' of table '%s' is not allowed.\n", col_refer_list[j], table_refer_list[j]);
                     free(pk_col_name);
                     pk_col_name = NULL;
                     return;
@@ -115,19 +118,19 @@ void create_table(Query* query){
         }
 
         // loop through all fk to check other criterias
-        for(i=0; i<fk_count; i++){
+        for(j=0; j<fk_count; j++){
             refer_table_exist = false;
             refer_col_exist = false;
             // check table refered exists
             //if it is the first table, it can't refer to anything
             if(!first_table){
-                fprintf(stderr, "Execution error: table '%s' refered to by '%s' does not exist.\n", table_refer_list[i], col_list[fk_list_index[i]]);
+                fprintf(stderr, "Execution error: table '%s' refered to by '%s' does not exist.\n", table_refer_list[j], col_list[fk_list_index[j]]);
                 free(pk_col_name);
                 pk_col_name = NULL;
                 return;
             }
             for(current_table = first_table; current_table != NULL; current_table = current_table->next_table){
-                if(strcmp(current_table->name, table_refer_list[i]) == 0){
+                if(strcmp(current_table->name, table_refer_list[j]) == 0){
                     refer_table_exist = true; // flag to check if all fk refer to existing tables
                     refered_table = current_table; // get the pointer to table to check if refered col exists later
                     break;
@@ -135,7 +138,7 @@ void create_table(Query* query){
             }
             // if a table refered to doesn't exist, return error
             if(!refer_table_exist){
-                fprintf(stderr, "Execution error: table '%s' refered to by '%s' does not exist.\n", table_refer_list[i], col_list[fk_list_index[i]]);
+                fprintf(stderr, "Execution error: table '%s' refered to by '%s' does not exist.\n", table_refer_list[j], col_list[fk_list_index[j]]);
                 free(pk_col_name);
                 pk_col_name = NULL;
                 return;
@@ -143,7 +146,7 @@ void create_table(Query* query){
 
             // table exist, check for col refered to exists in that table
             for(current_col = refered_table->first_col; current_col != NULL; current_col = current_col->next_col){
-                if(strcmp(current_col->name, col_refer_list[i]) == 0){
+                if(strcmp(current_col->name, col_refer_list[j]) == 0){
                     refer_col_exist = true; // flag to check if col exist
                     refered_col = current_col;
                     break;
@@ -151,7 +154,7 @@ void create_table(Query* query){
             }
             // if col doesn't exist, return error
             if(!refer_col_exist){
-                fprintf(stderr, "Execution error: column '%s' does not exist in table '%s' refered to.\n", col_refer_list[i], table_refer_list[i]);
+                fprintf(stderr, "Execution error: column '%s' does not exist in table '%s' refered to.\n", col_refer_list[j], table_refer_list[j]);
                 free(pk_col_name);
                 pk_col_name = NULL;
                 return;
@@ -159,15 +162,15 @@ void create_table(Query* query){
 
             // check if col is pk ?
             if(refered_col->constraint != PK){
-                fprintf(stderr, "Execution error: column '%s' in table '%s' refered to is not a primary key.\n", col_refer_list[i], table_refer_list[i]);
+                fprintf(stderr, "Execution error: column '%s' in table '%s' refered to is not a primary key.\n", col_refer_list[j], table_refer_list[j]);
                 free(pk_col_name);
                 pk_col_name = NULL;
                 return;
             }
 
             // check if col type is the same as col that refer to it
-            if(refered_col->type != type_list[fk_list_index[i]]){
-                fprintf(stderr, "Execution error: column '%s' in table '%s' refered to is not the same type as column '%s'.\n", col_refer_list[i], table_refer_list[i], col_list[fk_list_index[i]]);
+            if(refered_col->type != type_list[fk_list_index[j]]){
+                fprintf(stderr, "Execution error: column '%s' in table '%s' refered to is not the same type as column '%s'.\n", col_refer_list[j], table_refer_list[j], col_list[fk_list_index[j]]);
                 free(pk_col_name);
                 pk_col_name = NULL;
                 return;
@@ -186,7 +189,7 @@ void create_table(Query* query){
     // add col
     Col* current_col;
     int refer_list_index=0;
-    // through through the col list and add them in the linked list
+    // loop through the col list and add them in the linked list
     for(i=0; i<col_count; i++){
         // set basic info
         new_col = init_col();
@@ -206,12 +209,14 @@ void create_table(Query* query){
             refer_list_index++;
         }
         // set pointer to next col
-        if(!new_tb->first_col){
+        if (new_tb->first_col == NULL || new_tb->first_col->name == NULL) {
+            // free the dummy if it exists
+            if (new_tb->first_col && new_tb->first_col->name == NULL)
+                free_col(new_tb->first_col);
             new_tb->first_col = new_col;
-        } else{
-            // get pointer to the last col in the list
+        } else {
+            // append to the end
             current_col = get_last_col(new_tb->first_col);
-            // last col points to a new col
             current_col->next_col = new_col;
         }
     }
