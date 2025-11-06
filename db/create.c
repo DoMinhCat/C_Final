@@ -230,6 +230,9 @@ Response* create_table(Query* query){
     assert(hash_table->pk_col_name != NULL);
     // add buckets as rows are inserted, there are 67 NULL buckets reserved
 
+    // set hash table of this table
+    new_tb->hash_table = hash_table;
+    
     // return success message
     res->status = SUCCESS;
     fprintf(stdout, "table '%s' created successfuly with %d column(s).\n", new_tb_name, col_count);

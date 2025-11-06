@@ -32,7 +32,8 @@ typedef struct Col{
 typedef struct Table{
     char *name;
     Row *first_row;
-    Col *first_col;
+    Col *first_col; 
+    HashTable* hash_table; // pointer to the hash table of this table
 
     int col_count; // to free row and col
 
