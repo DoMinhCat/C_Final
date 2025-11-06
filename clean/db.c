@@ -39,11 +39,9 @@ void free_row(Row* row, int col_count){
 }
 
 void free_node(Node* node, int col_count){
-    free_row(node->row, col_count);
-    node->row = NULL;
-
     free(node);
     node = NULL;
+    // dont free row that node points to, row will be free when freeing table else we free row 2 times
 }
 
 void free_hash_table(HashTable* hash_table, int col_count){
@@ -64,6 +62,7 @@ void free_hash_table(HashTable* hash_table, int col_count){
             
             free_node(tmp_node, col_count);   
         }
+        hash_table->bucket[i] = NULL;
     }
 
     free(hash_table);
@@ -102,7 +101,8 @@ void free_table(Table* table){
     }
 
     // free the associated hash table
-    free_hash_table()
+    free_hash_table(table->hash_table, table->col_count);
+    hash_table = NULL;
 
     free(table);
     table = NULL;
