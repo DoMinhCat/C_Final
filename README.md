@@ -40,4 +40,12 @@ Projet final de C à ESGI
 6. Contributors
 
 Current quick start :
-`gcc main.c ui/parser.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/select.c ui/helper_ui.c clean/cmd.c clean/db.c init/query.c init/db.c init/hash_table.c init/response.c db/create.c db/helper_db.c global_var.c -o sb.exe`
+`gcc main.c ui/parser.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/select.c ui/helper_ui.c clean/cmd.c clean/db.c init/query.c init/db.c init/hash_table.c db/create.c db/helper_db.c db/drop.c global_var.c -o sb.exe`
+
+Commands to test:
+
+CREATE TABLE team ( id int pk, name string, score double )
+CREATE TABLE user ( id int pk, name string, age int, weight double, team_id int fk references team id )
+
+Interesting to add:
+show tables : print all table names

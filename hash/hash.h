@@ -7,7 +7,10 @@ Group 2 ESGI 2A3
 #ifndef HASH_H
 #define HASH_H
 #define HASH_TABLE_SIZE 67 // prime number size for better key distribution
-#include "../db/db.h"
+
+#include "../main.h"
+typedef struct Row Row;
+
 
 //linked list of nodes in a bucket
 typedef struct Node{
@@ -18,10 +21,9 @@ typedef struct Node{
 } Node;
 
 typedef struct HashTable{
-    int table_index; //hash table of which table in the linked list
-    int pk_col_index; // index of col in col_list in create_params that is pk to hash
+    char* pk_col_name; // name of pk col to hash
 
-    Node** bucket; // linked list of buckets, 67 buckets max -> bucket[67][linkedlist collision]
+    Node* bucket[HASH_TABLE_SIZE]; // linked list of buckets, 67 buckets max -> bucket[67][linkedlist collision]
 } HashTable;
 
 

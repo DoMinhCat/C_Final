@@ -48,7 +48,10 @@ int* get_fk_col_list_index(Query* query){
     }
     
     // handle an edge case that will probably never happens just to safe guard parse_create() if it has bug :))
-    if(current_index != fk_count) free(res);
+    if(current_index != fk_count) {
+        free(res);
+        res = NULL;
+    }
 
     return res;
 }

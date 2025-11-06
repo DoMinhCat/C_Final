@@ -71,17 +71,6 @@ typedef struct {
     int table_count; // to free table_list
 } DropParams;
 
-typedef enum{
-    SUCCESS,
-    FAILURE
-} ResponseStatus;
-
-// DB functions return this struct for error/success in db operations
-typedef struct Response{
-    ResponseStatus status;
-    char message[100];
-} Response;
-
 typedef struct Query
 {
     CommandType cmd_type; 
