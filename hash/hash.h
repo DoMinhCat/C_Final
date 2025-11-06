@@ -18,7 +18,6 @@ typedef struct Node{
 } Node;
 
 typedef struct HashTable{
-    char* table_name; //hash table of which table in the linked list
     char* pk_col_name; // name of pk col to hash
 
     Node* bucket[HASH_TABLE_SIZE]; // linked list of buckets, 67 buckets max -> bucket[67][linkedlist collision]

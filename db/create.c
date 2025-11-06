@@ -228,7 +228,6 @@ Response* create_table(Query* query){
 
     hash_table->pk_col_name = strdup(pk_col_name);
     assert(hash_table->pk_col_name != NULL);
-    hash_table->table_name = new_tb->name;
     // add buckets as rows are inserted, there are 67 NULL buckets reserved
 
     // return success message

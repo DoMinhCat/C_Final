@@ -51,8 +51,6 @@ void free_hash_table(HashTable* hash_table, int col_count){
     Node* current_node = NULL;
     Node* tmp_node = NULL;
 
-    free(hash_table->table_name);
-    hash_table->table_name = NULL;
     free(hash_table->pk_col_name);
     hash_table->pk_col_name = NULL;
 
@@ -79,6 +77,8 @@ void free_table(Table* table){
     Col* tmp_col; // temporary to free current col
     Row* current_row = table->first_row;
     Row* tmp_row;
+    HashTable* hash_table = NULL;
+    
 
     free(table->name);
     table->name = NULL;
@@ -102,6 +102,7 @@ void free_table(Table* table){
     }
 
     // free the associated hash table
+    free_hash_table()
 
     free(table);
     table = NULL;

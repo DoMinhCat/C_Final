@@ -23,7 +23,6 @@ HashTable* init_hash_table(){
     HashTable* hash_tab = NULL;
     assert((hash_tab = (HashTable*)malloc(sizeof(HashTable))) != NULL);
     
-    hash_tab->table_name = NULL;
     hash_tab->pk_col_name = NULL;
 
     // init each bucket
