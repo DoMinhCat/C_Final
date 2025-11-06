@@ -8,6 +8,7 @@ Group 2 ESGI 2A3
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+#include <stdbool.h>
 
 #include "db.h"
 #include "helper_db.h"
@@ -19,7 +20,7 @@ Group 2 ESGI 2A3
 
 Response* drop_table(Query* query) {
     Response* res = init_response();
-    Table* current_table = first_table;
+    Table* current_table;
     Table* prev_table = NULL;
     Row* current_row = NULL;
     Row* next_row = NULL;
@@ -31,34 +32,34 @@ Response* drop_table(Query* query) {
     char* table_string = NULL;
 
     int i;
-    int found = -1; // not found by default
     int table_count = query->params.drop_params.table_count;
     int table_index[table_count];
+    bool table_exist;
     
     // Cat's note : removed check for non existing table, this is already checked in parser
 
-    // Check if all table in the list provided exist
+    // Loop through each table provided in query, check and free one by one 
     for(i=0; i<table_count; i++){
         table_name = query->params.drop_params.table_list[i];
-        /* Cat's note : maybe I will write a helper function to get the index of the table with a given name
-        This function takes the name (and other inputs?), search the list of all tables
-        Return position of found table in the list, return -1 if not found
-        */
-        //table_index[i] = find_table_blabla return table_index()
+        table_exist = false;
     
-        // table not found, return error
-        if(found == -1){
+        // check existence
+        current_table = first_table;
+        while(current_table != NULL) {
+            if(strcmp(table_name, current_table->name) == 0){
+                table_exist = true;
+                break;
+            }
+            current_table = current_table->next_table;
+        }
+        if(!table_exist){
             res->status = FAILURE;
             fprintf(stderr, "Execution error: table '%s' not found.\n", table_name);
             return res;
         }
-    }
-
-    // When we are here, all table provided exist, continue with other checks
-    for(i=0; i<table_count; i++){
-        table_name = query->params.drop_params.table_list[i];
 
         // Check if any other table has a foreign key col references to current table
+        current_table = first_table;
         while(current_table != NULL) {
             // no need to check itself
             if(strcmp(current_table->name, table_name) == 0){
@@ -68,38 +69,20 @@ Response* drop_table(Query* query) {
             // loop through all col of the table 
             current_col = current_table->first_col;
             while(current_col != NULL) {
-                // TODO : return error if col refer to table to delete
-                if(current_col->constraint == FK) { // && strcmp(current_col.table_refer,table_name) == 0
-                    // However, the reference information is only available during creation
-                    // Cat's note: i forgot that, I added a table and col reference in struct Col and update create db to set them upon table creation
+                // return error if col refer to table to delete
+                if(current_col->constraint == FK && strcmp(current_col->refer_table, table_name) == 0) {
+                    res->status = FAILURE;
+                    fprintf(stderr, "Execution error: '%s' 'is referenced by column '%s' of table '%s.\n", table_name, current_col->name, current_table->name);
+                    return res;
                 }
                 current_col = current_col->next_col;
             }
             current_table = current_table->next_table;
         }
 
-        // Cat's note :  maybe dont need to loop all again, we can store indexes of tables given from the check if all tables exist above
-        // then free them one by one, no loop -> more efficient
         current_table = first_table;
         while(current_table != NULL) {
             if(strcmp(current_table->name, table_name) == 0) {
-                // First, free all rows
-
-                current_row = current_table->first_row;
-                while(current_row != NULL) {
-                    next_row = current_row->next_row;
-                    free_row(current_row, current_table->col_count);
-                    current_row = next_row;
-                }
-
-                // Free all columns
-                current_col = current_table->first_col;
-                while(current_col != NULL) {
-                    next_col = current_col->next_col;
-                    free_col(current_col);
-                    current_col = next_col;
-                }
-
                 // Update the table linked list
                 if(prev_table == NULL) {
                     first_table = current_table->next_table;
@@ -107,9 +90,9 @@ Response* drop_table(Query* query) {
                     prev_table->next_table = current_table->next_table;
                 }
 
-                // Free the table name and structure
-                free(current_table->name);
+                // drop table
                 free(current_table);
+                current_table = NULL;
 
                 res->status = SUCCESS;
                 // construct message 
