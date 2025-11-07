@@ -48,6 +48,3 @@ Commands to test:
 
 CREATE TABLE team ( id int pk, name string, score double )
 CREATE TABLE user ( id int pk, name string, age int, weight double, team_id int fk references team id )
-
-Interesting to add:
-show tables : print all table names
