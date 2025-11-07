@@ -1,6 +1,6 @@
 /*
 Date of creation : 18/10/2025
-Description : Free functions for Response and Query pointers to call before exit
+Description : Free functions  Query pointers to call before exit
 Group 2 ESGI 2A3
 */
 
@@ -20,6 +20,10 @@ void free_query(Query** query){
 
     switch ((*query)->cmd_type)
     {
+    case DESCRIBE:
+        free((*query)->params.describe_params.table_name);
+        (*query)->params.describe_params.table_name = NULL;
+        break;
     case CREATE:
         // free table_name
         free((*query)->params.create_params.table_name);

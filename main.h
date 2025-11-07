@@ -11,7 +11,7 @@ void print_divider();
 void flush_extra();
 int main(int argc, char ** argv);
 
-typedef enum{
+typedef enum ColType{
     INT,
     DOUBLE,
     STRING    

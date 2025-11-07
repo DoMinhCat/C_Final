@@ -119,24 +119,21 @@ void get_col_value_from_row(Table* table, Row* row, const char* col_name, char* 
 
 
 // keep only this func in select.c but comment out the part that implement WHERE and JOIN
-Response* select(Query* query) {
-    Response* res = init_response();
+void select(Query* query) {
     SelectParams* params = &query->params.select_params;
     Table* main_table = get_table_by_name(params->table_name);
 
     if (main_table == NULL) {
-        res->status = FAILURE;
-        sprintf(res->message, "Execution error: table '%s' does not exist.\n", params->table_name);
-        return res;
+        fprintf(stderr, "Execution error: table '%s' does not exist.\n", params->table_name);
+        return;
     }
 
     Table* join_table = NULL;
     if (params->table_join_name != NULL) {
         join_table = get_table_by_name(params->table_join_name);
         if (join_table == NULL) {
-            res->status = FAILURE;
-            sprintf(res->message, "Execution error: join table '%s' does not exist.\n", params->table_join_name);
-            return res;
+            fprintf(stderr, "Execution error: table to join '%s' does not exist.\n", params->table_join_name);
+            return;
         }
     }
 
@@ -153,9 +150,8 @@ Response* select(Query* query) {
             }
 
             if (!col_exists) {
-                res->status = FAILURE;
-                sprintf(res->message, "Execution error: column '%s' does not exist.\n", col_name);
-                return res;
+                fprintf(stderr, "Execution error: column '%s' does not exist.\n", col_name);
+                return;
             }
         }
     }
