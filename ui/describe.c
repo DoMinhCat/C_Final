@@ -14,6 +14,8 @@ Group 2 ESGI 2A3
 void parse_describe(Query** query){
     char* token = NULL;
 
+    (*query)->cmd_type = DESCRIBE;
+
     //check TABLES
     token = strtok(NULL, " \t");
     if(!contain_key_word(token, "TABLE", query, "DESCRIBE")) return;
