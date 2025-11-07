@@ -89,20 +89,15 @@ int main(int argc, char **argv){
         // Execute commands
         switch (parser_output->cmd_type){
         case SHOW:
-            // call show in db
-            printf("SHOW is called\n");
+            show(parser_output);
             break;
         case DESCRIBE:
             // call describe in db
             printf("DESCRIBE is called\n");
             break;
         case CREATE:
-            // Call create()
             create_table(parser_output);
-
-            printf("CREATE is called\n");
             break;
-
         case INSERT:
             // Call insert() of db
 
