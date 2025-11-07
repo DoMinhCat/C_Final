@@ -23,9 +23,7 @@ HashTable* init_hash_table(){
     HashTable* hash_tab = NULL;
     assert((hash_tab = (HashTable*)malloc(sizeof(HashTable))) != NULL);
     
-    hash_tab->table_index = 0;
-    hash_tab->pk_col_index = 0;
-    assert((hash_tab->bucket = (Node**)malloc(sizeof(Node*)*HASH_TABLE_SIZE)) != NULL);
+    hash_tab->pk_col_name = NULL;
 
     // init each bucket
     for(int i=0; i<HASH_TABLE_SIZE; i++){

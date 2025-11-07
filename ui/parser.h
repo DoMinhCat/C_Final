@@ -1,7 +1,7 @@
 
 /*
 Date of creation : 26/10/2025
-Description : Declaration of prototypes for parser.c, Query and Response struct
+Description : Declaration of prototypes for parser.c, Query struct
 Group 2 ESGI 2A3
 */
 
@@ -13,20 +13,24 @@ Group 2 ESGI 2A3
 #define TABLE_NAME_MAX 101
 
 #include "../main.h"
-
-typedef enum{
+typedef enum CommandType{
     CREATE,
     INSERT,
     DELETE,
     SELECT,
     DROP,
+    SHOW,
+    DESCRIBE,
     EXIT,
     INVALID
 } CommandType;
 
+typedef struct DescribeParams{
+    char* table_name;
+} DescribeParams;
 // For Create table function
 typedef struct{
-    char table_name[TABLE_NAME_MAX];
+    char* table_name;
 
     char **col_list; // list of column names passed in the query
     int col_count;          // number of columns
@@ -41,59 +45,49 @@ typedef struct{
 
 // For Insert function
 typedef struct{
-    char table_name[TABLE_NAME_MAX];
+    char* table_name;
 
     char **col_list; // list of column names passed in the query
-    int col_count;          // number of columns for free operation
+    int col_count;          // number of columns to free col_list and
 
     void **data_list; // list of input for each column
-    
-    // TODO: define other necessary params
 } InsertParams;
 
 typedef struct {
-    char table_name[TABLE_NAME_MAX];
-    char condition_column[TABLE_NAME_MAX];
-    char condition_value[MAX_TOKEN_SIZE];
+    char* table_name;
+    char* condition_column; // need to check input length
+    char* condition_value; // need to check input length
 } DeleteParams;
 
 typedef struct {
-    char table_name[TABLE_NAME_MAX];
-    
-    // add more later
+    char* table_name; // need to check input length
+    char* table_join_name; // need to check input length
+
+    char** col_list;
+    int col_count; //to free col_list
+    char* first_col_on;
+    char* second_col_on;
+    char* condition_col; // need to check input length
+    char* condition_val; // need to check input length
 } SelectParams;
 
 typedef struct {
-    char table_name[TABLE_NAME_MAX];
+    char** table_list;
+    int table_count; // to free table_list
 } DropParams;
 
-typedef enum{
-    SUCCESS,
-    FAILURE
-} ResponseStatus;
-
-// DB functions return this struct for error/success in db operations
-typedef struct Response{
-    ResponseStatus status;
-    char message[100];
-} Response;
-
-typedef struct Query
-{
+typedef struct Query{
     CommandType cmd_type; 
 
     // take one of these params based on cmd_type
     union{
         CreateParams create_params;
         InsertParams insert_params;
-        // Other structs of other types of commands
         DeleteParams delete_params;
         DropParams drop_params;
         SelectParams select_params;
+        DescribeParams describe_params;
     } params;
-
-    // set this if there is a syntax error that the parser detected
-    char syntax_message[100];
 } Query;
 
 
@@ -104,6 +98,8 @@ void parse_drop(Query** query);
 void parse_select(Query** query);
 void parse_insert(Query** query);
 void parse_create(Query** query);
+void parse_show(Query** query);
+void parse_describe(Query** query);
 Query* parse_cmd(char* cmd);
 
 #endif
