@@ -84,7 +84,7 @@ void create_table(Query* query){
     }
 
     // check type int/string for pk only
-    if(type_list[pk_index] != INT || type_list[pk_index] != STRING){
+    if(type_list[pk_index] != INT && type_list[pk_index] != STRING){
         fprintf(stderr, "Execution error: primary key's type must be int or string.\n");
         return;
     }
@@ -133,7 +133,7 @@ void create_table(Query* query){
             // check table refered exists
             //if it is the first table, it can't refer to anything
             if(!first_table){
-                fprintf(stderr, "Execution error: table '%s' refered to by '%s' does not exist.\n", table_refer_list[j], col_list[fk_list_index[j]]);
+                fprintf(stderr, "Execution error: table '%s' referenced by '%s' does not exist.\n", table_refer_list[j], col_list[fk_list_index[j]]);
                 free(pk_col_name);
                 pk_col_name = NULL;
                 free(fk_list_index);
@@ -149,7 +149,7 @@ void create_table(Query* query){
             }
             // if a table refered to doesn't exist, return error
             if(!refer_table_exist){
-                fprintf(stderr, "Execution error: table '%s' refered to by '%s' does not exist.\n", table_refer_list[j], col_list[fk_list_index[j]]);
+                fprintf(stderr, "Execution error: table '%s' referenced by '%s' does not exist.\n", table_refer_list[j], col_list[fk_list_index[j]]);
                 free(pk_col_name);
                 pk_col_name = NULL;
                 free(fk_list_index);

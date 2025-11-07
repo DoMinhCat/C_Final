@@ -21,6 +21,7 @@ void describe_table(Query* query){
     char* constraint = NULL;
     char* table_refer = NULL;
     char* col_refer = NULL;
+    int i;
 
     // check if table exists
     table = get_table_by_name(query->params.describe_params.table_name);
@@ -30,6 +31,9 @@ void describe_table(Query* query){
     }
 
     printf("%-20s %-20s %-20s %-25s %-20s\n", "Column", "Type", "Constraint", "References Table", "References Column");
+    for(i=0; i<110; i++) printf("-");
+    printf("\n");
+
     for(current_col=table->first_col; current_col!=NULL; current_col = current_col->next_col){
         name = strdup(current_col->name);
         assert(name!=NULL);
