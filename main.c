@@ -50,8 +50,11 @@ int main(int argc, char **argv){
     
     
     if(import_export_choice == 'y' || import_export_choice == 'Y'){
-        // Call import function from file folder
+        print_divider();
         printf("Import confirmed\n");
+        print_divider();
+        
+        // Call import function from file folder
     }else {
         print_divider();
         printf("Database importation aborted.\n");
@@ -65,7 +68,6 @@ int main(int argc, char **argv){
         cmd_input = read_cmd(cmd_buffer);
         // if nothing or command too long (read_cmd returns NULL)
         if (cmd_input == NULL){
-            printf("\n");
             continue;
         } else if(strcmp("long", cmd_input) == 0){
             printf("\n");
@@ -89,27 +91,23 @@ int main(int argc, char **argv){
 
         // Execute commands
         switch (parser_output->cmd_type){
-        case CREATE:
-            // Call create()
-            create_table(parser_output);
-
-            printf("CREATE is called\n");
+        case SHOW:
+            show(parser_output);
             break;
-
+        case DESCRIBE:
+            describe_table(parser_output);
+            break;
+        case CREATE:
+            create_table(parser_output);
+            break;
         case INSERT:
             // Call insert() of db
-
-            //placeholder
-            //no need to init response, it will be init in db functions
             
             printf("INSERT is called\n");
             break;
 
         case SELECT:
             // Call select() of db
-
-            //placeholder
-            //no need to init response, it will be init in db functions
             
             printf("SELECT is called\n");
             break;
@@ -164,8 +162,11 @@ int main(int argc, char **argv){
     } while (import_export_choice != 'y' && import_export_choice != 'Y' && import_export_choice != 'n' && import_export_choice != 'N');
 
     if(import_export_choice == 'y' || import_export_choice == 'Y'){
-        // Call export func from file folder
+        print_divider();
         printf("Export confirmed.\n");
+        print_divider();
+
+        // Call export func from file folder
     }else {
         print_divider();
         printf("Database exportation aborted.\n");
