@@ -54,7 +54,9 @@ void create_table(Query* query){
 
     //check 1 pk
     int pk_count = 0;
+    int pk_index;
     char* pk_col_name = NULL; // to set in hash table later
+
     for(i=0; i<col_count; i++){
         if(constraint_list[i] == PK){ 
             // free before strdup in case 2 pk
@@ -62,6 +64,7 @@ void create_table(Query* query){
             pk_col_name = NULL;
 
             pk_col_name = strdup(col_list[i]);
+            pk_index = i;
             assert(pk_col_name != NULL);
 
             pk_count++;
@@ -77,6 +80,12 @@ void create_table(Query* query){
         fprintf(stderr, "Execution error: a table must have a primary key column.\n");
         free(pk_col_name);
         pk_col_name = NULL;
+        return;
+    }
+
+    // check type int/string for pk only
+    if(type_list[pk_index] != INT && type_list[pk_index] != STRING){
+        fprintf(stderr, "Execution error: primary key's type must be int or string.\n");
         return;
     }
 
@@ -124,9 +133,11 @@ void create_table(Query* query){
             // check table refered exists
             //if it is the first table, it can't refer to anything
             if(!first_table){
-                fprintf(stderr, "Execution error: table '%s' refered to by '%s' does not exist.\n", table_refer_list[j], col_list[fk_list_index[j]]);
+                fprintf(stderr, "Execution error: table '%s' referenced by '%s' does not exist.\n", table_refer_list[j], col_list[fk_list_index[j]]);
                 free(pk_col_name);
                 pk_col_name = NULL;
+                free(fk_list_index);
+                fk_list_index = NULL;
                 return;
             }
             for(current_table = first_table; current_table != NULL; current_table = current_table->next_table){
@@ -138,9 +149,11 @@ void create_table(Query* query){
             }
             // if a table refered to doesn't exist, return error
             if(!refer_table_exist){
-                fprintf(stderr, "Execution error: table '%s' refered to by '%s' does not exist.\n", table_refer_list[j], col_list[fk_list_index[j]]);
+                fprintf(stderr, "Execution error: table '%s' referenced by '%s' does not exist.\n", table_refer_list[j], col_list[fk_list_index[j]]);
                 free(pk_col_name);
                 pk_col_name = NULL;
+                free(fk_list_index);
+                fk_list_index = NULL;
                 return;
             }
 
@@ -157,6 +170,8 @@ void create_table(Query* query){
                 fprintf(stderr, "Execution error: column '%s' does not exist in table '%s' refered to.\n", col_refer_list[j], table_refer_list[j]);
                 free(pk_col_name);
                 pk_col_name = NULL;
+                free(fk_list_index);
+                fk_list_index = NULL;
                 return;
             }
 
@@ -165,6 +180,8 @@ void create_table(Query* query){
                 fprintf(stderr, "Execution error: column '%s' in table '%s' refered to is not a primary key.\n", col_refer_list[j], table_refer_list[j]);
                 free(pk_col_name);
                 pk_col_name = NULL;
+                free(fk_list_index);
+                fk_list_index = NULL;
                 return;
             }
 
@@ -173,9 +190,13 @@ void create_table(Query* query){
                 fprintf(stderr, "Execution error: column '%s' in table '%s' refered to is not the same type as column '%s'.\n", col_refer_list[j], table_refer_list[j], col_list[fk_list_index[j]]);
                 free(pk_col_name);
                 pk_col_name = NULL;
+                free(fk_list_index);
+                fk_list_index = NULL;
                 return;
             }
         }
+        free(fk_list_index);
+        fk_list_index = NULL;
     }
 
     // create/malloc new table when all check is passed

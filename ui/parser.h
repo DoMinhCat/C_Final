@@ -1,7 +1,7 @@
 
 /*
 Date of creation : 26/10/2025
-Description : Declaration of prototypes for parser.c, Query and Response struct
+Description : Declaration of prototypes for parser.c, Query struct
 Group 2 ESGI 2A3
 */
 
@@ -19,10 +19,15 @@ typedef enum CommandType{
     DELETE,
     SELECT,
     DROP,
+    SHOW,
+    DESCRIBE,
     EXIT,
     INVALID
 } CommandType;
 
+typedef struct DescribeParams{
+    char* table_name;
+} DescribeParams;
 // For Create table function
 typedef struct{
     char* table_name;
@@ -71,18 +76,17 @@ typedef struct {
     int table_count; // to free table_list
 } DropParams;
 
-typedef struct Query
-{
+typedef struct Query{
     CommandType cmd_type; 
 
     // take one of these params based on cmd_type
     union{
         CreateParams create_params;
         InsertParams insert_params;
-        // Other structs of other types of commands
         DeleteParams delete_params;
         DropParams drop_params;
         SelectParams select_params;
+        DescribeParams describe_params;
     } params;
 } Query;
 
@@ -94,6 +98,8 @@ void parse_drop(Query** query);
 void parse_select(Query** query);
 void parse_insert(Query** query);
 void parse_create(Query** query);
+void parse_show(Query** query);
+void parse_describe(Query** query);
 Query* parse_cmd(char* cmd);
 
 #endif
