@@ -14,14 +14,10 @@ Projet final de C à ESGI
 - Available types : int, string, and double
 - Insert: values will be inserted in the order of which columns are created and all columns must be inserted (can't insert only 4 values into a table with 5 columns)
 - The primary column value will not be automatically generated or incremented, must be manually inserted with INSERT INTO
-- All command ends with a semicolon without spaces before it
-- Operators AND and OR are not available
+- Operators AND and OR are not available yet
 - Tables can't be altered one created, altering must be done through deleting the table, recreate it and manually reinsert all data :)
-- The column with foreign key attribute and the column it points to must have the same name in order for JOIN operation to work
-- JOIN and SELECT can't be used in the same SELECT command
-- NOT NULL and UNIQUE constraint are not available
+- NOT NULL and UNIQUE constraint are not available yet
 - Only one primary key is allowed for each table => relation many-many not available
-- A semicolon (;) at the end of a command is not allowed since it is command line based
 - Primary key must be of type int or string
 - "exit" or "quit" to exit the program
 
@@ -48,3 +44,7 @@ Commands to test:
 
 CREATE TABLE team ( id int pk, name string, score double )
 CREATE TABLE user ( id int pk, name string, age int, weight double, team_id int fk references team id )
+
+Ideas
+
+- Auto increment for int pk
