@@ -47,8 +47,7 @@ Query* parse_cmd(char* cmd) {
     else if(strcasecmp(token, "SELECT") == 0) parse_select(&query);
     else if(strcasecmp(token, "INSERT") == 0) parse_insert(&query);
     else if(strcasecmp(token, "SHOW") == 0) parse_show(&query);
-
-
+    else if(strcasecmp(token, "DESCRIBE") == 0) parse_describe(&query);
 
     // exit/quit case 
     else if(strcasecmp(token, "EXIT") == 0 || strcasecmp(token, "QUIT") == 0) query->cmd_type = EXIT;

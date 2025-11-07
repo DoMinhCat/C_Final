@@ -20,6 +20,10 @@ void free_query(Query** query){
 
     switch ((*query)->cmd_type)
     {
+    case DESCRIBE:
+        free((*query)->params.describe_params.table_name);
+        (*query)->params.describe_params.table_name = NULL;
+        break;
     case CREATE:
         // free table_name
         free((*query)->params.create_params.table_name);

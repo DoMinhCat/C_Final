@@ -92,6 +92,10 @@ int main(int argc, char **argv){
             // call show in db
             printf("SHOW is called\n");
             break;
+        case DESCRIBE:
+            // call describe in db
+            printf("DESCRIBE is called\n");
+            break;
         case CREATE:
             // Call create()
             create_table(parser_output);
