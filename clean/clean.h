@@ -7,7 +7,6 @@ Group 2 ESGI 2A3
 #ifndef CLEAN_H
 #define CLEAN_H
 
-typedef struct Response Response;  
 typedef struct Query Query;
 typedef struct Col Col;
 typedef struct Row Row;

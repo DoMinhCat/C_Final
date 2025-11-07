@@ -1,7 +1,7 @@
 
 /*
 Date of creation : 26/10/2025
-Description : Declaration of prototypes for parser.c, Query and Response struct
+Description : Declaration of prototypes for parser.c, Query struct
 Group 2 ESGI 2A3
 */
 

@@ -21,6 +21,6 @@ void show(Query* query){
     }
 
     print_divider();
-    if(tb_count>1) printf("%d %s in total.\n", tb_count, tb_count>1?"tables":"table");
+    if(tb_count>=1) printf("%d %s in total.\n", tb_count, tb_count>1?"tables":"table");
     else printf("Database is empty.\n");
 }

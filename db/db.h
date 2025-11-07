@@ -42,10 +42,9 @@ typedef struct Table{
     struct Table *next_table;
 } Table;
 
-// prototypes
-typedef struct Response Response;  
 typedef struct Query Query;  
 
+// prototypes
 void create_table(Query* query);
 void drop_table(Query* query);
 void describe_table(Query* query);

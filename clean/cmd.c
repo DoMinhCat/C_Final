@@ -1,6 +1,6 @@
 /*
 Date of creation : 18/10/2025
-Description : Free functions for Response and Query pointers to call before exit
+Description : Free functions  Query pointers to call before exit
 Group 2 ESGI 2A3
 */
 
