@@ -65,7 +65,6 @@ int main(int argc, char **argv){
         cmd_input = read_cmd(cmd_buffer);
         // if nothing or command too long (read_cmd returns NULL)
         if (cmd_input == NULL){
-            printf("\n");
             continue;
         } else if(strcmp("long", cmd_input) == 0){
             printf("\n");
@@ -89,6 +88,10 @@ int main(int argc, char **argv){
 
         // Execute commands
         switch (parser_output->cmd_type){
+        case SHOW:
+            // call show in db
+            printf("SHOW is called\n");
+            break;
         case CREATE:
             // Call create()
             create_table(parser_output);

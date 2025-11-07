@@ -31,6 +31,7 @@ Projet final de C à ESGI
 
 5. Usage
 
+- `show tables`
 - `delete from tab1 [where col1 = 6]`
 - `drop table tab1`
 - `create table tab1 ( col1 int pk, col2 string fk references tab_to_refer col_to_refer, col3 double )`, spaces between parentheses are obligated for the program to parse the command correctly
@@ -40,7 +41,7 @@ Projet final de C à ESGI
 6. Contributors
 
 Current quick start :
-`gcc main.c ui/parser.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/select.c ui/helper_ui.c clean/cmd.c clean/db.c init/query.c init/db.c init/hash_table.c db/create.c db/helper_db.c db/drop.c global_var.c -o sb.exe`
+`gcc main.c ui/parser.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/select.c ui/show.c ui/helper_ui.c clean/cmd.c clean/db.c init/query.c init/db.c init/hash_table.c db/create.c db/helper_db.c db/drop.c global_var.c -o sb.exe`
 
 Commands to test:
 

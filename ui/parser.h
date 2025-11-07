@@ -19,6 +19,7 @@ typedef enum CommandType{
     DELETE,
     SELECT,
     DROP,
+    SHOW,
     EXIT,
     INVALID
 } CommandType;
@@ -94,6 +95,7 @@ void parse_drop(Query** query);
 void parse_select(Query** query);
 void parse_insert(Query** query);
 void parse_create(Query** query);
+void parse_show(Query** query);
 Query* parse_cmd(char* cmd);
 
 #endif
