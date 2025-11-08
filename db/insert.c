@@ -15,7 +15,7 @@ void insert(Query* query){
     char** col_list = query->params.insert_params.col_list;
     char* col_name = NULL;
     int col_count = query->params.insert_params.col_count;
-    void** data_list = query->params.insert_params.data_list;
+    char* data_list = query->params.insert_params.data_list;
     char* tb_name = query->params.insert_params.table_name;
     Table* table = get_table_by_name(tb_name);
     ColType* type_list = NULL; //(ColType*)malloc(sizeof(ColType) * col_count); // TODO: free at early return

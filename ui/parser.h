@@ -50,7 +50,7 @@ typedef struct{
     char **col_list; // list of column names passed in the query
     int col_count;          // number of columns to free col_list and
 
-    void **data_list; // list of input for each column
+    char **data_list; // list of input for each column, saved as string in rax form, process later in insert db
 } InsertParams;
 
 typedef struct {

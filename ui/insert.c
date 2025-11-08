@@ -79,7 +79,7 @@ void parse_insert(Query** query){
     token = strtok(data_list, " ,\t"); // got val1
     while(token != NULL){
         // increase size of data_list 
-        (*query)->params.insert_params.data_list = (void**)realloc((*query)->params.insert_params.data_list, (val_count+1) * sizeof(void*)); 
+        (*query)->params.insert_params.data_list = (char**)realloc((*query)->params.insert_params.data_list, (val_count+1) * sizeof(char*)); 
         assert(((*query)->params.insert_params.data_list) != NULL);
         // set value
         (*query)->params.insert_params.data_list[val_count] = strdup(token);

@@ -16,7 +16,10 @@ typedef struct HashTable HashTable;
 
 // struct
 typedef struct Row{
-    void **data_field; // double pointer in case data is string 
+    int* int_field;
+    char* str_field;
+    double* double_field;
+    
     struct Row *next_row;
 } Row;
 
