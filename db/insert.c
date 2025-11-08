@@ -88,8 +88,8 @@ void insert(Query* query){
                         return; 
                     }
 
-                    // if col to insert is pk, check uniqueness
-                    if(current_col->type == PK){
+                    // check uniqueness constraint UNIQUE
+                    if(current_col->constraint == UNIQUE){
                         if(!is_unique_int(table, col_list[i], data_list[i])) {
                             free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
                             return;
@@ -117,6 +117,8 @@ void insert(Query* query){
                         return;
                     }
 
+                    // no check for unique needed, double type not allowed to have unique or pk constraint
+
                     // expand temp list and store validated value
                     double_list_to_insert = (double*)realloc(double_list_to_insert, sizeof(double) * (double_item_count+1));
                     assert(double_list_to_insert!=NULL);
@@ -127,7 +129,7 @@ void insert(Query* query){
                 case STRING:
                     // no need to convert type, data_list is stored as string
                     // check pk case
-                    if(current_col->type == PK){
+                    if(current_col->constraint == UNIQUE){
                         if(!is_unique_str(table, col_list[i], data_list[i])) {
                             free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
                             return;

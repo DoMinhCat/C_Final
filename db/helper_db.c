@@ -181,7 +181,7 @@ bool is_unique_int(Table* table, char* col_name, int value_to_check){
     //loop rows of tables and compare value
     for(current = table->first_row; current!=NULL; current = current->next_row){
         if(value_to_check == current->int_list[col_index]){
-            fprintf(stderr, "Execution error: unique constraint violated on column '%s'.\n", col_name);  
+            fprintf(stderr, "Execution error: UNIQUE constraint violated on column '%s'.\n", col_name);  
             return false;  
         }
     }
@@ -201,7 +201,7 @@ bool is_unique_str(Table* table, char* col_name, char* value_to_check){
     //loop rows of tables and compare value
     for(current = table->first_row; current!=NULL; current = current->next_row){
         if(strcmp(value_to_check, current->str_list[col_index]) == 0 ){
-            fprintf(stderr, "Execution error: unique constraint violated on column '%s'.\n", col_name);  
+            fprintf(stderr, "Execution error: UNIQUE constraint violated on column '%s'.\n", col_name);  
             return false;  
         }
     }
