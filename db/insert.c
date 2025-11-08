@@ -133,7 +133,7 @@ void insert(Query* query){
                         return;
                     }
 
-                    // no check for unique/pk needed, double type not allowed to have unique or pk constraint
+                    // no check for unique/pk/fk needed, double type not allowed to have unique/pk/fk constraint
 
                     // expand temp list and store validated value
                     double_list_to_insert = (double*)realloc(double_list_to_insert, sizeof(double) * (double_item_count+1));
@@ -158,6 +158,11 @@ void insert(Query* query){
                             free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
                             return;
                         }
+                    }
+
+                    //TODO check fk: referential integrity
+                    if(current_col->constraint == FK){
+                        if(!pk_val_is_valid(data_list[i], NULL, hash_tab, STRING)) return;
                     }
                     
                     // check pk case
