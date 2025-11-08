@@ -177,8 +177,8 @@ void create_table(Query* query){
                 return;
             }
 
-            // check if col is pk ?
-            if(refered_col->constraint != PK){
+            // check if col is pk or unique ?
+            if(refered_col->constraint != PK && refered_col->constraint != UNIQUE){
                 fprintf(stderr, "Execution error: column '%s' in table '%s' refered to is not a primary key.\n", col_refer_list[j], table_refer_list[j]);
                 free(pk_col_name);
                 pk_col_name = NULL;

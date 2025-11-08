@@ -42,8 +42,8 @@ gcc main.c ui/parser.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/select.c
 
 Commands to test:
 
-CREATE TABLE team ( id int pk, name string, score double )
-CREATE TABLE user ( id int pk, name string, age int, weight double, team_id int fk references team id )
+CREATE TABLE team ( id int pk, name string unique, score double )
+CREATE TABLE player ( id int pk, name string, age int, weight double, team_id int fk references team id )
 
 Ideas
 NOTE for below: no need to utilise skipped gap, let next_id be the next one of that user inserted
