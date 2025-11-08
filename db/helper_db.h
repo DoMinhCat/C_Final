@@ -17,5 +17,6 @@ Table* get_last_table(Table* first_table);
 
 Table* get_table_by_name(const char* table_name);
 Col* get_col_by_name(Table* table, const char* col_name);
+int get_col_index(Table* table, char* col_name);
 
 #endif

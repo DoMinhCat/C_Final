@@ -101,3 +101,18 @@ Col* get_col_by_name(Table* table, const char* col_name) {
     }
     return NULL;
 }
+
+int get_col_index(Table* table, char* col_name){
+    // same as get_col_by_name, but return index of col instead of pointer to col, return -1 if not found
+    // use this to get the index to access to the corresponding data field of that col
+    // ex: data = data_field[get_col_index(tab1, col1)];
+
+    Col* current_col = NULL;
+    int index = 0;
+
+    for(current_col=table->first_col; current_col!=NULL; current_col=current_col->next_col){
+        if(strcmp(col_name, current_col->name)==0) return index;
+        index++;
+    }
+    return -1;
+}

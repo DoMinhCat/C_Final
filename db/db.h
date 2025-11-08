@@ -47,6 +47,10 @@ typedef struct Query Query;
 // prototypes
 void create_table(Query* query);
 void drop_table(Query* query);
+void where_double(Table* table, char* col_name, const double condition);
+void where_int(Table* table, char* col_name, const int condition);
+void where_str(Table* table, char* col_name, const char* condition);
+
 void describe_table(Query* query);
 void show(Query* query);
 #endif
