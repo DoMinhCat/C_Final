@@ -25,10 +25,8 @@ void describe_table(Query* query){
 
     // check if table exists
     table = get_table_by_name(query->params.describe_params.table_name);
-    if(!table){
-        fprintf(stderr, "Execution error: table '%s' not found.\n", query->params.describe_params.table_name);
-        return;
-    }
+
+    if(!table_exists(table)) return;
 
     printf("%-20s %-20s %-20s %-25s %-20s\n", "Column", "Type", "Constraint", "References Table", "References Column");
     for(i=0; i<110; i++) printf("-");

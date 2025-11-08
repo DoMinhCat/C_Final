@@ -5,6 +5,7 @@ Group 2 ESGI 2A3
 */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <assert.h>
 #include <string.h>
 
@@ -12,6 +13,11 @@ Group 2 ESGI 2A3
 #include "../ui/parser.h"
 #include "db.h"
 #include "../global_var.h"
+
+bool table_exists(char* table_name){
+    Table* table = get_table_by_name(table_name);
+    if(!table) fprintf(stderr, "Execution error: table '%s' not found.\n", table_name);
+}
 
 int* get_fk_col_list_index(Query* query){
     /*
