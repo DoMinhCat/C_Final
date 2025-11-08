@@ -154,6 +154,7 @@ int get_data_list_index(Table* table, char* col_name){
     return -1; // if col not found
 }
 
+/*
 int compare_double(double val1, double val2){
     //safely compare double
     // return 0 if val1=val2
@@ -164,7 +165,7 @@ int compare_double(double val1, double val2){
     if (fabs(val1 - val2) <= epsilon) return 0;
     else if(val1<val2) return -1;
     else return 1;
-}
+}*/
 
 bool is_unique_int(Table* table, char* col_name, int value_to_check){
     // check uniqueness of int value of a col
@@ -180,26 +181,6 @@ bool is_unique_int(Table* table, char* col_name, int value_to_check){
     //loop rows of tables and compare value
     for(current = table->first_row; current!=NULL; current = current->next_row){
         if(value_to_check == current->int_list[col_index]){
-            fprintf(stderr, "Execution error: unique constraint violated on column '%s'.\n", col_name);  
-            return false;  
-        }
-    }
-    return true;
-}
-
-bool is_unique_double(Table* table, char* col_name, double value_to_check){
-    // check uniqueness of double value of a col
-    Row* current = NULL;
-    int col_index = get_col_index(table, col_name);
-
-    if(col_index == -1) {
-        fprintf(stderr, "Execution error: column '%s' not found.\n", col_name);
-        return false;
-    }
-
-    //loop rows of tables and compare value
-    for(current = table->first_row; current!=NULL; current = current->next_row){
-        if(compare_double(value_to_check, current->double_list[col_index]) == 0 ){
             fprintf(stderr, "Execution error: unique constraint violated on column '%s'.\n", col_name);  
             return false;  
         }

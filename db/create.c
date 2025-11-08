@@ -84,7 +84,7 @@ void create_table(Query* query){
 
     // check type int/string for pk only
     if(type_list[pk_index] != INT && type_list[pk_index] != STRING){
-        fprintf(stderr, "Execution error: primary key's type must be int or string.\n");
+        fprintf(stderr, "Execution error: primary key's type must be INT or STRING.\n");
         return;
     }
 

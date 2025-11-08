@@ -13,23 +13,32 @@ Group 2 ESGI 2A3
 #include "helper_db.h"
 #include "../ui/parser.h"
 
+void free_insert_before_exit(int** int_list_to_insert, char*** str_list_to_insert, double** double_list_to_insert, int str_item_count){
+    free(*int_list_to_insert);
+    *int_list_to_insert = NULL;
+    for(int i=0; i<str_item_count; i++){
+        free((*str_list_to_insert)[i]);
+        (*str_list_to_insert)[i] = NULL;
+    }
+    free(*str_list_to_insert);
+    *str_list_to_insert = NULL;
+    free(*double_list_to_insert);
+    *double_list_to_insert = NULL;
+}
+
 void insert(Query* query){
     char** col_list = query->params.insert_params.col_list;
-    char* col_name = NULL; // col to insert
     int col_count = query->params.insert_params.col_count;
     char** data_list = query->params.insert_params.data_list;
-    char* data_field = NULL;
-    char* tb_name = query->params.insert_params.table_name;
 
-    Table* table = get_table_by_name(tb_name);
+    Table* table = NULL;
     //ColType* type_list = NULL; //(ColType*)malloc(sizeof(ColType) * col_count); // IMPORTANT: free at early return
-    ColType type;
     Col* current_col = table->first_col;
     bool col_exist;
 
     // list storing validated field for insert later
     int* int_list_to_insert = NULL;
-    char* str_list_to_insert = NULL;
+    char** str_list_to_insert = NULL;
     double* double_list_to_insert = NULL;
     int int_item_count = 0;
     int str_item_count = 0;
@@ -38,50 +47,53 @@ void insert(Query* query){
     int i,j;
 
     // check table exist
-    if(!table_exists(tb_name)) return;
+    table = get_table_by_name(query->params.insert_params.table_name);
+    if(!table) {
+        fprintf(stderr, "Execution error: table '%s' not found.\n", query->params.insert_params.table_name);
+        return;
+    }
 
     // checks for cols to insert
     for(i=0; i<col_count; i++){
-        col_name = col_list[i];
-        data_field = strdup(data_list[i]); // IMPORTANT : free at exit
-        assert(data_field!=NULL);
 
         // Loop through cols of table
         for(j=0; j<table->col_count; j++) {
             col_exist = false;
 
             // search for col
-            if (strcmp(current_col->name, col_name) == 0) {
+            if (strcmp(current_col->name, col_list[i]) == 0) {
                 col_exist = true;
-                type = current_col->type;
                 
                 // found col, check type col same with data type
-                switch (type)
+                switch (current_col->type)
                 {
                 case INT:
                     char* endptr;
                     long int_val;
                     errno = 0;
 
-                    int_val = strtol(data_field, &endptr, 10);
+                    int_val = strtol(data_list[i], &endptr, 10);
 
                     // check conversion error
-                    if (endptr == data_field || *endptr != '\0') {
-                        fprintf(stderr, "Execution error: invalid value '%s' for column '%s' type INT.\n", data_field, col_name);
-                        free(data_field);
-                        data_field = NULL;
+                    if (endptr == data_list[i] || *endptr != '\0') {
+                        fprintf(stderr, "Execution error: invalid value '%s' for column '%s' type INT.\n", data_list[i], col_list[i]);
+                        free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
                         return;
                     }
 
                     // check overflow for type int
-                    if (data_field > INT_MAX || data_field < INT_MIN || errno == ERANGE) {
+                    if (data_list[i] > INT_MAX || data_list[i] < INT_MIN || errno == ERANGE) {
                         printf("Execution error: incompatible size of value '%s' for type INT.\n");
+                        free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
                         return; 
                     }
 
                     // if col to insert is pk, check uniqueness
                     if(current_col->type == PK){
-                        // TODO
+                        if(!is_unique_int(table, col_list[i], data_list[i])) {
+                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
+                            return;
+                        }
                     }
 
                     // expand temp list and store validated value
@@ -92,24 +104,45 @@ void insert(Query* query){
                     int_item_count++;
                     break;
                 case DOUBLE:
-                    /* code */
+                    char* endptr;
+                    double double_val;
+                    errno = 0;
+
+                    double_val = strtol(data_list[i], &endptr, 10);
+
+                    // check conversion error
+                    if (endptr == data_list[i] || *endptr != '\0' || isinf(data_list[i]) || isnan(data_list[i]) || errno == ERANGE) {
+                        fprintf(stderr, "Execution error: invalid value '%s' for column '%s' type DOUBLE.\n", data_list[i], col_list[i]);
+                        free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
+                        return;
+                    }
+
+                    // expand temp list and store validated value
+                    double_list_to_insert = (double*)realloc(double_list_to_insert, sizeof(double) * (double_item_count+1));
+                    assert(double_list_to_insert!=NULL);
+                    double_list_to_insert[double_item_count] = (double)double_val;
+
+                    double_item_count++;
                     break;
                 case STRING:
                     // no need to convert type, data_list is stored as string
                     // check pk case
                     if(current_col->type == PK){
-                        // TODO
+                        if(!is_unique_str(table, col_list[i], data_list[i])) {
+                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
+                            return;
+                        }
                     }
 
                     // expand temp list and store validated value
-                    str_list_to_insert = (char*)realloc(str_list_to_insert, sizeof(char) * (strlen(data_field)+1));
+                    str_list_to_insert = (char*)realloc(str_list_to_insert, sizeof(char) * (strlen(data_list[i])+1));
                     assert(str_list_to_insert!=NULL);
-                    str_list_to_insert[str_item_count] = data_field;
+                    str_list_to_insert[str_item_count] = data_list[i];
                     
                     str_item_count++;
                     break;
                 default:
-                    fprintf(stderr, "Execution error: unknown type for column '%s'.\n", col_name);
+                    fprintf(stderr, "Execution error: unknown type for column '%s'.\n", col_list[i]);
                     break;
                 }
 
@@ -123,7 +156,8 @@ void insert(Query* query){
         }
 
         if(!col_exist){
-            fprintf(stderr, "Column '%s' not found.\n", col_name);
+            fprintf(stderr, "Column '%s' not found.\n", col_list[i]);
+            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
             return;
         }
     
