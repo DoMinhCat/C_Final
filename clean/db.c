@@ -26,17 +26,21 @@ void free_col(Col* col){
 
 void free_row(Row* row, int col_count){
     if (!row) return;
-
     int i;
     
-    if (row->data_field) {
-        for(i=0; i<col_count; i++){
-            free(row->data_field[i]);
-            row->data_field[i] = NULL;
-        }
-        free(row->data_field);
-        row->data_field = NULL;
+    if (row->int_field) {
+        free(row->int_field);
+        row->int_field = NULL;
     }
+    if (row->str_field) {
+        free(row->str_field);
+        row->str_field = NULL;
+    }
+    if (row->double_field) {
+        free(row->double_field);
+        row->double_field = NULL;
+    }
+
     free(row);
     row = NULL;
 }
