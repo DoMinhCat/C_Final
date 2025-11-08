@@ -25,10 +25,9 @@ HashTable* init_hash_table(){
     
     hash_tab->pk_col_name = NULL;
 
-    // init each bucket
+    // init each bucket, we will have bucket[0-66] = NULL, can be safely accessed and allocated later
     for(int i=0; i<HASH_TABLE_SIZE; i++){
         hash_tab->bucket[i] = NULL;
-        // add buckets as rows are inserted
     }
     return hash_tab;
 }

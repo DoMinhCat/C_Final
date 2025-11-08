@@ -8,10 +8,12 @@ Group 2 ESGI 2A3
 #include <stdio.h>
 #include <errno.h>
 #include <assert.h>
+#include <string.h>
 
 #include "db.h"
 #include "helper_db.h"
 #include "../ui/parser.h"
+#include "../hash/hash.h"
 
 void free_insert_before_exit(int** int_list_to_insert, char*** str_list_to_insert, double** double_list_to_insert, int str_item_count){
     free(*int_list_to_insert);
@@ -34,6 +36,8 @@ void insert(Query* query){
     Table* table = NULL;
     //ColType* type_list = NULL; //(ColType*)malloc(sizeof(ColType) * col_count); // IMPORTANT: free at early return
     Col* current_col = table->first_col;
+    HashTable* hash_tab = NULL;
+    Node* current_hash_node = NULL;
     bool col_exist;
 
     // list storing validated field for insert later
@@ -43,8 +47,9 @@ void insert(Query* query){
     int int_item_count = 0;
     int str_item_count = 0;
     int double_item_count = 0;
+    int sscanf_check = 0;
 
-    int i,j;
+    int i,j,k;
 
     // check table exist
     table = get_table_by_name(query->params.insert_params.table_name);
@@ -52,6 +57,7 @@ void insert(Query* query){
         fprintf(stderr, "Execution error: table '%s' not found.\n", query->params.insert_params.table_name);
         return;
     }
+    hash_tab = table->hash_table;
 
     // checks for cols to insert
     for(i=0; i<col_count; i++){
@@ -64,14 +70,14 @@ void insert(Query* query){
             if (strcmp(current_col->name, col_list[i]) == 0) {
                 col_exist = true;
                 
-                // found col, check type col same with data type
+                // found col, do checks based on data type of col
                 switch (current_col->type)
                 {
                 case INT:
                     char* endptr;
                     long int_val;
                     errno = 0;
-
+                    // convert to int to do checks, and to check if input is the good type
                     int_val = strtol(data_list[i], &endptr, 10);
 
                     // check conversion error
@@ -80,20 +86,55 @@ void insert(Query* query){
                         free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
                         return;
                     }
-
                     // check overflow for type int
-                    if (data_list[i] > INT_MAX || data_list[i] < INT_MIN || errno == ERANGE) {
+                    if (int_val > INT_MAX || int_val < INT_MIN || errno == ERANGE) {
                         printf("Execution error: incompatible size of value '%s' for type INT.\n");
                         free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
                         return; 
                     }
 
+                    // check fk case
+                    if(current_col->constraint == FK && int_val<=0){
+                        fprintf(stderr, "Execution error: FOREIGN KEY values must be 1 or larger.\n");
+                        return;
+
+                        //TODO check referential integrity: value to insert exist on the referenced col
+                    }
+                        
                     // check uniqueness constraint UNIQUE
                     if(current_col->constraint == UNIQUE){
-                        if(!is_unique_int(table, col_list[i], data_list[i])) {
+                        if(!is_unique_int(table, col_list[i], int_val)) {
                             free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
                             return;
                         }
+                    }
+
+                    // check pk case
+                    if(current_col->constraint == PK){
+                        // 0 and negative not allowed
+                        if(int_val<=0){
+                            fprintf(stderr, "Execution error: PRIMARY KEY values must be 1 or larger.\n");
+                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
+                            return;
+                        }
+                        //hash and check uniqueness with hash table
+                        int hashed_int = hash_int(int_val); // this is the key 0-66
+                        int int_val_db;
+                        sscanf_check = 0;
+
+                        // bucket null => no duplicate value, no need to check 
+                        if(hash_tab->bucket[hashed_int] != NULL){
+                            for(current_hash_node = hash_tab->bucket[hashed_int]; current_hash_node!=NULL; current_hash_node=current_hash_node->next_node){
+                                // convert back to int before cmp, no need strol because we are sure it is int converted to string when inserted and passed earlier checks
+                                sscanf_check = sscanf(current_hash_node->original_value, "%d", &int_val_db); 
+                                if(int_val_db == int_val){
+                                    fprintf(stderr, "Execution error: PRIMARY KEY constraint violated on column '%s'.\n",col_list[i]);
+                                    free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
+                                    return;
+                                }
+                            }
+                        }
+
                     }
 
                     // expand temp list and store validated value
@@ -117,7 +158,7 @@ void insert(Query* query){
                         return;
                     }
 
-                    // no check for unique needed, double type not allowed to have unique or pk constraint
+                    // no check for unique/pk needed, double type not allowed to have unique or pk constraint
 
                     // expand temp list and store validated value
                     double_list_to_insert = (double*)realloc(double_list_to_insert, sizeof(double) * (double_item_count+1));
@@ -128,12 +169,25 @@ void insert(Query* query){
                     break;
                 case STRING:
                     // no need to convert type, data_list is stored as string
-                    // check pk case
+
+                    // empty value not allowed
+                    if(strcmp(data_list[i], "") == 0 || !data_list[i]){
+                        fprintf(stderr, "Execution error: empty string not allowed.\n");
+                        free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
+                        return;
+                    }
+
+                    // check UNIQUE constraint
                     if(current_col->constraint == UNIQUE){
                         if(!is_unique_str(table, col_list[i], data_list[i])) {
                             free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
                             return;
                         }
+                    }
+                    
+                    // check pk case
+                    if(current_col->constraint == PK){
+                        // TODO: hash and check unique
                     }
 
                     // expand temp list and store validated value

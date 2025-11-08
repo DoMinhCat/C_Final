@@ -15,14 +15,15 @@ Projet final de C à ESGI
 - Insert: values will be inserted in the order of which columns are created and all columns must be inserted (can't insert only 4 values into a table with 5 columns)
 - Operators AND and OR are not available yet
 - Tables can't be altered one created, altering must be done through deleting the table, recreate it and manually reinsert all data :)
-- NOT NULL and UNIQUE constraint are not available yet
+- NOT NULL constraint is not available yet
 - Only one primary key is allowed for each table => relation many-many not available
-- Primary key must be of type int or string
+- Primary key must be of type int or string, can't be negative if is int
 - The order of tables passed for DROP matters (foreign key constraint)
 - "exit" or "quit" to exit the program
 
-- Max col per table = 50
-- Max table = 50
+- Max col per table = 50 TODO
+- Max table = 200 TODO
+- Max length for str values 257 (\0 counted) TODO
 - Max chars for table/col name = 100
 
 5. Usage
@@ -45,7 +46,9 @@ Commands to test:
 CREATE TABLE team ( id int pk, name string unique, score double )
 CREATE TABLE player ( id int pk, name string, age int, weight double, team_id int fk references team id )
 
-Ideas
+Ideas:
+default
+
 NOTE for below: no need to utilise skipped gap, let next_id be the next one of that user inserted
 
 - Auto increment for int pk (

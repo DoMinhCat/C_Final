@@ -6,7 +6,7 @@ Group 2 ESGI 2A3
 
 #ifndef DB_H
 #define DB_H
-#define MAX_TABLE_COUNT 50
+#define MAX_TABLE_COUNT 200
 
 #include <stdbool.h>
 
