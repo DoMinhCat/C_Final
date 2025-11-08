@@ -20,7 +20,7 @@ Table* init_table(){
     table->first_col = init_col();
     table->next_table = NULL;
     table->col_count = 0;
-    table->hash_table = NULL;
+    table->first_hash_table = NULL;
     table->next_id = 1;
 
     return table;

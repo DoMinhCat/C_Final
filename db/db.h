@@ -38,7 +38,7 @@ typedef struct Table{
     char *name;
     Row *first_row;
     Col *first_col; 
-    HashTable* hash_table; // pointer to the hash table of this table
+    HashTable* first_hash_table; // linked list of hash tables of this table
     int next_id;
 
     int col_count; // to free row and col

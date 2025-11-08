@@ -255,8 +255,8 @@ void create_table(Query* query){
     // init hash table
     HashTable* hash_table = init_hash_table();
 
-    hash_table->pk_col_name = strdup(pk_col_name);
-    assert(hash_table->pk_col_name != NULL);
+    hash_table->col_name = strdup(pk_col_name);
+    assert(hash_table->col_name != NULL);
     // add buckets as rows are inserted, there are 67 NULL buckets reserved
 
     // set hash table of this table
