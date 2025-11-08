@@ -47,6 +47,8 @@ typedef struct Query Query;
 // prototypes
 void create_table(Query* query);
 void drop_table(Query* query);
+void insert(Query* query);
+
 void describe_table(Query* query);
 void show(Query* query);
 #endif
