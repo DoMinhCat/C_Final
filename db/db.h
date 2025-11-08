@@ -17,7 +17,7 @@ typedef struct HashTable HashTable;
 // struct
 typedef struct Row{
     int* int_list;
-    char* str_list;
+    char** str_list;
     double* double_list;
 
     struct Row *next_row;

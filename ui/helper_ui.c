@@ -127,7 +127,9 @@ bool exceed_max_len(char* token, Query** query, int max_len, char* current_str){
 
 bool is_valid_identifier(char* token, Query** query){
     // check that value doesn't match reserved key word
-    char* banned_name_list[] = {"SELECT", "INSERT", "VALUES", "DROP", "DELETE", "TABLE", "FROM", "INTO", "WHERE", "JOIN", "ON", "INT", "STRING", "DOUBLE"};
+    char* banned_name_list[] = {
+        "SELECT", "INSERT", "VALUES", "DROP", "DELETE", "TABLE", "SHOW", "DESCRIBE", "TABLES", "PK", "FK", "UNIQUE", 
+        "FROM", "INTO", "WHERE", "JOIN", "ON", "INT", "STRING", "DOUBLE"};
     int i;
 
     for(i=0; i<sizeof(banned_name_list) / sizeof(banned_name_list[0]); i++){

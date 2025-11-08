@@ -51,11 +51,11 @@ void create_table(Query* query){
         }
     }
 
-    //check 1 pk
     int pk_count = 0;
     int pk_index;
     char* pk_col_name = NULL; // to set in hash table later
-
+    
+    //check 1 pk and check UNIQUE on DOUBLE not allowed
     for(i=0; i<col_count; i++){
         if(constraint_list[i] == PK){ 
             // free before strdup in case 2 pk
@@ -73,6 +73,9 @@ void create_table(Query* query){
                 pk_col_name = NULL;
                 return;
             }
+        } else if(constraint_list[i] == UNIQUE && type_list[i] == DOUBLE){
+            fprintf(stderr, "Execution error: UNIQUE constraint not allowed for type DOUBLE.\n");
+            return;
         }
     }
     if(pk_count != 1){

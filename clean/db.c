@@ -28,17 +28,17 @@ void free_row(Row* row, int col_count){
     if (!row) return;
     int i;
     
-    if (row->int_field) {
-        free(row->int_field);
-        row->int_field = NULL;
+    if (row->int_list) {
+        free(row->int_list);
+        row->int_list = NULL;
     }
-    if (row->str_field) {
-        free(row->str_field);
-        row->str_field = NULL;
+    if (row->str_list) {
+        free(row->str_list);
+        row->str_list = NULL;
     }
-    if (row->double_field) {
-        free(row->double_field);
-        row->double_field = NULL;
+    if (row->double_list) {
+        free(row->double_list);
+        row->double_list = NULL;
     }
 
     free(row);

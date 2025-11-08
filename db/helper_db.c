@@ -90,7 +90,7 @@ Col* get_last_col(Col* first_col){
     return current_col;
 }
 
-Table* get_table_by_name(const char* table_name) {
+Table* get_table_by_name(char* table_name) {
     // this func return pointer to the table having input name
     Table* current = first_table;
 
@@ -103,7 +103,7 @@ Table* get_table_by_name(const char* table_name) {
     return NULL;
 }
 
-Col* get_col_by_name(Table* table, const char* col_name) {
+Col* get_col_by_name(Table* table, char* col_name) {
     // return pointer to column with input name of a given table
     Col* current = table->first_col;
     
@@ -170,7 +170,7 @@ int compare_double(double val1, double val2){
 bool is_unique_int(Table* table, char* col_name, int value_to_check){
     // check uniqueness of int value of a col
     Row* current = NULL;
-    int col_index = get_col_index(table, col_name);
+    int col_index = get_data_list_index(table, col_name);
 
     // safe guard, but not likely to happen
     if(col_index == -1) {
@@ -191,7 +191,7 @@ bool is_unique_int(Table* table, char* col_name, int value_to_check){
 bool is_unique_str(Table* table, char* col_name, char* value_to_check){
     // check uniqueness of str value of a col
     Row* current = NULL;
-    int col_index = get_col_index(table, col_name);
+    int col_index = get_data_list_index(table, col_name);
 
     if(col_index == -1) {
         fprintf(stderr, "Execution error: column '%s' not found.\n", col_name);

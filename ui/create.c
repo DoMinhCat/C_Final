@@ -132,7 +132,15 @@ void parse_create(Query** query){
         assert((*query)->params.create_params.constraint_list != NULL);
 
         if(col_constraint){
-            if (strcasecmp(col_constraint, "PK") == 0){
+            if(strcasecmp(col_constraint, "UNIQUE") == 0){
+                (*query)->params.create_params.constraint_list[(*query)->params.create_params.col_count - 1] = UNIQUE;
+                token = strtok_r(NULL, " \t", &saveptr2);
+                if(token){
+                    sprintf(err_msg, "constraint declaration of column '%s'", (*query)->params.create_params.col_list[(*query)->params.create_params.col_count - 1]);
+                    check_end_of_cmd(token, query, err_msg);
+                }
+            }
+            else if (strcasecmp(col_constraint, "PK") == 0){
                 (*query)->params.create_params.constraint_list[(*query)->params.create_params.col_count - 1] = PK;
                 token = strtok_r(NULL, " \t", &saveptr2);
                 if(token){

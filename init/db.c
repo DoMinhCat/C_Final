@@ -44,9 +44,9 @@ Row* init_row(){
     Row* row = NULL;
     assert((row = (Row*)malloc(sizeof(Row))) != NULL);
 
-    row->int_field = NULL;
-    row->str_field = NULL;
-    row->double_field = NULL;
+    row->int_list = NULL;
+    row->str_list = NULL;
+    row->double_list = NULL;
 
     row->next_row = NULL;    
 

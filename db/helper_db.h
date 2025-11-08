@@ -23,7 +23,7 @@ bool col_exists(Table* table, char* col_name);
 bool is_unique_str(Table* table, char* col_name, char* value_to_check);
 bool is_unique_int(Table* table, char* col_name, int value_to_check);
 
-Table* get_table_by_name(const char* table_name);
-Col* get_col_by_name(Table* table, const char* col_name);
+Table* get_table_by_name(char* table_name);
+Col* get_col_by_name(Table* table, char* col_name);
 
 #endif
