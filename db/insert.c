@@ -22,7 +22,7 @@ void insert(Query* query){
     char* tb_name = query->params.insert_params.table_name;
 
     Table* table = get_table_by_name(tb_name);
-    ColType* type_list = NULL; //(ColType*)malloc(sizeof(ColType) * col_count); // TODO: free at early return
+    //ColType* type_list = NULL; //(ColType*)malloc(sizeof(ColType) * col_count); // IMPORTANT: free at early return
     ColType type;
     Col* current_col = table->first_col;
     bool col_exist;
@@ -43,7 +43,7 @@ void insert(Query* query){
     // checks for cols to insert
     for(i=0; i<col_count; i++){
         col_name = col_list[i];
-        data_field = strdup(data_list[i]); // TODO : free at exit
+        data_field = strdup(data_list[i]); // IMPORTANT : free at exit
         assert(data_field!=NULL);
 
         // Loop through cols of table

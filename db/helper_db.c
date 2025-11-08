@@ -8,6 +8,8 @@ Group 2 ESGI 2A3
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <float.h>
+#include <math.h>
 
 #include "helper_db.h"
 #include "../ui/parser.h"
@@ -112,4 +114,115 @@ Col* get_col_by_name(Table* table, const char* col_name) {
         current = current->next_col;
     }
     return NULL;
+}
+
+int get_data_list_index(Table* table, char* col_name){
+    // get the index of data list of Row, use this to access to data field of row (same as SELECT col1)
+    /* ex: 
+    col1 int, col2 str, col3 str, col4 int
+        0                            1
+    get_data_list_index(table, "col4") -> 1 (col4 is INT so col4 is has index 1 for INT col)
+    */
+    Col* current = table->first_col;
+    int i_int = -1;
+    int i_str = -1;
+    int i_double = -1;
+    
+    while (current != NULL) {
+        if(current->type == INT) i_int++;
+        else if(current->type == DOUBLE) i_double++;
+        else if(current->type == STRING) i_str++;
+
+        if (strcmp(current->name, col_name) == 0) {
+            switch(current->type) {
+            case INT:
+                return i_int;
+                break;
+            case STRING:
+                return i_str;
+                break;
+            case DOUBLE:
+                return i_double;
+                break;
+            default:
+                return -1; // not gonna happen tho, all col type is INT/STR/DOUBLE
+                break;
+            }
+        }
+        current = current->next_col;
+    }
+    return -1; // if col not found
+}
+
+int compare_double(double val1, double val2){
+    //safely compare double
+    // return 0 if val1=val2
+    // return 1 if val1>val2
+    // return -1 if val1<val2
+    double epsilon = DBL_EPSILON * 10.0;
+
+    if (fabs(val1 - val2) <= epsilon) return 0;
+    else if(val1<val2) return -1;
+    else return 1;
+}
+
+bool is_unique_int(Table* table, char* col_name, int value_to_check){
+    // check uniqueness of int value of a col
+    Row* current = NULL;
+    int col_index = get_col_index(table, col_name);
+
+    // safe guard, but not likely to happen
+    if(col_index == -1) {
+        fprintf(stderr, "Execution error: column '%s' not found.\n", col_name);
+        return false;
+    }
+
+    //loop rows of tables and compare value
+    for(current = table->first_row; current!=NULL; current = current->next_row){
+        if(value_to_check == current->int_list[col_index]){
+            fprintf(stderr, "Execution error: unique constraint violated on column '%s'.\n", col_name);  
+            return false;  
+        }
+    }
+    return true;
+}
+
+bool is_unique_double(Table* table, char* col_name, double value_to_check){
+    // check uniqueness of double value of a col
+    Row* current = NULL;
+    int col_index = get_col_index(table, col_name);
+
+    if(col_index == -1) {
+        fprintf(stderr, "Execution error: column '%s' not found.\n", col_name);
+        return false;
+    }
+
+    //loop rows of tables and compare value
+    for(current = table->first_row; current!=NULL; current = current->next_row){
+        if(compare_double(value_to_check, current->double_list[col_index]) == 0 ){
+            fprintf(stderr, "Execution error: unique constraint violated on column '%s'.\n", col_name);  
+            return false;  
+        }
+    }
+    return true;
+}
+
+bool is_unique_str(Table* table, char* col_name, char* value_to_check){
+    // check uniqueness of str value of a col
+    Row* current = NULL;
+    int col_index = get_col_index(table, col_name);
+
+    if(col_index == -1) {
+        fprintf(stderr, "Execution error: column '%s' not found.\n", col_name);
+        return false;
+    }
+
+    //loop rows of tables and compare value
+    for(current = table->first_row; current!=NULL; current = current->next_row){
+        if(strcmp(value_to_check, current->str_list[col_index]) == 0 ){
+            fprintf(stderr, "Execution error: unique constraint violated on column '%s'.\n", col_name);  
+            return false;  
+        }
+    }
+    return true;
 }
