@@ -8,7 +8,6 @@ Group 2 ESGI 2A3
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
-#include <stdbool.h>
 
 #include "db.h"
 #include "helper_db.h"
