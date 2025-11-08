@@ -29,6 +29,5 @@ typedef struct HashTable{
 
 unsigned int hash_int(int);
 unsigned int hash_string(char*);
-unsigned int hash_all(ColType, void*);
 
 #endif
