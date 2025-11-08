@@ -91,6 +91,16 @@ Col* get_last_col(Col* first_col){
     return current_col;
 }
 
+HashTable* get_last_hash_table(HashTable* first_ht){
+    // this function assumes there are at least 1 hash table already
+    HashTable* current_ht = first_ht;
+    
+    while(current_ht->next_hash_table){
+        current_ht = current_ht->next_hash_table;
+    }
+    return current_ht;
+}
+
 Table* get_table_by_name(char* table_name) {
     // this func return pointer to the table having input name
     Table* current = first_table;

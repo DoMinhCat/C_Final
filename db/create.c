@@ -210,7 +210,7 @@ void create_table(Query* query){
     assert(new_tb->name != NULL);
 
     // add col
-    Col* current_col;
+    Col* current_col = NULL;
     int refer_list_index=0;
     // loop through the col list and add them in the linked list
     for(i=0; i<col_count; i++){
@@ -234,8 +234,7 @@ void create_table(Query* query){
         // set pointer to next col
         if (new_tb->first_col == NULL || new_tb->first_col->name == NULL) {
             // free the dummy if it exists
-            if (new_tb->first_col && new_tb->first_col->name == NULL)
-                free_col(new_tb->first_col);
+            if (new_tb->first_col && new_tb->first_col->name == NULL) free_col(new_tb->first_col);
             new_tb->first_col = new_col;
         } else {
             // append to the end
@@ -245,22 +244,34 @@ void create_table(Query* query){
     }
     new_tb->col_count = col_count;
 
+    HashTable* new_hash_table = NULL;
+    HashTable* current_ht = NULL;
+    // loop through col list and init hash table for unique cols
+    for(i=0; i<col_count; i++){
+        if(constraint_list[i] == UNIQUE || constraint_list[i] == PK){
+            new_hash_table = init_hash_table();
+            // set col name of hash table
+            assert((new_hash_table->col_name = strdup(col_list[i])) != NULL);
+            
+            // set pointer
+            if (new_tb->first_hash_table == NULL || new_tb->first_hash_table->col_name == NULL) {
+                // free the dummy if it exists
+                if (new_tb->first_hash_table && new_tb->first_hash_table->col_name == NULL) free_hash_table(new_tb->first_hash_table);
+                new_tb->first_hash_table = new_hash_table;
+            } else {
+                // append to the end
+                current_ht = get_last_hash_table(new_tb->first_hash_table);
+                current_ht->next_hash_table = new_hash_table;
+            }
+        }
+    }
+
     // add table to the linked list
     if(!first_table) first_table = new_tb;
     else{
         current_table = get_last_table(first_table);
         current_table->next_table = new_tb;
     }
-    
-    // init hash table
-    HashTable* hash_table = init_hash_table();
-
-    hash_table->col_name = strdup(pk_col_name);
-    assert(hash_table->col_name != NULL);
-    // add buckets as rows are inserted, there are 67 NULL buckets reserved
-
-    // set hash table of this table
-    new_tb->hash_table = hash_table;
 
     // prints success message
     fprintf(stdout, "table '%s' created successfuly with %d column(s).\n", new_tb_name, col_count);

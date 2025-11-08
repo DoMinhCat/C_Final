@@ -55,7 +55,7 @@ void insert(Query* query){
         fprintf(stderr, "Execution error: table '%s' not found.\n", query->params.insert_params.table_name);
         return;
     }
-    hash_tab = table->hash_table;
+    hash_tab = table->first_hash_table;
 
     // checks for cols to insert
     for(i=0; i<col_count; i++){
@@ -207,6 +207,7 @@ void insert(Query* query){
     //TODO : set id, check id, auto increment (see ideas in README)
     // TODO : hash id then add to hash table of this table
     // TODO : cast data fields to its correct type and add to row
+    // TODO : also hash unique col and add to corresponding hash table
 
 
 }

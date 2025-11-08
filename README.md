@@ -47,7 +47,7 @@ CREATE TABLE team ( id int pk, name string unique, score double )
 CREATE TABLE player ( id int pk, name string, age int, weight double, team_id int fk references team id )
 
 Ideas:
-default
+default, auto increment
 
 NOTE for below: no need to utilise skipped gap, let next_id be the next one of that user inserted
 
@@ -65,3 +65,5 @@ NOTE for below: no need to utilise skipped gap, let next_id be the next one of t
         - if unique
           - save to a var to insert later since still checking other cols and other criterias, insert operation is after all checks
           - check next_id != id to insert, if same then next_id++)
+
+IMPORTANT : replace first dummy node of col, row, first hash table
