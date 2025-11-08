@@ -15,6 +15,7 @@ Group 2 ESGI 2A3
 #include "../ui/parser.h"
 #include "db.h"
 #include "../global_var.h"
+#include "../hash/hash.h"
 
 bool table_exists(char* table_name){
     // check for table existence, print error if not.
@@ -206,4 +207,63 @@ bool is_unique_str(Table* table, char* col_name, char* value_to_check){
         }
     }
     return true;
+}
+
+bool pk_val_is_valid(char* str_to_check, int val_to_check, HashTable* hash_tab, ColType type){
+    // this func check if the value to be inserted for pk col is valid or not
+    int sscanf_check = 0;
+    int hashed_int;
+    Node* current_hash_node = NULL;
+
+    switch (type)
+    {
+    case INT:
+        // 0 and negative not allowed
+        if(val_to_check<=0){
+            fprintf(stderr, "Execution error: PRIMARY KEY values must be 1 or larger.\n");
+            return false;
+        }
+        //hash and check uniqueness with hash table
+        hashed_int = hash_int(val_to_check); // this is the key 0-66
+        int val_db;
+
+        // bucket null => no duplicate value, no need to check 
+        if(hash_tab->bucket[hashed_int] != NULL){
+            for(current_hash_node = hash_tab->bucket[hashed_int]; current_hash_node!=NULL; current_hash_node=current_hash_node->next_node){
+                // convert back to int before cmp, no need strol because we are sure it is int converted to string when inserted and passed earlier checks
+                sscanf_check = sscanf(current_hash_node->original_value, "%d", &val_db); 
+                if(sscanf_check != 1){
+                    fprintf(stderr, "Execution error: an error occured while hashing.\n");
+                    return false;
+                }
+                if(val_db == val_to_check){
+                    fprintf(stderr, "Execution error: PRIMARY KEY constraint violated on column.\n");
+                    return false;
+                }
+            }
+        }
+        //all checks passed
+        return true;
+        break;
+
+    case STRING:
+        //hash and check uniqueness with hash table
+        hashed_int = hash_string(str_to_check); // this is the key 0-66
+
+        // bucket null => no duplicate value, no need to check 
+        if(hash_tab->bucket[hashed_int] != NULL){
+            for(current_hash_node = hash_tab->bucket[hashed_int]; current_hash_node!=NULL; current_hash_node=current_hash_node->next_node){
+                if(strcmp(current_hash_node->original_value, str_to_check) == 0){
+                    fprintf(stderr, "Execution error: PRIMARY KEY constraint violated on column.\n");
+                    return false;
+                }
+            }
+        }
+        //all checks passed
+        return true;
+        break;
+    default:
+        return false;
+        break;
+    }
 }

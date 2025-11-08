@@ -37,7 +37,6 @@ void insert(Query* query){
     //ColType* type_list = NULL; //(ColType*)malloc(sizeof(ColType) * col_count); // IMPORTANT: free at early return
     Col* current_col = table->first_col;
     HashTable* hash_tab = NULL;
-    Node* current_hash_node = NULL;
     bool col_exist;
 
     // list storing validated field for insert later
@@ -47,7 +46,6 @@ void insert(Query* query){
     int int_item_count = 0;
     int str_item_count = 0;
     int double_item_count = 0;
-    int sscanf_check = 0;
 
     int i,j,k;
 
@@ -111,30 +109,7 @@ void insert(Query* query){
 
                     // check pk case
                     if(current_col->constraint == PK){
-                        // 0 and negative not allowed
-                        if(int_val<=0){
-                            fprintf(stderr, "Execution error: PRIMARY KEY values must be 1 or larger.\n");
-                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
-                            return;
-                        }
-                        //hash and check uniqueness with hash table
-                        int hashed_int = hash_int(int_val); // this is the key 0-66
-                        int int_val_db;
-                        sscanf_check = 0;
-
-                        // bucket null => no duplicate value, no need to check 
-                        if(hash_tab->bucket[hashed_int] != NULL){
-                            for(current_hash_node = hash_tab->bucket[hashed_int]; current_hash_node!=NULL; current_hash_node=current_hash_node->next_node){
-                                // convert back to int before cmp, no need strol because we are sure it is int converted to string when inserted and passed earlier checks
-                                sscanf_check = sscanf(current_hash_node->original_value, "%d", &int_val_db); 
-                                if(int_val_db == int_val){
-                                    fprintf(stderr, "Execution error: PRIMARY KEY constraint violated on column '%s'.\n",col_list[i]);
-                                    free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
-                                    return;
-                                }
-                            }
-                        }
-
+                        if(!pk_val_is_valid(NULL,(int)int_val, hash_tab, INT)) return;
                     }
 
                     // expand temp list and store validated value
@@ -187,7 +162,7 @@ void insert(Query* query){
                     
                     // check pk case
                     if(current_col->constraint == PK){
-                        // TODO: hash and check unique
+                        if(!pk_val_is_valid(data_list[i], NULL, hash_tab, STRING)) return;
                     }
 
                     // expand temp list and store validated value

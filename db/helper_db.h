@@ -16,14 +16,18 @@ int* get_fk_col_list_index(Query* query);
 Col* get_last_col(Col* first_col);
 Table* get_last_table(Table* first_table);
 int get_data_list_index(Table* table, char* col_name);
-int compare_double(double val1, double val2);
+Table* get_table_by_name(char* table_name);
+Col* get_col_by_name(Table* table, char* col_name);
 
+//int compare_double(double val1, double val2); not sure needed or not, just leave here
+
+// check functions
 bool table_exists(char* table_name);
 bool col_exists(Table* table, char* col_name);
 bool is_unique_str(Table* table, char* col_name, char* value_to_check);
 bool is_unique_int(Table* table, char* col_name, int value_to_check);
+bool pk_val_is_valid(char* str_to_check, int val_to_check, HashTable* hash_tab, ColType type);
 
-Table* get_table_by_name(char* table_name);
-Col* get_col_by_name(Table* table, char* col_name);
+
 
 #endif
