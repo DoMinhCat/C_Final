@@ -15,7 +15,9 @@ typedef struct Row Row;
 //linked list of nodes in a bucket
 typedef struct Node{
     Row* row; //what row is store at this node
-    unsigned int key; // from 0 to 66
+
+    // the actual value before hashed/value of pk, we can access to it by accessing to row above but will be complicated, so store it here for fast access
+    char* original_value; // actual value can be int/str but converted upon inserting, need to convert back to original type to cmp
 
     struct Node* next_node; 
 } Node;
