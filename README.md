@@ -47,5 +47,19 @@ CREATE TABLE team ( id int pk, name string, score double )
 CREATE TABLE user ( id int pk, name string, age int, weight double, team_id int fk references team id )
 
 Ideas
+NOTE for below: no need to utilise skipped gap, let next_id be the next one of that user inserted
 
-- Auto increment for int pk
+- Auto increment for int pk (
+  - add "next_id" field for struct Table
+  - if insert without pk col
+    - if pk not int, return err obligate value for pk
+    - if pk is int: loop while infinity, check next_id is unique in pk col by hash it and look up at hash table, loop through linked list of the bucket and compare with id fields of Row of that bucket
+      - if unique, set pk field = next_id, then next_id++ if pk, flag=true to break out of loop
+      - if no, next_id++, then check again
+  - if insert with pk col,
+    - if pk is int
+      - check id to insert is unique by looping infinity : hash then lookup at hash table like above
+        - if no, return error
+        - if unique
+          - save to a var to insert later since still checking other cols and other criterias, insert operation is after all checks
+          - check next_id != id to insert, if same then next_id++)

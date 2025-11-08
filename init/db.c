@@ -21,6 +21,7 @@ Table* init_table(){
     table->next_table = NULL;
     table->col_count = 0;
     table->hash_table = NULL;
+    table->next_id = 1;
 
     return table;
 }

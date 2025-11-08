@@ -15,8 +15,16 @@ Group 2 ESGI 2A3
 #include "../global_var.h"
 
 bool table_exists(char* table_name){
+    // check for table existence, print error if not.
+    // ex: if(!table_exists(tb_name)) return;
     Table* table = get_table_by_name(table_name);
     if(!table) fprintf(stderr, "Execution error: table '%s' not found.\n", table_name);
+}
+
+bool col_exists(Table* table, char* col_name){
+    // same as table_exists above but for col
+    Col* col = get_col_by_name(table, col_name);
+    if(!col) fprintf(stderr, "Execution error: column '%s' not found.\n", col_name);
 }
 
 int* get_fk_col_list_index(Query* query){
@@ -95,8 +103,6 @@ Table* get_table_by_name(const char* table_name) {
 
 Col* get_col_by_name(Table* table, const char* col_name) {
     // return pointer to column with input name of a given table
-    if (table == NULL || col_name == NULL) return NULL;
-
     Col* current = table->first_col;
     
     while (current != NULL) {
