@@ -4,10 +4,11 @@ Description : Clean initialisation of Hash table
 Group 2 ESGI 2A3
 */
 
-#include "../hash/hash.h"
-
 #include <stdlib.h>
 #include <assert.h>
+
+#include "../hash/hash.h"
+#include "init.h"
 
 Node* init_node(){
     Node* node = NULL;

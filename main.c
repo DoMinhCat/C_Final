@@ -101,9 +101,7 @@ int main(int argc, char **argv){
             create_table(parser_output);
             break;
         case INSERT:
-            // Call insert() of db
-            
-            printf("INSERT is called\n");
+            insert(parser_output);
             break;
 
         case SELECT:

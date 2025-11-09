@@ -5,6 +5,8 @@ Group 2 ESGI 2A3
 */
 #include <stdbool.h>
 
+#include "../main.h"
+
 #ifndef HELPER_DB_H
 #define HELPER_DB_H
 

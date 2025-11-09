@@ -39,12 +39,13 @@ Projet final de C à ESGI
 6. Contributors
 
 Current quick start :
-gcc main.c ui/parser.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/select.c ui/show.c ui/describe.c ui/helper_ui.c clean/cmd.c clean/db.c init/query.c init/db.c init/hash_table.c db/create.c db/helper_db.c db/drop.c db/show.c db/describe.c global_var.c -o sb.exe
+gcc main.c ui/parser.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/select.c ui/show.c ui/describe.c ui/helper_ui.c clean/cmd.c clean/db.c init/query.c init/db.c init/hash_table.c db/create.c db/helper_db.c db/drop.c db/show.c db/insert.c db/describe.c global_var.c hash/hash.c -o sb.exe
 
 Commands to test:
 
 CREATE TABLE team ( id int pk, name string unique, score double )
 CREATE TABLE player ( id int pk, name string, age int, weight double, team_id int fk references team id )
+INSERT INTO team ( id, name, score ) values ( 2147483648, abc, 45.5s ) // id overflow for int type, 45.5s invalid for double type
 
 Ideas:
 default, auto increment

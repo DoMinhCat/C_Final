@@ -9,6 +9,7 @@ Group 2 ESGI 2A3
 #include <errno.h>
 #include <assert.h>
 #include <string.h>
+#include <math.h>
 
 #include "db.h"
 #include "helper_db.h"
@@ -55,7 +56,7 @@ void insert(Query* query){
     int double_item_count = 0;
 
     char* endptr;
-    long int_val;
+    long long int_val;
     double double_val;
     int i;
 
@@ -82,48 +83,53 @@ void insert(Query* query){
                 // found col, do checks based on data type of col
                 switch (current_col->type)
                 {
-                case INT:                    // convert to int to do checks, and to check if input is the good type
-                    int_val = strtol(data_list[i], &endptr, 10);
+                case INT:
+                    errno = 0;
+                    long long parsed_val = strtoll(data_list[i], &endptr, 10);
+                    // debug
+                    printf("DEBUG: parsed_val = %lld, errno = %d, ERANGE = %d\n", parsed_val, errno, ERANGE);
+                    printf("DEBUG: endptr check: endptr=%p, data_list[i]=%p, *endptr='%c' (0x%02x)\n", (void*)endptr, (void*)data_list[i], *endptr, (unsigned char)*endptr);
 
                     // check conversion error
                     if (endptr == data_list[i] || *endptr != '\0') {
-                        fprintf(stderr, "Execution error: invalid value '%s' for column '%s' type INT.\n", data_list[i], col_list[i]);
+                        fprintf(stderr, "Execution error: invalid value '%s' for column '%s' type INT.\n",
+                                data_list[i], col_list[i]);
                         free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
                         return;
                     }
+
                     // check overflow for type int
-                    if (int_val > INT_MAX || int_val < INT_MIN || errno == ERANGE) {
-                        fprintf(stderr, "Execution error: incompatible size of value '%s' for type INT.\n");
+                    if (errno == ERANGE || parsed_val > INT_MAX || parsed_val < INT_MIN) {
+                        fprintf(stderr, "Execution error: incompatible size of value '%s' for type INT.\n", data_list[i]);
                         free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
-                        return; 
+                        return;
                     }
 
-                    // check fk case
-                    if(current_col->constraint == FK && int_val<=0){
+                    int safe_val = (int)parsed_val;
+
+                    // FK check
+                    if (current_col->constraint == FK && safe_val <= 0) {
                         fprintf(stderr, "Execution error: FOREIGN KEY values must be 1 or larger.\n");
                         free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
                         return;
-
-                        //TODO check referential integrity: value to insert exist on the referenced col
                     }
 
-                    // check uniqueness for pk and unique case
-                    if(current_col->constraint == PK || current_col->constraint == UNIQUE){ 
+                    // Uniqueness check
+                    if (current_col->constraint == PK || current_col->constraint == UNIQUE) {
                         hash_tab_of_col = get_ht_by_col_name(first_hash_tab, current_col->name);
-                        if(!is_unique_hash(NULL,(int)int_val, hash_tab_of_col, INT)){
+                        if (!is_unique_hash(NULL, safe_val, hash_tab_of_col, INT)) {
                             free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
                             return;
-                        } 
+                        }
                     }
 
-                    // expand temp list and store validated value
-                    int_list_to_insert = (int*)realloc(int_list_to_insert, sizeof(int) * (int_item_count+1));
-                    assert(int_list_to_insert!=NULL);
-                    int_list_to_insert[int_item_count] = (int)int_val;
-
-                    int_item_count++;
+                    // Store validated value in a list to insert later
+                    int_list_to_insert = realloc(int_list_to_insert, sizeof(int) * (int_item_count + 1));
+                    assert(int_list_to_insert != NULL);
+                    int_list_to_insert[int_item_count++] = safe_val;
                     break;
                 case DOUBLE:
+                    errno = 0;
                     double_val = strtod(data_list[i], &endptr);
 
                     // check conversion error
@@ -161,7 +167,7 @@ void insert(Query* query){
                     // check UNIQUE constraint and pk uniqueness
                     if(current_col->constraint == PK || current_col->constraint == UNIQUE){ 
                         hash_tab_of_col = get_ht_by_col_name(first_hash_tab, current_col->name);
-                        if(!is_unique_hash(data_list[i], NULL, hash_tab_of_col, STRING)){
+                        if(!is_unique_hash(data_list[i], 0, hash_tab_of_col, STRING)){
                             free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
                             return;
                         }
@@ -190,10 +196,6 @@ void insert(Query* query){
             free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
             return;
         }
-    
-
-
-
     }
 
     // start inserting
