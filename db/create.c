@@ -32,6 +32,12 @@ void create_table(Query* query){
 
     int i,j,k;
 
+    // check max table
+    if(table_count>=MAX_TABLE_COUNT){
+        fprintf(stderr, "Execution error: 200 tables limit reached.\n", new_tb_name);
+        return;
+    }
+    
     // check table name
     while(current_table){
         if(strcmp(current_table->name, new_tb_name) == 0){
@@ -273,6 +279,8 @@ void create_table(Query* query){
         current_table->next_table = new_tb;
     }
 
+    // global table count
+    table_count++;
     // prints success message
     fprintf(stdout, "table '%s' created successfuly with %d column(s).\n", new_tb_name, col_count);
     free(pk_col_name);
