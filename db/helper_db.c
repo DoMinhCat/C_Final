@@ -119,10 +119,17 @@ Col* get_col_by_name(Table* table, char* col_name) {
     Col* current = table->first_col;
     
     while (current != NULL) {
-        if (strcmp(current->name, col_name) == 0) {
-            return current;
-        }
+        if (strcmp(current->name, col_name) == 0) return current;
         current = current->next_col;
+    }
+    return NULL;
+}
+
+HashTable* get_ht_by_col_name(HashTable* first_ht, char* col_name){
+    while(first_ht!=NULL){
+        if(strcmp(first_ht->col_name, col_name)==0) return first_ht;
+
+        first_ht = first_ht->next_hash_table;
     }
     return NULL;
 }
@@ -178,49 +185,8 @@ int compare_double(double val1, double val2){
     else return 1;
 }*/
 
-bool is_unique_int(Table* table, char* col_name, int value_to_check){
-    // check uniqueness of int value of a col
-    Row* current = NULL;
-    int col_index = get_data_list_index(table, col_name);
-
-    // safe guard, but not likely to happen
-    if(col_index == -1) {
-        fprintf(stderr, "Execution error: column '%s' not found.\n", col_name);
-        return false;
-    }
-
-    //loop rows of tables and compare value
-    for(current = table->first_row; current!=NULL; current = current->next_row){
-        if(value_to_check == current->int_list[col_index]){
-            fprintf(stderr, "Execution error: UNIQUE constraint violated on column '%s'.\n", col_name);  
-            return false;  
-        }
-    }
-    return true;
-}
-
-bool is_unique_str(Table* table, char* col_name, char* value_to_check){
-    // check uniqueness of str value of a col
-    Row* current = NULL;
-    int col_index = get_data_list_index(table, col_name);
-
-    if(col_index == -1) {
-        fprintf(stderr, "Execution error: column '%s' not found.\n", col_name);
-        return false;
-    }
-
-    //loop rows of tables and compare value
-    for(current = table->first_row; current!=NULL; current = current->next_row){
-        if(strcmp(value_to_check, current->str_list[col_index]) == 0 ){
-            fprintf(stderr, "Execution error: UNIQUE constraint violated on column '%s'.\n", col_name);  
-            return false;  
-        }
-    }
-    return true;
-}
-
-bool pk_val_is_valid(char* str_to_check, int val_to_check, HashTable* hash_tab, ColType type){
-    // this func check if the value to be inserted for pk col is valid or not
+bool is_unique_hash(char* str_to_check, int val_to_check, HashTable* hash_tab, ColType type){
+    // this func check uniqueness with hash table lookup, use for pk and unique cols
     int sscanf_check = 0;
     int hashed_int;
     Node* current_hash_node = NULL;
