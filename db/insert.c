@@ -160,6 +160,13 @@ void insert(Query* query){
                         }
                     }
 
+                    // check max_len 256
+                    if(strlen(data_list[i]) > MAX_STR_LEN){
+                        fprintf(stderr, "Execution error: 256 characters maximum allowed for STRING values.\n");
+                        free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
+                        return;
+                    }
+
                     //TODO check fk: referential integrity
                     if(current_col->constraint == FK){
                     }

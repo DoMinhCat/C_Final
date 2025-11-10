@@ -22,7 +22,7 @@ Projet final de C à ESGI
 - "exit" or "quit" to exit the program
 
 - Max col per table = 50
-- Max length for str values 257 (\0 counted) TODO
+- Max length for str values 256 (\0 excluded)
 - Max table = 100
 - Max chars for table/col name = 100
 - Row per table warning threshold = 10 000
