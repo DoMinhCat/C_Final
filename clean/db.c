@@ -24,19 +24,33 @@ void free_col(Col* col){
     col = NULL;
 }
 
-void free_row(Row* row, int col_count){
+void free_row(Row* row){
     if (!row) return;
     int i;
-    
+    //free int list
     if (row->int_list) {
+        for(i=0; i<row->int_count; i++){
+            free(row->int_list[i]);
+            row->int_list[i] = NULL;
+        }
         free(row->int_list);
         row->int_list = NULL;
     }
+    //free str list
     if (row->str_list) {
+        for(i=0; i<row->str_count; i++){
+            free(row->str_list[i]);
+            row->str_list[i] = NULL;
+        }
         free(row->str_list);
         row->str_list = NULL;
     }
+    //free double list
     if (row->double_list) {
+        for(i=0; i<row->double_count; i++){
+            free(row->double_list[i]);
+            row->double_list[i] = NULL;
+        }
         free(row->double_list);
         row->double_list = NULL;
     }
@@ -101,6 +115,7 @@ void free_table(Table* table){
         current_col = current_col->next_col;
         
         free_col(tmp_col);   
+        tmp_col = NULL;
     }
 
     //free row 
@@ -109,7 +124,8 @@ void free_table(Table* table){
         // save pointer to next row, then free current pointer
         current_row = current_row->next_row;
         
-        free_row(tmp_row, table->col_count);   
+        free_row(tmp_row); 
+        tmp_row = NULL;  
     }
 
     // free associated hash tables
@@ -138,5 +154,3 @@ void free_db(Table* first_table){
         tmp_table = NULL;
     }
 }
-
-// WARNING : must not free pointer to the next one

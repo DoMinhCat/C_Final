@@ -18,6 +18,7 @@ Projet final de C à ESGI
 - NOT NULL constraint is not available yet
 - Only one primary key is allowed for each table => relation many-many not available
 - Primary key and foreign key must be of type int or string, can't be 0 or negative if is int
+- Primary key type INT auto-incrementation supported
 - All foreign keys are ON DELETE RESTRICT
 - The order of tables passed for DROP matters (foreign key constraint)
 - "exit" or "quit" to exit the program
@@ -55,9 +56,7 @@ default, auto increment
 NOTE for below: no need to utilise skipped gap, let next_id be the next one of that user inserted
 
 - Auto increment for int pk (
-  - add "next_id" field for struct Table
   - if insert without pk col
-    - if pk not int, return err obligate value for pk
     - if pk is int: loop while infinity, check next_id is unique in pk col by hash it and look up at hash table, loop through linked list of the bucket and compare with id fields of Row of that bucket
       - if unique, set pk field = next_id, then next_id++ if pk, flag=true to break out of loop
       - if no, next_id++, then check again

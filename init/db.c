@@ -48,6 +48,10 @@ Row* init_row(){
     row->str_list = NULL;
     row->double_list = NULL;
 
+    row->int_count = 0;
+    row->str_count = 0;
+    row->double_count = 0;
+
     row->next_row = NULL;    
 
     return row;
