@@ -90,8 +90,8 @@ void check_where(char* token, Query** query){
 
     //check condition value of where
     token = strtok(NULL, " \t");
-    if((*query)->cmd_type == SELECT) sprintf(error_msg, "1 value is required for column '%s' in WHERE clause", (*query)->params.select_params.condition_col);
-    else if((*query)->cmd_type == DELETE) sprintf(error_msg, "1 value is required for column '%s' in WHERE clause", (*query)->params.delete_params.condition_column);
+    if((*query)->cmd_type == SELECT) sprintf(error_msg, "1 value is required for '%s' column  in WHERE clause", (*query)->params.select_params.condition_col);
+    else if((*query)->cmd_type == DELETE) sprintf(error_msg, "1 value is required for '%s' column  in WHERE clause", (*query)->params.delete_params.condition_column);
     if(!contain_param(token, query, error_msg)) return; 
     
     if((*query)->cmd_type == SELECT) {

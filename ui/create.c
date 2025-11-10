@@ -105,7 +105,7 @@ void parse_create(Query** query){
         (*query)->params.create_params.col_count++;
 
         col_type = strtok_r(NULL, " \t", &saveptr2);
-        sprintf(err_msg, "missing type for column '%s'", (*query)->params.create_params.col_list[(*query)->params.create_params.col_count - 1]);
+        sprintf(err_msg, "missing type for '%s' column ", (*query)->params.create_params.col_list[(*query)->params.create_params.col_count - 1]);
         if(!contain_param(col_type, query, err_msg)){
             free(tmp_col_def);
             return;
@@ -122,7 +122,7 @@ void parse_create(Query** query){
             (*query)->params.create_params.type_list[(*query)->params.create_params.col_count - 1] = DOUBLE;
         else {
             (*query)->cmd_type = INVALID;
-            fprintf(stderr, "Syntax error: invalid type '%s' for column '%s'.\n", col_type, (*query)->params.create_params.col_list[(*query)->params.create_params.col_count - 1]);
+            fprintf(stderr, "Syntax error: invalid type '%s' for '%s' column .\n", col_type, (*query)->params.create_params.col_list[(*query)->params.create_params.col_count - 1]);
             free(tmp_col_def);
             return;
         }
@@ -136,7 +136,7 @@ void parse_create(Query** query){
                 (*query)->params.create_params.constraint_list[(*query)->params.create_params.col_count - 1] = UNIQUE;
                 token = strtok_r(NULL, " \t", &saveptr2);
                 if(token){
-                    sprintf(err_msg, "constraint declaration of column '%s'", (*query)->params.create_params.col_list[(*query)->params.create_params.col_count - 1]);
+                    sprintf(err_msg, "constraint declaration of '%s' column ", (*query)->params.create_params.col_list[(*query)->params.create_params.col_count - 1]);
                     check_end_of_cmd(token, query, err_msg);
                 }
             }
@@ -144,7 +144,7 @@ void parse_create(Query** query){
                 (*query)->params.create_params.constraint_list[(*query)->params.create_params.col_count - 1] = PK;
                 token = strtok_r(NULL, " \t", &saveptr2);
                 if(token){
-                    sprintf(err_msg, "constraint declaration of column '%s'", (*query)->params.create_params.col_list[(*query)->params.create_params.col_count - 1]);
+                    sprintf(err_msg, "constraint declaration of '%s' column ", (*query)->params.create_params.col_list[(*query)->params.create_params.col_count - 1]);
                     check_end_of_cmd(token, query, err_msg);
                 }
             }
@@ -165,7 +165,7 @@ void parse_create(Query** query){
                 assert((*query)->params.create_params.table_refer_list[fk_count] != NULL);
 
                 token = strtok_r(NULL, " \t", &saveptr2);
-                sprintf(err_msg, "1 column is required for table '%s' in REFERNCES clause", (*query)->params.create_params.table_refer_list[fk_count]);
+                sprintf(err_msg, "1 column is required for '%s' table in REFERNCES clause", (*query)->params.create_params.table_refer_list[fk_count]);
                 if(!contain_param(token, query, err_msg)) { free(tmp_col_def); return; }
                 (*query)->params.create_params.col_refer_list = (char**)realloc((*query)->params.create_params.col_refer_list, (fk_count + 1) * sizeof(char*));
                 assert(((*query)->params.create_params.col_refer_list) != NULL);
@@ -178,7 +178,7 @@ void parse_create(Query** query){
                 if(token) check_end_of_cmd(token, query, "REFERENCES clause");
             }
             else {
-                sprintf(err_msg, "column '%s'", (*query)->params.create_params.col_list[(*query)->params.create_params.col_count - 1]);
+                sprintf(err_msg, "'%s' column ", (*query)->params.create_params.col_list[(*query)->params.create_params.col_count - 1]);
                 check_end_of_cmd(col_constraint, query, err_msg);
             }
         }

@@ -63,7 +63,7 @@ void insert(Query* query){
     // check table exist
     table = get_table_by_name(query->params.insert_params.table_name);
     if(!table) {
-        fprintf(stderr, "Execution error: table '%s' not found.\n", query->params.insert_params.table_name);
+        fprintf(stderr, "Execution error: '%s' table not found.\n", query->params.insert_params.table_name);
         return;
     }
     first_hash_tab = table->first_hash_table;
@@ -92,7 +92,7 @@ void insert(Query* query){
 
                     // check conversion error
                     if (endptr == data_list[i] || *endptr != '\0') {
-                        fprintf(stderr, "Execution error: invalid value '%s' for column '%s' type INT.\n",
+                        fprintf(stderr, "Execution error: invalid value '%s' for '%s' column  type INT.\n",
                                 data_list[i], col_list[i]);
                         free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
                         return;
@@ -140,7 +140,7 @@ void insert(Query* query){
 
                     // check conversion error
                     if (endptr == data_list[i] || *endptr != '\0' || isinf(double_val) || isnan(double_val) || errno == ERANGE) {
-                        fprintf(stderr, "Execution error: invalid value '%s' for column '%s' type DOUBLE.\n", data_list[i], col_list[i]);
+                        fprintf(stderr, "Execution error: invalid value '%s' for '%s' column  type DOUBLE.\n", data_list[i], col_list[i]);
                         free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
                         return;
                     }
@@ -199,7 +199,7 @@ void insert(Query* query){
                     str_item_count++;
                     break;
                 default:
-                    fprintf(stderr, "Execution error: unknown type for column '%s'.\n", col_list[i]);
+                    fprintf(stderr, "Execution error: unknown type for '%s' column .\n", col_list[i]);
                     free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
                     return;
                     break;
@@ -209,7 +209,7 @@ void insert(Query* query){
         }
 
         if(!col_exist){
-            fprintf(stderr, "Column '%s' not found.\n", col_list[i]);
+            fprintf(stderr, "'%s' column  not found.\n", col_list[i]);
             free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
             return;
         }

@@ -69,4 +69,4 @@ NOTE for below: no need to utilise skipped gap, let next_id be the next one of t
           - save to a var to insert later since still checking other cols and other criterias, insert operation is after all checks
           - check next_id != id to insert, if same then next_id++)
 
-IMPORTANT : replace first dummy node of col, row, first hash table
+IMPORTANT : replace first dummy node of row upon insertion
