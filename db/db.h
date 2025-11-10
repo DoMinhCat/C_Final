@@ -8,6 +8,7 @@ Group 2 ESGI 2A3
 #define DB_H
 #define MAX_TABLE_COUNT 100
 #define MAX_COL_COUNT 50
+#define WARNING_ROW_COUNT 10000
 
 #include <stdbool.h>
 

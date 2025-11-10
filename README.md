@@ -25,6 +25,7 @@ Projet final de C à ESGI
 - Max length for str values 257 (\0 counted) TODO
 - Max table = 100
 - Max chars for table/col name = 100
+- Row per table warning threshold = 10 000
 
 5. Usage
 
