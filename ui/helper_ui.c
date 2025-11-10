@@ -119,7 +119,7 @@ void check_where(char* token, Query** query){
 bool exceed_max_len(char* token, Query** query, int max_len, char* current_str){
     if (strlen(token)>max_len){
         (*query)->cmd_type = INVALID;
-        fprintf(stderr, "Syntax error: %d characters maximum allowed for %s.\n", max_len, current_str);
+        fprintf(stderr, "Syntax error: %d characters maximum allowed for %s.\n", max_len-1, current_str);
         return true;
     }
     return false;

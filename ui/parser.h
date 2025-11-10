@@ -32,7 +32,7 @@ typedef struct{
     char* table_name;
 
     char **col_list; // list of column names passed in the query
-    int col_count;          // number of columns
+    int col_count; // number of columns
 
     ColType *type_list;  // list of types corresponding order of col_list
     ColConstraintType *constraint_list; // list of constraint corresponding to order of col_list

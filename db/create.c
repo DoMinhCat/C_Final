@@ -32,9 +32,14 @@ void create_table(Query* query){
 
     int i,j,k;
 
-    // check max table
+    // check max table, if >= max then don't allow table creation
     if(table_count>=MAX_TABLE_COUNT){
-        fprintf(stderr, "Execution error: 200 tables limit reached.\n", new_tb_name);
+        fprintf(stderr, "Execution error: 200 tables limit reached.\n");
+        return;
+    }
+    // check max col
+    if(col_count>MAX_TABLE_COUNT){
+        fprintf(stderr, "Execution error: 50 columns per table limit reached.\n");
         return;
     }
     

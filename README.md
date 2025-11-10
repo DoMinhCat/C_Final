@@ -21,9 +21,9 @@ Projet final de C à ESGI
 - The order of tables passed for DROP matters (foreign key constraint)
 - "exit" or "quit" to exit the program
 
-- Max col per table = 50 TODO
-- Max table = 200 TODO
+- Max col per table = 50
 - Max length for str values 257 (\0 counted) TODO
+- Max table = 100
 - Max chars for table/col name = 100
 
 5. Usage
