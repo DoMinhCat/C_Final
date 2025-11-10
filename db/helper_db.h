@@ -15,6 +15,7 @@ typedef struct Table Table;
 typedef struct Query Query; 
 typedef struct HashTable HashTable; 
 
+// get pointer functions
 int* get_fk_col_list_index(Query* query);
 Col* get_last_col(Col* first_col);
 Table* get_last_table(Table* first_table);
@@ -29,7 +30,8 @@ HashTable* get_ht_by_col_name(HashTable* first_ht, char* col_name);
 // check functions
 bool table_exists(char* table_name);
 bool col_exists(Table* table, char* col_name);
-bool is_unique_hash(char* str_to_check, int val_to_check, HashTable* hash_tab, ColType type);
+bool is_unique_hash(char* str_to_check, int val_to_check, HashTable* hash_tab);
+bool refer_val_exists(char* str_to_check, int val_to_check, char* ref_table, char* ref_col);
 
 
 

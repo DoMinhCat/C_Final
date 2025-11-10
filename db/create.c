@@ -106,7 +106,6 @@ void create_table(Query* query){
     int fk_count = query->params.create_params.fk_count;
 
     if(fk_count>0){
-        // refer to an existing table 
         int* fk_list_index = get_fk_col_list_index(query);
         assert(fk_list_index != NULL);
         bool refer_table_exist;

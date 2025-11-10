@@ -17,7 +17,8 @@ Projet final de C à ESGI
 - Tables can't be altered one created, altering must be done through deleting the table, recreate it and manually reinsert all data :)
 - NOT NULL constraint is not available yet
 - Only one primary key is allowed for each table => relation many-many not available
-- Primary key must be of type int or string, can't be negative if is int
+- Primary key and foreign key must be of type int or string, can't be 0 or negative if is int
+- All foreign keys are ON DELETE RESTRICT
 - The order of tables passed for DROP matters (foreign key constraint)
 - "exit" or "quit" to exit the program
 

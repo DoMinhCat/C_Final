@@ -107,17 +107,23 @@ void insert(Query* query){
 
                     int safe_val = (int)parsed_val;
 
-                    // FK check
-                    if (current_col->constraint == FK && safe_val <= 0) {
-                        fprintf(stderr, "Execution error: FOREIGN KEY values must be 1 or larger.\n");
-                        free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
-                        return;
+                    // FK check referential integrity
+                    if (current_col->constraint == FK) {
+                        if(safe_val <= 0){
+                            fprintf(stderr, "Execution error: values with FOREIGN KEY constraint must be 1 or larger.\n");
+                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
+                            return;
+                        }
+                        if(!refer_val_exists(NULL, safe_val, current_col->refer_table, current_col->refer_col)){
+                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
+                            return;
+                        }
                     }
 
                     // Uniqueness check
                     if (current_col->constraint == PK || current_col->constraint == UNIQUE) {
                         hash_tab_of_col = get_ht_by_col_name(first_hash_tab, current_col->name);
-                        if (!is_unique_hash(NULL, safe_val, hash_tab_of_col, INT)) {
+                        if (!is_unique_hash(NULL, safe_val, hash_tab_of_col)) {
                             free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
                             return;
                         }
@@ -169,12 +175,16 @@ void insert(Query* query){
 
                     //TODO check fk: referential integrity
                     if(current_col->constraint == FK){
+                        if(!refer_val_exists(data_list[i], 0, current_col->refer_table, current_col->refer_col)){
+                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
+                            return;
+                        }
                     }
                   
                     // check UNIQUE constraint and pk uniqueness
                     if(current_col->constraint == PK || current_col->constraint == UNIQUE){ 
                         hash_tab_of_col = get_ht_by_col_name(first_hash_tab, current_col->name);
-                        if(!is_unique_hash(data_list[i], 0, hash_tab_of_col, STRING)){
+                        if(!is_unique_hash(data_list[i], 0, hash_tab_of_col)){
                             free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
                             return;
                         }
@@ -205,7 +215,7 @@ void insert(Query* query){
         }
     }
 
-    // start inserting
+    // start inserting after all checks passed
 
     //TODO : set id, check id, auto increment (see ideas in README)
     // TODO : hash id then add to hash table of this table
