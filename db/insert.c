@@ -232,17 +232,21 @@ void insert(Query* query){
     int int_col_count = 0;
 
     new_row = init_row();
-//TODO malloc 3 lists
+
     // get size to malloc for each type
     for(current_col=table->first_col; current_col!=NULL; current_col=current_col->next_col){
         if(current_col->type == INT) int_col_count++;
         else if(current_col->type == STRING) str_col_count++;
         else if(current_col->type == DOUBLE) double_col_count++;
     }
-    new_row->double_list = (double*)calloc(double_col_count, sizeof(double));
+    new_row->int_count = int_col_count;
+    new_row->str_count = str_col_count;
+    new_row->double_count = double_col_count;
 
-    //insert str list
-    assert((new_row->str_list = (char**)malloc(sizeof(char*) * str_item_count)) != NULL); //wrong
+    //TODO calloc 3 lists
+    new_row->double_list = (double**)calloc(double_col_count, sizeof(double*));
+    assert(new_row->double_list!=NULL);
+    for(i=0;i<double_col_count; i++) assert(new_row->double_list[i] = (double*)malloc(sizeof(double))!=NULL);
     
 
     // handle auto incrementation of int pk
