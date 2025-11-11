@@ -232,7 +232,7 @@ void create_table(Query* query){
         new_col->type = type_list[i];
         new_col->constraint = constraint_list[i];
 
-        // TODO : if col to add is fk, set table and col it refers to
+        // if col to add is fk, set table and col it refers to
         if(new_col->constraint == FK){
             new_col->refer_table = strdup(refer_table_list[refer_list_index]);
             assert(new_col->refer_table!=NULL);

@@ -31,6 +31,7 @@ typedef struct Col{
     ColType type;
     ColConstraintType constraint;
 
+    // for referential integrity check upon insert
     char* refer_table; // table that fk col references
     char* refer_col; // col of table that fk col references
 
