@@ -15,6 +15,7 @@ Group 2 ESGI 2A3
 #include "helper_db.h"
 #include "../ui/parser.h"
 #include "../hash/hash.h"
+#include "../init/init.h"
 
 void free_insert_before_exit(int** int_list_to_insert, char*** str_list_to_insert, double** double_list_to_insert, int str_item_count){
     if(*int_list_to_insert){
@@ -43,9 +44,11 @@ void insert(Query* query){
     Table* table = NULL;
     //ColType* type_list = NULL; //(ColType*)malloc(sizeof(ColType) * col_count); // IMPORTANT: free at early return
     Col* current_col = NULL;
+    Row* new_row = NULL;
     HashTable* first_hash_tab = NULL;
     HashTable* hash_tab_of_col = NULL;
     bool col_exist;
+    bool int_pk_provided = false;
 
     // list storing validated field for insert later
     int* int_list_to_insert = NULL;
@@ -56,19 +59,21 @@ void insert(Query* query){
     int double_item_count = 0;
 
     char* endptr;
-    long long int_val;
+    long long parsed_val;
     double double_val;
     int i;
+    int int_pk_val;
+    int safe_val;
 
     // check table exist
     table = get_table_by_name(query->params.insert_params.table_name);
     if(!table) {
-        fprintf(stderr, "Execution error: table '%s' not found.\n", query->params.insert_params.table_name);
+        fprintf(stderr, "Execution error: '%s' table not found.\n", query->params.insert_params.table_name);
         return;
     }
     first_hash_tab = table->first_hash_table;
 
-    // checks for cols to insert
+    // checks for cols to insert and init list for later insert
     for(i=0; i<col_count; i++){
         
         col_exist = false;
@@ -85,14 +90,14 @@ void insert(Query* query){
                 {
                 case INT:
                     errno = 0;
-                    long long parsed_val = strtoll(data_list[i], &endptr, 10);
+                    parsed_val = strtoll(data_list[i], &endptr, 10);
                     // debug
                     printf("DEBUG: parsed_val = %lld, errno = %d, ERANGE = %d\n", parsed_val, errno, ERANGE);
                     printf("DEBUG: endptr check: endptr=%p, data_list[i]=%p, *endptr='%c' (0x%02x)\n", (void*)endptr, (void*)data_list[i], *endptr, (unsigned char)*endptr);
 
                     // check conversion error
                     if (endptr == data_list[i] || *endptr != '\0') {
-                        fprintf(stderr, "Execution error: invalid value '%s' for column '%s' type INT.\n",
+                        fprintf(stderr, "Execution error: invalid value '%s' for '%s' column  type INT.\n",
                                 data_list[i], col_list[i]);
                         free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
                         return;
@@ -105,19 +110,30 @@ void insert(Query* query){
                         return;
                     }
 
-                    int safe_val = (int)parsed_val;
+                    safe_val = (int)parsed_val;
 
-                    // FK check
-                    if (current_col->constraint == FK && safe_val <= 0) {
-                        fprintf(stderr, "Execution error: FOREIGN KEY values must be 1 or larger.\n");
-                        free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
-                        return;
+                    // FK check referential integrity
+                    if (current_col->constraint == FK) {
+                        if(safe_val <= 0){
+                            fprintf(stderr, "Execution error: values with FOREIGN KEY constraint must be 1 or larger.\n");
+                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
+                            return;
+                        }
+                        if(!refer_val_exists(NULL, safe_val, current_col->refer_table, current_col->refer_col)){
+                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
+                            return;
+                        }
                     }
 
                     // Uniqueness check
                     if (current_col->constraint == PK || current_col->constraint == UNIQUE) {
+                        // flag for auto increment later
+                        if(current_col->constraint == PK){
+                            int_pk_provided = true;
+                            int_pk_val = safe_val;
+                        }
                         hash_tab_of_col = get_ht_by_col_name(first_hash_tab, current_col->name);
-                        if (!is_unique_hash(NULL, safe_val, hash_tab_of_col, INT)) {
+                        if (!is_unique_hash(NULL, safe_val, hash_tab_of_col)) {
                             free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
                             return;
                         }
@@ -134,7 +150,7 @@ void insert(Query* query){
 
                     // check conversion error
                     if (endptr == data_list[i] || *endptr != '\0' || isinf(double_val) || isnan(double_val) || errno == ERANGE) {
-                        fprintf(stderr, "Execution error: invalid value '%s' for column '%s' type DOUBLE.\n", data_list[i], col_list[i]);
+                        fprintf(stderr, "Execution error: invalid value '%s' for '%s' column  type DOUBLE.\n", data_list[i], col_list[i]);
                         free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
                         return;
                     }
@@ -169,12 +185,16 @@ void insert(Query* query){
 
                     //TODO check fk: referential integrity
                     if(current_col->constraint == FK){
+                        if(!refer_val_exists(data_list[i], 0, current_col->refer_table, current_col->refer_col)){
+                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
+                            return;
+                        }
                     }
                   
                     // check UNIQUE constraint and pk uniqueness
                     if(current_col->constraint == PK || current_col->constraint == UNIQUE){ 
                         hash_tab_of_col = get_ht_by_col_name(first_hash_tab, current_col->name);
-                        if(!is_unique_hash(data_list[i], 0, hash_tab_of_col, STRING)){
+                        if(!is_unique_hash(data_list[i], 0, hash_tab_of_col)){
                             free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
                             return;
                         }
@@ -189,7 +209,7 @@ void insert(Query* query){
                     str_item_count++;
                     break;
                 default:
-                    fprintf(stderr, "Execution error: unknown type for column '%s'.\n", col_list[i]);
+                    fprintf(stderr, "Execution error: unknown type for '%s' column .\n", col_list[i]);
                     free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
                     return;
                     break;
@@ -199,17 +219,47 @@ void insert(Query* query){
         }
 
         if(!col_exist){
-            fprintf(stderr, "Column '%s' not found.\n", col_list[i]);
+            fprintf(stderr, "'%s' column  not found.\n", col_list[i]);
             free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
             return;
         }
     }
 
-    // start inserting
+
+    // start inserting after all checks passed
+    int str_col_count = 0;
+    int double_col_count = 0;
+    int int_col_count = 0;
+
+    new_row = init_row();
+
+    // get size to malloc for each type
+    for(current_col=table->first_col; current_col!=NULL; current_col=current_col->next_col){
+        if(current_col->type == INT) int_col_count++;
+        else if(current_col->type == STRING) str_col_count++;
+        else if(current_col->type == DOUBLE) double_col_count++;
+    }
+    new_row->int_count = int_col_count;
+    new_row->str_count = str_col_count;
+    new_row->double_count = double_col_count;
+
+    //TODO calloc 3 lists
+    new_row->double_list = (double**)calloc(double_col_count, sizeof(double*));
+    assert(new_row->double_list!=NULL);
+    for(i=0;i<double_col_count; i++) assert(new_row->double_list[i] = (double*)malloc(sizeof(double))!=NULL);
+    
+
+    // handle auto incrementation of int pk
+    // if(int_pk_provided){
+    //     table->next_id = int_pk_val+1;
+    // }else{
+    //     table->next_id++;
+    // }
 
     //TODO : set id, check id, auto increment (see ideas in README)
     // TODO : hash id then add to hash table of this table
     // TODO : cast data fields to its correct type and add to row
     // TODO : also hash unique col and add to corresponding hash table
     free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, str_item_count);
+    fprintf(stdout, "Executed: a new row with %d %s inserted into '%s' table.\n", col_count, col_count>1?"values":"value", table->name);
 }

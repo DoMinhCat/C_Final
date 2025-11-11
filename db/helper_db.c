@@ -21,13 +21,13 @@ bool table_exists(char* table_name){
     // check for table existence, print error if not.
     // ex: if(!table_exists(tb_name)) return;
     Table* table = get_table_by_name(table_name);
-    if(!table) fprintf(stderr, "Execution error: table '%s' not found.\n", table_name);
+    if(!table) fprintf(stderr, "Execution error: '%s' table not found.\n", table_name);
 }
 
 bool col_exists(Table* table, char* col_name){
     // same as table_exists above but for col
     Col* col = get_col_by_name(table, col_name);
-    if(!col) fprintf(stderr, "Execution error: column '%s' not found.\n", col_name);
+    if(!col) fprintf(stderr, "Execution error: '%s' column  not found.\n", col_name);
 }
 
 int* get_fk_col_list_index(Query* query){
@@ -135,7 +135,7 @@ HashTable* get_ht_by_col_name(HashTable* first_ht, char* col_name){
 }
 
 int get_data_list_index(Table* table, char* col_name){
-    // get the index of data list of Row, use this to access to data field of row (same as SELECT col1)
+    // get the index of data list of Row, use this to access to data field of row (same as SELECT col1) or to insert into the right place of the list of row struct
     /* ex: 
     col1 int, col2 str, col3 str, col4 int
         0                            1
@@ -185,18 +185,34 @@ int compare_double(double val1, double val2){
     else return 1;
 }*/
 
-bool is_unique_hash(char* str_to_check, int val_to_check, HashTable* hash_tab, ColType type){
+bool refer_val_exists(char* str_to_check, int val_to_check, HashTable* hash_tab){
     // this func check uniqueness with hash table lookup, use for pk and unique cols
     int sscanf_check = 0;
     int hashed_int;
     Node* current_hash_node = NULL;
 
-    switch (type)
-    {
-    case INT:
+    // str value
+    if(str_to_check!=NULL){
+        //hash and check uniqueness with hash table
+        hashed_int = hash_string(str_to_check); // this is the key 0-66
+
+        // bucket null => no duplicate value, no need to check 
+        if(hash_tab->bucket[hashed_int] != NULL){
+            for(current_hash_node = hash_tab->bucket[hashed_int]; current_hash_node!=NULL; current_hash_node=current_hash_node->next_node){
+                if(strcmp(current_hash_node->original_value, str_to_check) == 0){
+                    fprintf(stderr, "Execution error: PRIMARY KEY constraint violated.\n");
+                    return false;
+                }
+            }
+        }
+        //all checks passed
+        return true;
+    
+    // int value
+    }else{
         // 0 and negative not allowed
         if(val_to_check<=0){
-            fprintf(stderr, "Execution error: PRIMARY KEY values must be 1 or larger.\n");
+            fprintf(stderr, "Execution error: values with PRIMARY KEY constraint must be 1 or larger.\n");
             return false;
         }
         //hash and check uniqueness with hash table
@@ -213,33 +229,68 @@ bool is_unique_hash(char* str_to_check, int val_to_check, HashTable* hash_tab, C
                     return false;
                 }
                 if(val_db == val_to_check){
-                    fprintf(stderr, "Execution error: PRIMARY KEY constraint violated on column.\n");
+                    fprintf(stderr, "Execution error: PRIMARY KEY constraint violated.\n");
                     return false;
                 }
             }
         }
         //all checks passed
         return true;
-        break;
+    }
+}
 
-    case STRING:
-        //hash and check uniqueness with hash table
+bool refer_val_exists(char* str_to_check, int val_to_check, char* ref_table_name, char* ref_col_name){
+    // this func check if the inserted value for fk exists in the referenced column of the referenced table
+    int sscanf_check = 0;
+    int hashed_int;
+    Node* current_hash_node = NULL;
+    HashTable* hash_tab = get_ht_by_col_name(get_table_by_name(ref_table_name)->first_hash_table, ref_col_name); 
+
+    // no need to check if referenced table exists: this is restricted by drop (can't drop table if it is still refernced)
+
+    // str value check
+    if(str_to_check!=NULL){
+        //hash and check existenece with hash table
         hashed_int = hash_string(str_to_check); // this is the key 0-66
 
-        // bucket null => no duplicate value, no need to check 
-        if(hash_tab->bucket[hashed_int] != NULL){
-            for(current_hash_node = hash_tab->bucket[hashed_int]; current_hash_node!=NULL; current_hash_node=current_hash_node->next_node){
-                if(strcmp(current_hash_node->original_value, str_to_check) == 0){
-                    fprintf(stderr, "Execution error: PRIMARY KEY constraint violated on column.\n");
-                    return false;
-                }
-            }
+        // bucket null => value non existing, ref integrity violated 
+        if(hash_tab->bucket[hashed_int] == NULL){
+            fprintf(stderr, "Execution error: referential integrity violated. Value '%s' for '%s' column of '%s' table does not exist.\n", str_to_check, ref_col_name, ref_table_name);
+            return false;
         }
-        //all checks passed
-        return true;
-        break;
-    default:
+        
+        for(current_hash_node = hash_tab->bucket[hashed_int]; current_hash_node!=NULL; current_hash_node=current_hash_node->next_node){
+            if(strcmp(current_hash_node->original_value, str_to_check) == 0) return true;
+        }
+        
+        //no result found
+        fprintf(stderr, "Execution error: referential integrity violated. Value '%s' for '%s' column of '%s' table does not exist.\n", str_to_check, ref_col_name, ref_table_name);
         return false;
-        break;
+
+    // int value check
+    }else{
+        //hash and check existenece with hash table
+        hashed_int = hash_int(val_to_check); // this is the key 0-66
+        int val_db;
+
+        // bucket null => no duplicate value, no need to check 
+        if(hash_tab->bucket[hashed_int] == NULL){
+            fprintf(stderr, "Execution error: referential integrity violated. Value '%d' for '%s' column of '%s' table does not exist.", val_to_check, ref_col_name, ref_table_name);
+            return false;
+        }
+
+        for(current_hash_node = hash_tab->bucket[hashed_int]; current_hash_node!=NULL; current_hash_node=current_hash_node->next_node){
+            // convert back to int to compare, no need strol because we are sure it is int converted to string when inserted and passed earlier checks
+            sscanf_check = sscanf(current_hash_node->original_value, "%d", &val_db); 
+            if(sscanf_check != 1){
+                fprintf(stderr, "Execution error: an error occured while hashing.\n");
+                return false;
+            }
+            if(val_db == val_to_check) return true;
+        }
+        
+        //no result found
+        fprintf(stderr, "Execution error: referential integrity violated. Value '%d' for '%s' column of '%s' table does not exist.", val_to_check, ref_col_name, ref_table_name);
+        return false;
     }
 }

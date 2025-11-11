@@ -19,9 +19,13 @@ typedef struct HashTable HashTable;
 
 // struct
 typedef struct Row{
-    int* int_list;
+    int** int_list; // unset int will be NULL, int_list[int_count][1]
     char** str_list;
-    double* double_list;
+    double** double_list; // unset double will be NULL, double_list[double_count][1]
+
+    int int_count;
+    int str_count;
+    int double_count;
 
     struct Row *next_row;
 } Row;
