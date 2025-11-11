@@ -6,7 +6,7 @@ Group 2 ESGI 2A3
 
 #include <string.h>
 #include "hash.h"
-#include "db.h"
+#include "../db/db.h"
 
 unsigned int hash_string(char* string_to_hash){
     unsigned int res = 0;
