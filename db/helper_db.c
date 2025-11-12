@@ -81,24 +81,34 @@ Table* get_last_table(Table* first_table){
     return current_table;
 }
 
-Col* get_last_col(Col* first_col){
-    // this function assumes there are at least 1 col already
-    Col* current_col = first_col;
+// NOTE: DON'T DELETE, maybe will need this in the future for delete/where/select?
+// Col* get_last_col(Col* first_col){
+//     // this function assumes there are at least 1 col already
+//     Col* current_col = first_col;
     
-    while(current_col->next_col){
-        current_col = current_col->next_col;
-    }
-    return current_col;
-}
+//     while(current_col->next_col){
+//         current_col = current_col->next_col;
+//     }
+//     return current_col;
+// }
 
-HashTable* get_last_hash_table(HashTable* first_ht){
-    // this function assumes there are at least 1 hash table already
-    HashTable* current_ht = first_ht;
+// HashTable* get_last_hash_table(HashTable* first_ht){
+//     // this function assumes there are at least 1 hash table already
+//     HashTable* current_ht = first_ht;
     
-    while(current_ht->next_hash_table){
-        current_ht = current_ht->next_hash_table;
+//     while(current_ht->next_hash_table){
+//         current_ht = current_ht->next_hash_table;
+//     }
+//     return current_ht;
+// }
+Row* get_last_row(Row* first_row){
+    // this function assumes there are at least 1 row already
+    Row* current_row = first_row;
+    
+    while(current_row->next_row){
+        current_row = current_row->next_row;
     }
-    return current_ht;
+    return current_row;
 }
 
 Table* get_table_by_name(char* table_name) {
