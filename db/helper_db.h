@@ -11,6 +11,7 @@ Group 2 ESGI 2A3
 #define HELPER_DB_H
 
 typedef struct Col Col; 
+typedef struct Row Row; 
 typedef struct Table Table; 
 typedef struct Query Query; 
 typedef struct HashTable HashTable; 
@@ -31,8 +32,7 @@ HashTable* get_ht_by_col_name(HashTable* first_ht, char* col_name);
 // check functions
 bool table_exists(char* table_name);
 bool col_exists(Table* table, char* col_name);
-bool is_unique_hash(char* str_to_check, int val_to_check, HashTable* hash_tab);
-bool refer_val_exists(char* str_to_check, int val_to_check, char* ref_table, char* ref_col);
+bool is_unique_hash(char* str_to_check, int val_to_check, char* ref_table_name, char* ref_col_name);
 
 char* int_to_str(int val);
 

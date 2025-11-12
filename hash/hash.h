@@ -33,6 +33,6 @@ typedef struct HashTable{
 
 unsigned int hash_int(int);
 unsigned int hash_string(char*);
-void add_to_ht(HashTable** hash_table, int key, char* value, Row* corresponding_row);
+void add_to_ht(HashTable* hash_table, int key, char* value, Row* corresponding_row);
 
 #endif

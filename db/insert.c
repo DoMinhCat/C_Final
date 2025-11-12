@@ -179,14 +179,14 @@ void insert(Query* query){
                     // check conversion error
                     if (endptr == data_list[i] || *endptr != '\0') {
                         fprintf(stderr, "Execution error: invalid value '%s' for '%s' column  type INT.\n", data_list[i], col_list[i]);
-                        free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, int_unique_val_list, str_unique_val_list, int_unique_col_name_list, str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
+                        free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
                         return;
                     }
 
                     // check overflow for type int
                     if (errno == ERANGE || parsed_val > INT_MAX || parsed_val < INT_MIN) {
                         fprintf(stderr, "Execution error: incompatible size of value '%s' for type INT.\n", data_list[i]);
-                        free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, int_unique_val_list, str_unique_val_list, int_unique_col_name_list, str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
+                        free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
                         return;
                     }
 
@@ -196,11 +196,11 @@ void insert(Query* query){
                     if (current_col->constraint == FK) {
                         if(safe_val <= 0){
                             fprintf(stderr, "Execution error: values with FOREIGN KEY constraint must be 1 or larger.\n");
-                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, int_unique_val_list, str_unique_val_list, int_unique_col_name_list, str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
+                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
                             return;
                         }
-                        if(!refer_val_exists(NULL, safe_val, current_col->refer_table, current_col->refer_col)){
-                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, int_unique_val_list, str_unique_val_list, int_unique_col_name_list, str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
+                        if(!is_unique_hash(NULL, safe_val, current_col->refer_table, current_col->refer_col)){
+                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
                             return;
                         }
                     }
@@ -220,8 +220,8 @@ void insert(Query* query){
                         unique_int_col_count++;
                         // check uniqueness of value to be inserted
                         hash_tab_of_col = get_ht_by_col_name(first_hash_tab, current_col->name);
-                        if (!is_unique_hash(NULL, safe_val, hash_tab_of_col)) {
-                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, int_unique_val_list, str_unique_val_list, int_unique_col_name_list, str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
+                        if (!is_unique_hash(NULL, safe_val, current_col->refer_table, current_col->refer_col)) {
+                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
                             return;
                         }
                     }
@@ -237,7 +237,7 @@ void insert(Query* query){
                     // check conversion error
                     if (endptr == data_list[i] || *endptr != '\0' || isinf(double_val) || isnan(double_val) || errno == ERANGE) {
                         fprintf(stderr, "Execution error: invalid value '%s' for '%s' column  type DOUBLE.\n", data_list[i], col_list[i]);
-                        free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, int_unique_val_list, str_unique_val_list, int_unique_col_name_list, str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
+                        free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
                         return;
                     }
 
@@ -254,7 +254,7 @@ void insert(Query* query){
                     if(data_list[i]){
                         if(strcmp(data_list[i], "") == 0){
                             fprintf(stderr, "Execution error: empty string not allowed.\n");
-                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, int_unique_val_list, str_unique_val_list, int_unique_col_name_list, str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
+                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
                             return;
                         }
                     }
@@ -262,14 +262,14 @@ void insert(Query* query){
                     // check max_len 256
                     if(strlen(data_list[i]) > MAX_STR_LEN){
                         fprintf(stderr, "Execution error: 256 characters maximum allowed for STRING values.\n");
-                        free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, int_unique_val_list, str_unique_val_list, int_unique_col_name_list, str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
+                        free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
                         return;
                     }
 
                     //check fk: referential integrity
                     if(current_col->constraint == FK){
-                        if(!refer_val_exists(data_list[i], 0, current_col->refer_table, current_col->refer_col)){
-                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, int_unique_val_list, str_unique_val_list, int_unique_col_name_list, str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
+                        if(!is_unique_hash(data_list[i], 0, current_col->refer_table, current_col->refer_col)){
+                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
                             return;
                         }
                     }
@@ -278,8 +278,8 @@ void insert(Query* query){
                     if(current_col->constraint == PK || current_col->constraint == UNIQUE){ 
                         if(current_col->constraint == PK) str_pk_provided = true;
                         hash_tab_of_col = get_ht_by_col_name(first_hash_tab, current_col->name);
-                        if(!is_unique_hash(data_list[i], 0, hash_tab_of_col)){
-                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, int_unique_val_list, str_unique_val_list, int_unique_col_name_list, str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
+                        if(!is_unique_hash(data_list[i], 0, current_col->refer_table, current_col->refer_col)){
+                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
                             return;
                         }
                         // save value and col name to insert into hash table later
@@ -296,7 +296,7 @@ void insert(Query* query){
                     break;
                 default:
                     fprintf(stderr, "Execution error: unknown type for '%s' column .\n", col_list[i]);
-                    free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, int_unique_val_list, str_unique_val_list, int_unique_col_name_list, str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
+                    free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
                     return;
                     break;
                 }
@@ -306,7 +306,7 @@ void insert(Query* query){
 
         if(!col_exist){
             fprintf(stderr, "'%s' column  not found.\n", col_list[i]);
-            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, int_unique_val_list, str_unique_val_list, int_unique_col_name_list, str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
+            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
             return;
         }
     }
@@ -353,7 +353,7 @@ void insert(Query* query){
     }
     // hash str values of unique str cols and add to their hash table
     for(i=0; i<unique_str_col_count; i++){
-        hashed_val = hash_int(str_unique_val_list[i]);
+        hashed_val = hash_string(str_unique_val_list[i]);
         hash_tab_of_col = get_ht_by_col_name(first_hash_tab, str_unique_col_name_list[i]);
 
         // add key-value pair to hash table of the correct int unique column
