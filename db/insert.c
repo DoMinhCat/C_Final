@@ -340,7 +340,7 @@ void insert(Query* query){
     new_row->str_list = str_list_to_insert;
     new_row->int_list = int_list_to_insert;
 
-    // hash int values of unique int cols and add to hash table of unique int cols
+    // hash int values of unique int cols and add to their hash table
     int hashed_val;
     char* value;
     for(i=0; i<unique_int_col_count; i++){
@@ -351,7 +351,15 @@ void insert(Query* query){
         // add key-value pair to hash table of the correct int unique column
         add_to_ht(hash_tab_of_col, hashed_val, value, new_row);
     }
+    // hash str values of unique str cols and add to their hash table
+    for(i=0; i<unique_str_col_count; i++){
+        hashed_val = hash_int(str_unique_val_list[i]);
+        hash_tab_of_col = get_ht_by_col_name(first_hash_tab, str_unique_col_name_list[i]);
 
-    // TODO set pointer for row/next row
+        // add key-value pair to hash table of the correct int unique column
+        add_to_ht(hash_tab_of_col, hashed_val, str_unique_val_list[i], new_row);
+    }
+
+    // set pointer for row/next row
     fprintf(stdout, "Executed: a new row was inserted into '%s' table.\n", table->name);
 }
