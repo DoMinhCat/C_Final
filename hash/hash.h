@@ -24,7 +24,8 @@ typedef struct Node{
 
 typedef struct HashTable{
     char* col_name; // name of pk col to hash
-    Node* bucket[HASH_TABLE_SIZE]; // linked list of buckets, 67 buckets max -> bucket[67][linkedlist collision]
+    // linked list of buckets, 67 buckets max -> bucket[66][linkedlist collision]
+    Node* bucket[HASH_TABLE_SIZE]; // this is also the "first_node"
 
     struct HashTable* next_hash_table;
 } HashTable;
@@ -32,5 +33,6 @@ typedef struct HashTable{
 
 unsigned int hash_int(int);
 unsigned int hash_string(char*);
+void add_to_ht(HashTable** hash_table, int key, char* value, Row* corresponding_row);
 
 #endif
