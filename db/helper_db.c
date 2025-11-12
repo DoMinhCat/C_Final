@@ -135,7 +135,7 @@ HashTable* get_ht_by_col_name(HashTable* first_ht, char* col_name){
 }
 
 int get_data_list_index(Table* table, char* col_name){
-    // get the index of data list of Row, use this to access to data field of row (same as SELECT col1) or to insert into the right place of the list of row struct
+    // get the index of data list of Row for the corresponding type list, use this to access to data field of row (same as SELECT col1) or to insert into the right place of the list of row struct
     /* ex: 
     col1 int, col2 str, col3 str, col4 int
         0                            1

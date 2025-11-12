@@ -53,19 +53,4 @@ INSERT INTO team ( id, name, score ) values ( 2147483648, abc, 45.5s ) // id ove
 Ideas:
 default, auto increment
 
-NOTE for below: no need to utilise skipped gap, let next_id be the next one of that user inserted
-
-- Auto increment for int pk (
-  - if insert without pk col
-    - if pk is int: loop while infinity, check next_id is unique in pk col by hash it and look up at hash table, loop through linked list of the bucket and compare with id fields of Row of that bucket
-      - if unique, set pk field = next_id, then next_id++ if pk, flag=true to break out of loop
-      - if no, next_id++, then check again
-  - if insert with pk col,
-    - if pk is int
-      - check id to insert is unique by looping infinity : hash then lookup at hash table like above
-        - if no, return error
-        - if unique
-          - save to a var to insert later since still checking other cols and other criterias, insert operation is after all checks
-          - check next_id != id to insert, if same then next_id++)
-
 IMPORTANT : replace first dummy node of row upon insertion

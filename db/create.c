@@ -79,7 +79,7 @@ void create_table(Query* query){
 
             pk_count++;
             if(pk_count > 1){
-                fprintf(stderr, "Execution error: a table must not have multiple primary key columns.\n");
+                fprintf(stderr, "Execution error: a table must not have multiple PRIMARY KEY columns.\n");
                 free(pk_col_name);
                 pk_col_name = NULL;
                 return;
@@ -90,7 +90,7 @@ void create_table(Query* query){
         }
     }
     if(pk_count != 1){
-        fprintf(stderr, "Execution error: a table must have a primary key column.\n");
+        fprintf(stderr, "Execution error: a table must have a PRIMARY KEY column.\n");
         free(pk_col_name);
         pk_col_name = NULL;
         return;
@@ -98,7 +98,7 @@ void create_table(Query* query){
 
     // check type int/string for pk only
     if(type_list[pk_index] != INT && type_list[pk_index] != STRING){
-        fprintf(stderr, "Execution error: primary key's type must be INT or STRING.\n");
+        fprintf(stderr, "Execution error: PRIMARY KEY's type must be INT or STRING.\n");
         return;
     }
 
