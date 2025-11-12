@@ -38,7 +38,7 @@ void create_table(Query* query){
         return;
     }
     // check max col
-    if(col_count>MAX_TABLE_COUNT){
+    if(col_count>MAX_COL_COUNT){
         fprintf(stderr, "Execution error: 50 columns per table limit reached.\n");
         return;
     }
@@ -221,6 +221,9 @@ void create_table(Query* query){
 
     // add col
     Col* current_col = NULL;
+    Col* last_col = NULL;
+    HashTable* new_hash_table = NULL;
+    HashTable* last_ht = NULL;
     int refer_list_index=0;
     // loop through the col list and add them in the linked list
     for(i=0; i<col_count; i++){
@@ -246,19 +249,15 @@ void create_table(Query* query){
             // free the dummy if it exists
             if (new_tb->first_col && new_tb->first_col->name == NULL) free_col(new_tb->first_col);
             new_tb->first_col = new_col;
+            last_col = new_tb->first_col;
         } else {
             // append to the end
-            current_col = get_last_col(new_tb->first_col);
-            current_col->next_col = new_col;
+            last_col->next_col = new_col;
+            last_col = new_col;
         }
-    }
-    new_tb->col_count = col_count;
 
-    HashTable* new_hash_table = NULL;
-    HashTable* current_ht = NULL;
-    // loop through col list and init hash table for unique cols
-    for(i=0; i<col_count; i++){
-        if(constraint_list[i] == UNIQUE || constraint_list[i] == PK){
+        // init hash table for unique/pk cols
+        if(new_col->constraint == UNIQUE || new_col->constraint == PK){
             new_hash_table = init_hash_table();
             // set col name of hash table
             assert((new_hash_table->col_name = strdup(col_list[i])) != NULL);
@@ -268,13 +267,15 @@ void create_table(Query* query){
                 // free the dummy if it exists
                 if (new_tb->first_hash_table && new_tb->first_hash_table->col_name == NULL) free_hash_table(new_tb->first_hash_table);
                 new_tb->first_hash_table = new_hash_table;
+                last_ht = new_tb->first_hash_table;
             } else {
                 // append to the end
-                current_ht = get_last_hash_table(new_tb->first_hash_table);
-                current_ht->next_hash_table = new_hash_table;
+                last_ht->next_hash_table = new_hash_table;
+                last_ht = new_hash_table;
             }
         }
     }
+    new_tb->col_count = col_count;
 
     // add table to the linked list
     if(!first_table) first_table = new_tb;
