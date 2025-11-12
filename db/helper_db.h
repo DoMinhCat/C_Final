@@ -32,7 +32,8 @@ HashTable* get_ht_by_col_name(HashTable* first_ht, char* col_name);
 // check functions
 bool table_exists(char* table_name);
 bool col_exists(Table* table, char* col_name);
-bool is_unique_hash(char* str_to_check, int val_to_check, char* ref_table_name, char* ref_col_name);
+bool refer_val_exists(char* str_to_check, int val_to_check, char* ref_table_name, char* ref_col_name);
+bool pk_value_is_unique(char* str_to_check, int val_to_check, HashTable* hash_tab);
 
 char* int_to_str(int val);
 

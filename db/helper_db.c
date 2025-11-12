@@ -195,7 +195,7 @@ int compare_double(double val1, double val2){
     else return 1;
 }*/
 
-bool is_unique_hash(char* str_to_check, int val_to_check, char* ref_table_name, char* ref_col_name){
+bool refer_val_exists(char* str_to_check, int val_to_check, char* ref_table_name, char* ref_col_name){
     // this func check if the inserted value for fk exists in the referenced column of the referenced table
     int sscanf_check = 0;
     int hashed_int;
@@ -248,6 +248,60 @@ bool is_unique_hash(char* str_to_check, int val_to_check, char* ref_table_name, 
         //no result found
         fprintf(stderr, "Execution error: referential integrity violated. Value '%d' for '%s' column of '%s' table does not exist.", val_to_check, ref_col_name, ref_table_name);
         return false;
+    }
+}
+
+bool pk_value_is_unique(char* str_to_check, int val_to_check, HashTable* hash_tab){
+    // this func check uniqueness with hash table lookup, use for pk and unique cols
+    int sscanf_check = 0;
+    int hashed_int;
+    Node* current_hash_node = NULL;
+
+    // str value
+    if(str_to_check!=NULL){
+        //hash and check uniqueness with hash table
+        hashed_int = hash_string(str_to_check); // this is the key 0-66
+
+        // bucket null => no duplicate value, no need to check 
+        if(hash_tab->bucket[hashed_int] != NULL){
+            for(current_hash_node = hash_tab->bucket[hashed_int]; current_hash_node!=NULL; current_hash_node=current_hash_node->next_node){
+                if(strcmp(current_hash_node->original_value, str_to_check) == 0){
+                    fprintf(stderr, "Execution error: PRIMARY KEY constraint violated.\n");
+                    return false;
+                }
+            }
+        }
+        //all checks passed
+        return true;
+    
+    // int value
+    }else{
+        // 0 and negative not allowed
+        if(val_to_check<=0){
+            fprintf(stderr, "Execution error: values with PRIMARY KEY constraint must be 1 or larger.\n");
+            return false;
+        }
+        //hash and check uniqueness with hash table
+        hashed_int = hash_int(val_to_check); // this is the key 0-66
+        int val_db;
+
+        // bucket null => no duplicate value, no need to check 
+        if(hash_tab->bucket[hashed_int] != NULL){
+            for(current_hash_node = hash_tab->bucket[hashed_int]; current_hash_node!=NULL; current_hash_node=current_hash_node->next_node){
+                // convert back to int before cmp, no need strol because we are sure it is int converted to string when inserted and passed earlier checks
+                sscanf_check = sscanf(current_hash_node->original_value, "%d", &val_db); 
+                if(sscanf_check != 1){
+                    fprintf(stderr, "Execution error: an error occured while hashing.\n");
+                    return false;
+                }
+                if(val_db == val_to_check){
+                    fprintf(stderr, "Execution error: PRIMARY KEY constraint violated.\n");
+                    return false;
+                }
+            }
+        }
+        //all checks passed
+        return true;
     }
 }
 

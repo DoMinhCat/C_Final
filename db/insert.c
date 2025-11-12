@@ -144,7 +144,6 @@ void insert(Query* query){
                 pk_is_int = true;
                 assert((pk_int_col_name = strdup(current_col->name)) != NULL);
             }
-            break;
         }
     }
 
@@ -158,12 +157,12 @@ void insert(Query* query){
 
     // checks for cols to insert and init list for later insert
     for(i=0; i<col_count; i++){
-        
         col_exist = false;
 
         // Loop through cols of table
         for(current_col = table->first_col; current_col!=NULL; current_col = current_col->next_col) {
             col_index = get_data_list_index(table, current_col->name);
+
             // search for col
             if (strcmp(current_col->name, col_list[i]) == 0) {
                 col_exist = true;
@@ -199,7 +198,7 @@ void insert(Query* query){
                             free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
                             return;
                         }
-                        if(!is_unique_hash(NULL, safe_val, current_col->refer_table, current_col->refer_col)){
+                        if(!refer_val_exists(NULL, safe_val, current_col->refer_table, current_col->refer_col)){
                             free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
                             return;
                         }
@@ -220,10 +219,11 @@ void insert(Query* query){
                         unique_int_col_count++;
                         // check uniqueness of value to be inserted
                         hash_tab_of_col = get_ht_by_col_name(first_hash_tab, current_col->name);
-                        if (!is_unique_hash(NULL, safe_val, current_col->refer_table, current_col->refer_col)) {
+                        if(!pk_value_is_unique(NULL, safe_val, hash_tab_of_col)){
                             free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
                             return;
                         }
+
                     }
 
                     // Store validated value in int list to insert later
@@ -268,7 +268,7 @@ void insert(Query* query){
 
                     //check fk: referential integrity
                     if(current_col->constraint == FK){
-                        if(!is_unique_hash(data_list[i], 0, current_col->refer_table, current_col->refer_col)){
+                        if(!refer_val_exists(data_list[i], 0, current_col->refer_table, current_col->refer_col)){
                             free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
                             return;
                         }
@@ -278,7 +278,7 @@ void insert(Query* query){
                     if(current_col->constraint == PK || current_col->constraint == UNIQUE){ 
                         if(current_col->constraint == PK) str_pk_provided = true;
                         hash_tab_of_col = get_ht_by_col_name(first_hash_tab, current_col->name);
-                        if(!is_unique_hash(data_list[i], 0, current_col->refer_table, current_col->refer_col)){
+                        if(!pk_value_is_unique(data_list[i], 0, hash_tab_of_col)){
                             free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
                             return;
                         }
