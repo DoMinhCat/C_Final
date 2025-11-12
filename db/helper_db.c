@@ -294,3 +294,12 @@ bool refer_val_exists(char* str_to_check, int val_to_check, char* ref_table_name
         return false;
     }
 }
+
+char* int_to_str(int val){
+    char buffer[20];
+    char* res = NULL;
+
+    snprintf(buffer, 20, "%d", val);
+    assert((res = strdup(buffer))!=NULL);
+    return res;
+}

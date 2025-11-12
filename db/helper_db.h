@@ -33,6 +33,6 @@ bool col_exists(Table* table, char* col_name);
 bool is_unique_hash(char* str_to_check, int val_to_check, HashTable* hash_tab);
 bool refer_val_exists(char* str_to_check, int val_to_check, char* ref_table, char* ref_col);
 
-
+char* int_to_str(int val);
 
 #endif
