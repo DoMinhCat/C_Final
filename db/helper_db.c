@@ -259,7 +259,7 @@ bool refer_val_exists(char* str_to_check, int val_to_check, char* ref_table_name
     }
 }
 
-bool pk_value_is_unique(char* str_to_check, int val_to_check, HashTable* hash_tab){
+bool pk_value_is_unique(char* str_to_check, int val_to_check, HashTable* hash_tab, char* constraint){
     // this func check uniqueness with hash table lookup, use for pk and unique cols
     int sscanf_check = 0;
     int hashed_int;
@@ -274,7 +274,7 @@ bool pk_value_is_unique(char* str_to_check, int val_to_check, HashTable* hash_ta
         if(hash_tab->bucket[hashed_int] != NULL){
             for(current_hash_node = hash_tab->bucket[hashed_int]; current_hash_node!=NULL; current_hash_node=current_hash_node->next_node){
                 if(strcmp(current_hash_node->original_value, str_to_check) == 0){
-                    fprintf(stderr, "Execution error: PRIMARY KEY constraint violated.\n");
+                    fprintf(stderr, "Execution error: %s constraint violated.\n", constraint);
                     return false;
                 }
             }
@@ -285,7 +285,7 @@ bool pk_value_is_unique(char* str_to_check, int val_to_check, HashTable* hash_ta
     // int value
     }else{
         // 0 and negative not allowed
-        if(val_to_check<=0){
+        if(strcasecmp("PRIMARY KEY", constraint)==0 && val_to_check<=0){
             fprintf(stderr, "Execution error: values with PRIMARY KEY constraint must be 1 or larger.\n");
             return false;
         }
@@ -303,7 +303,7 @@ bool pk_value_is_unique(char* str_to_check, int val_to_check, HashTable* hash_ta
                     return false;
                 }
                 if(val_db == val_to_check){
-                    fprintf(stderr, "Execution error: PRIMARY KEY constraint violated.\n");
+                    fprintf(stderr, "Execution error: UNIQUE constraint violated.\n");
                     return false;
                 }
             }
