@@ -37,7 +37,7 @@ Projet final de C à ESGI
 - `drop table tab1 [, tab2, tab3,...]`
 - `create table tab1 ( col1 int pk, col2 string fk references tab_to_refer col_to_refer, col3 double )`, spaces between parentheses are obligated for the program to parse the command correctly
 - `insert into tab1 ( col1, col2 ) values ( val1, val2 )`
-- `select ( col1, col2, col3 )/* from tab1 [join tab2 on col1 = col2] [where col1 = xyz]`
+- `select ( col1, col2, col3 )/* from tab1 [join tab2 on col1 = col2] [where col1 = xyz]`, order of col1 and col2 in JOIN clause matters, col1 and col2 correspond to tab1 and tab2 respectively
 
 6. Contributors
 
@@ -56,8 +56,5 @@ INSERT INTO player ( id , name , age , weight , team_id ) values ( 99 , ronaldo 
 INSERT INTO player ( id , name , age , weight , team_id ) values ( 15 , stringfk , 22 , 70.0 , abc ) // invalid FK
 
 Ideas:
-default, auto increment
+default
 
-Bugs known:
-
-- auto increment of int id didnt insert correctly? later manually inserting that id is still accepted
