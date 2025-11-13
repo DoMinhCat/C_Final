@@ -48,8 +48,12 @@ Commands to test:
 
 CREATE TABLE team ( id int pk, name string unique, score double )
 CREATE TABLE player ( id int pk, name string, age int, weight double, team_id int fk references team id )
+DROP TABLE player // error: 'player' references 'team'
 INSERT INTO team ( id, name, score ) values ( 1, abc, 45.5 )
 INSERT INTO player ( team_id ) values ( 5 ) //ref id doesnt exist
+INSERT INTO team ( id , name , score ) values ( 1 , duplicateteam , 100.0 ) // PK violated
+INSERT INTO player ( id , name , age , weight , team_id ) values ( 99 , ronaldo , 38 , 78.0 , 1 )
+INSERT INTO player ( id , name , age , weight , team_id ) values ( 15 , stringfk , 22 , 70.0 , abc ) // invalid FK
 
 Ideas:
 default, auto increment
