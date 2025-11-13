@@ -217,13 +217,13 @@ void insert(Query* query){
                         assert((int_unique_col_name_list = (char**)realloc(int_unique_col_name_list, sizeof(char*) * (unique_int_col_count+1))) != NULL);
                         assert((int_unique_col_name_list[unique_int_col_count] = strdup(current_col->name)) != NULL);
                         unique_int_col_count++;
-                        // check uniqueness of value to be inserted
+
+                        // check uniqueness of values to be inserted
                         hash_tab_of_col = get_ht_by_col_name(first_hash_tab, current_col->name);
                         if(!pk_value_is_unique(NULL, safe_val, hash_tab_of_col)){
                             free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
                             return;
                         }
-
                     }
 
                     // Store validated value in int list to insert later

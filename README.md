@@ -49,6 +49,7 @@ Commands to test:
 CREATE TABLE team ( id int pk, name string unique, score double )
 CREATE TABLE player ( id int pk, name string, age int, weight double, team_id int fk references team id )
 INSERT INTO team ( id, name, score ) values ( 1, abc, 45.5 )
+INSERT INTO player ( team_id ) values ( 5 ) //ref id doesnt exist
 
 Ideas:
 default, auto increment

@@ -178,8 +178,7 @@ void parse_create(Query** query){
                 if(token) check_end_of_cmd(token, query, "REFERENCES clause");
             }
             else {
-                sprintf(err_msg, "'%s' column ", (*query)->params.create_params.col_list[(*query)->params.create_params.col_count - 1]);
-                check_end_of_cmd(col_constraint, query, err_msg);
+                check_end_of_cmd(col_constraint, query, (*query)->params.create_params.col_list[(*query)->params.create_params.col_count - 1]);
             }
         }
         else {

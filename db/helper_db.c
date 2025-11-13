@@ -239,7 +239,7 @@ bool refer_val_exists(char* str_to_check, int val_to_check, char* ref_table_name
 
         // bucket null => no duplicate value, no need to check 
         if(hash_tab->bucket[hashed_int] == NULL){
-            fprintf(stderr, "Execution error: referential integrity violated. Value '%d' for '%s' column of '%s' table does not exist.", val_to_check, ref_col_name, ref_table_name);
+            fprintf(stderr, "Execution error: referential integrity violated. Value '%d' for '%s' column of '%s' table does not exist.\n", val_to_check, ref_col_name, ref_table_name);
             return false;
         }
 
@@ -254,7 +254,7 @@ bool refer_val_exists(char* str_to_check, int val_to_check, char* ref_table_name
         }
         
         //no result found
-        fprintf(stderr, "Execution error: referential integrity violated. Value '%d' for '%s' column of '%s' table does not exist.", val_to_check, ref_col_name, ref_table_name);
+        fprintf(stderr, "Execution error: referential integrity violated. Value '%d' for '%s' column of '%s' table does not exist.\n", val_to_check, ref_col_name, ref_table_name);
         return false;
     }
 }

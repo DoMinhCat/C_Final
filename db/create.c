@@ -119,7 +119,7 @@ void create_table(Query* query){
         // refering to the table itself is not allowed, since it hasn't been created yet
         for(j=0; j<fk_count; j++){
             if (strcmp(new_tb_name, table_refer_list[j]) == 0) {
-                fprintf(stderr, "Execution error: table cannot reference itself.\n");
+                fprintf(stderr, "Execution error: a table can't reference itself.\n");
                 free(pk_col_name);
                 pk_col_name = NULL;
                 return;

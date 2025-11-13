@@ -40,18 +40,9 @@ void drop_table(Query* query) {
         while(current_table != NULL) {
             // no need to check itself 
             if(strcmp(current_table->name, table_name) != 0){
-                printf("checking table %s", current_table->name);
                 current_col = current_table->first_col;
                 while(current_col != NULL) {
                     // return error if col refer to table to delete
-
-                    if(current_col->constraint == FK) {
-    printf("DEBUG: FK column '%s' in table '%s' references '%s'\n",
-           current_col->name,
-           current_table->name,
-           current_col->refer_table ? current_col->refer_table : "NULL");
-}
-
                     if(current_col->constraint == FK && strcmp(current_col->refer_table, table_name) == 0) {
                         fprintf(stderr, "Execution error: '%s' 'is referenced by '%s' column  of table '%s'.\n", table_name, current_col->name, current_table->name);
                         return;
