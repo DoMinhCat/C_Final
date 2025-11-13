@@ -26,8 +26,7 @@ int get_data_list_index(Table* table, char* col_name);
 Table* get_table_by_name(char* table_name);
 Col* get_col_by_name(Table* table, char* col_name);
 HashTable* get_ht_by_col_name(HashTable* first_ht, char* col_name);
-int get_col_index(Table* table, char* col_name);
-//int compare_double(double val1, double val2); not sure needed or not, just leave here
+int compare_double(double val1, double val2); 
 
 // check functions
 bool table_exists(char* table_name);

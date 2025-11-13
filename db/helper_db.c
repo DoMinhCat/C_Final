@@ -143,21 +143,6 @@ Col* get_col_by_name(Table* table, char* col_name) {
     return NULL;
 }
 
-int get_col_index(Table* table, char* col_name){
-    // same as get_col_by_name, but return index of col instead of pointer to col, return -1 if not found
-    // use this to get the index to access to the corresponding data field of that col
-    // ex: data = data_field[get_col_index(tab1, col1)];
-
-    Col* current_col = NULL;
-    int index = 0;
-
-    for(current_col=table->first_col; current_col!=NULL; current_col=current_col->next_col){
-        if(strcmp(col_name, current_col->name)==0) return index;
-        index++;
-    }
-    return -1;
-}
-
 HashTable* get_ht_by_col_name(HashTable* first_ht, char* col_name){
     while(first_ht!=NULL){
         if(strcmp(first_ht->col_name, col_name)==0) return first_ht;
@@ -205,18 +190,18 @@ int get_data_list_index(Table* table, char* col_name){
     return -1; // if col not found
 }
 
-/*
 int compare_double(double val1, double val2){
-    //safely compare double
-    // return 0 if val1=val2
-    // return 1 if val1>val2
-    // return -1 if val1<val2
+    /*safely compare double, used for where with double column (no hash table available)
+    return 0 if val1=val2
+    return 1 if val1>val2
+    return -1 if val1<val2
+    */
     double epsilon = DBL_EPSILON * 10.0;
 
     if (fabs(val1 - val2) <= epsilon) return 0;
     else if(val1<val2) return -1;
     else return 1;
-}*/
+}
 
 bool refer_val_exists(char* str_to_check, int val_to_check, char* ref_table_name, char* ref_col_name){
     // this func check if the inserted value for fk exists in the referenced column of the referenced table

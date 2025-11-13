@@ -56,7 +56,11 @@ INSERT INTO player ( id , name , age , weight , team_id ) values ( 99 , ronaldo 
 INSERT INTO player ( id , name , age , weight , team_id ) values ( 15 , stringfk , 22 , 70.0 , abc ) // invalid FK
 
 Ideas:
-default, auto increment
+default constraint
+end with ; to be able to execute multiple cmds in one run
+SELECT without where: print on the go
+SELECT with WHERE (no indexing) : print on the go with a compare to check condition (like above + check)
+SELECT with WHERE (indexing) : look up hash table, return list of Rows\*, loop through result rows and print on the go
 
 Bugs known:
 

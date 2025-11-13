@@ -18,10 +18,11 @@ Group 2 ESGI 2A3
 typedef struct HashTable HashTable;
 
 // struct
-typedef struct Row{
-    int** int_list; // unset int will be NULL, int_list[int_count][1]
-    char** str_list;
-    double** double_list; // unset double will be NULL, double_list[double_count][1]
+typedef struct Row
+{
+    int **int_list; // unset int will be NULL, int_list[int_count][1]
+    char **str_list;
+    double **double_list; // unset double will be NULL, double_list[double_count][1]
 
     int int_count;
     int str_count;
@@ -30,23 +31,25 @@ typedef struct Row{
     struct Row *next_row;
 } Row;
 
-typedef struct Col{
-    char* name;
+typedef struct Col
+{
+    char *name;
     ColType type;
     ColConstraintType constraint;
 
     // for referential integrity check upon insert
-    char* refer_table; // table that fk col references
-    char* refer_col; // col of table that fk col references
+    char *refer_table; // table that fk col references
+    char *refer_col;   // col of table that fk col references
 
     struct Col *next_col;
 } Col;
 
-typedef struct Table{
+typedef struct Table
+{
     char *name;
     Row *first_row;
-    Col *first_col; 
-    HashTable* first_hash_table; // linked list of hash tables of this table
+    Col *first_col;
+    HashTable *first_hash_table; // linked list of hash tables of this table
     int next_id;
 
     int col_count; // to free row and col
@@ -54,15 +57,12 @@ typedef struct Table{
     struct Table *next_table;
 } Table;
 
-typedef struct Query Query;  
+typedef struct Query Query;
 
 // prototypes
-void create_table(Query* query);
-void drop_table(Query* query);
-void where_double(Table* table, char* col_name, const double condition);
-void where_int(Table* table, char* col_name, const int condition);
-void where_str(Table* table, char* col_name, const char* condition);
-void insert(Query* query);
-void describe_table(Query* query);
-void show(Query* query);
+void create_table(Query *query);
+void drop_table(Query *query);
+void insert(Query *query);
+void describe_table(Query *query);
+void show(Query *query);
 #endif
