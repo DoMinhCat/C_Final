@@ -20,7 +20,8 @@ Table* init_table(){
     table->first_col = init_col();
     table->next_table = NULL;
     table->col_count = 0;
-    table->hash_table = NULL;
+    table->first_hash_table = NULL;
+    table->next_id = 1;
 
     return table;
 }
@@ -43,7 +44,14 @@ Row* init_row(){
     Row* row = NULL;
     assert((row = (Row*)malloc(sizeof(Row))) != NULL);
 
-    row->data_field = NULL;
+    row->int_list = NULL;
+    row->str_list = NULL;
+    row->double_list = NULL;
+
+    row->int_count = 0;
+    row->str_count = 0;
+    row->double_count = 0;
+
     row->next_row = NULL;    
 
     return row;

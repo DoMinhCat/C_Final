@@ -9,7 +9,6 @@ Group 2 ESGI 2A3
 #define PARSER_H
 
 #define MAX_CMD_SIZE 1024
-#define MAX_TOKEN_SIZE 257
 #define TABLE_NAME_MAX 101
 
 #include "../main.h"
@@ -33,7 +32,7 @@ typedef struct{
     char* table_name;
 
     char **col_list; // list of column names passed in the query
-    int col_count;          // number of columns
+    int col_count; // number of columns
 
     ColType *type_list;  // list of types corresponding order of col_list
     ColConstraintType *constraint_list; // list of constraint corresponding to order of col_list
@@ -50,7 +49,7 @@ typedef struct{
     char **col_list; // list of column names passed in the query
     int col_count;          // number of columns to free col_list and
 
-    void **data_list; // list of input for each column
+    char **data_list; // list of input for each column, saved as string in rax form, process later in insert db
 } InsertParams;
 
 typedef struct {

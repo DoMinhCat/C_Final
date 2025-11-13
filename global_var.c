@@ -6,3 +6,4 @@
 Table* first_table = NULL;
 Row* first_row = NULL;
 Col* first_col = NULL;
+int table_count = 0;

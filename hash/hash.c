@@ -5,41 +5,49 @@ Group 2 ESGI 2A3
 */
 
 #include <string.h>
+#include <assert.h>
+
 #include "hash.h"
-#include "db.h"
+#include "../db/db.h"
+#include "../init/init.h"
 
 unsigned int hash_string(char* string_to_hash){
-    unsigned int res = 0;
-    int length = strlen(string_to_hash);
-    int i;
+    //DJB2 Algorithm
+    unsigned int res = 5381; // prime seed (known to work well)
+    unsigned char c;
 
-    for(i=0; i<length; i++){
-        res = res + string_to_hash[i];
-        res = res * string_to_hash[i%10];
-        res = res % HASH_TABLE_SIZE;
+    if (string_to_hash == NULL) {
+        return 0; 
     }
-    return res;
+    while ((c = *string_to_hash++)) res = ((res << 5) + res) + c; 
+    return res % HASH_TABLE_SIZE;
 }
 
 unsigned int hash_int(int num_to_hash){
-    unsigned int res = 2025;
-    short last_digit = num_to_hash%10;
-
-    res = res * num_to_hash + last_digit;
-    res = (res % HASH_TABLE_SIZE + HASH_TABLE_SIZE) % HASH_TABLE_SIZE; // handle negative values
-
-    return res;
+    unsigned int val = (unsigned int)num_to_hash;
+    
+    // some hash func i found on internet doing bit shift and bitwise XOR
+    val = (val ^ 61) ^ (val >> 16);
+    val = val + (val << 3);
+    val = val ^ (val >> 4);
+    
+    return val % HASH_TABLE_SIZE;
 }
 
-// TODO : review input type when implement Insert function
-// need to know col index in linked list to match with data_field index of Row to hash
-// unsigned int hash_all(ColType type, Row row){
-//     unsigned int res;
-//     if(type == STRING){
-//         res = hash_string(*(char*)val_to_hash);
-//     }else{
-//         res = hash_int(*(int*)val_to_hash);
-//     }
+void add_to_ht(HashTable* hash_table, int key, char* value, Row* corresponding_row){
+    // function to add a node to the indicated hash table, original value can be str/int, must be converted to str before passing in this function
+    Node* new_node = NULL;
 
-//     return res;
-// }
+    new_node = init_node();
+    assert((new_node->original_value = strdup(value)) != NULL);
+    new_node->row = corresponding_row;
+
+    // set pointer for node in the linked list that handles collisions
+    if(!hash_table->bucket[key]){
+        hash_table->bucket[key] = new_node;
+    }else{
+        // insert at head
+        new_node->next_node = hash_table->bucket[key];
+        hash_table->bucket[key] = new_node;
+    }
+}

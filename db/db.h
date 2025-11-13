@@ -6,7 +6,10 @@ Group 2 ESGI 2A3
 
 #ifndef DB_H
 #define DB_H
-#define MAX_TABLE_COUNT 50
+#define MAX_TABLE_COUNT 100
+#define MAX_COL_COUNT 50
+#define WARNING_ROW_COUNT 10000
+#define MAX_STR_LEN 256
 
 #include <stdbool.h>
 
@@ -16,7 +19,14 @@ typedef struct HashTable HashTable;
 
 // struct
 typedef struct Row{
-    void **data_field; // double pointer in case data is string 
+    int** int_list; // unset int will be NULL, int_list[int_count][1]
+    char** str_list;
+    double** double_list; // unset double will be NULL, double_list[double_count][1]
+
+    int int_count;
+    int str_count;
+    int double_count;
+
     struct Row *next_row;
 } Row;
 
@@ -25,6 +35,7 @@ typedef struct Col{
     ColType type;
     ColConstraintType constraint;
 
+    // for referential integrity check upon insert
     char* refer_table; // table that fk col references
     char* refer_col; // col of table that fk col references
 
@@ -35,7 +46,8 @@ typedef struct Table{
     char *name;
     Row *first_row;
     Col *first_col; 
-    HashTable* hash_table; // pointer to the hash table of this table
+    HashTable* first_hash_table; // linked list of hash tables of this table
+    int next_id;
 
     int col_count; // to free row and col
 
@@ -50,7 +62,7 @@ void drop_table(Query* query);
 void where_double(Table* table, char* col_name, const double condition);
 void where_int(Table* table, char* col_name, const int condition);
 void where_str(Table* table, char* col_name, const char* condition);
-
+void insert(Query* query);
 void describe_table(Query* query);
 void show(Query* query);
 #endif

@@ -9,5 +9,6 @@ typedef struct Row Row;
 extern Table* first_table;
 extern Row* first_row;
 extern Col* first_col;
+extern int table_count;
 
 #endif
