@@ -56,6 +56,8 @@ typedef struct Table
     struct Table *next_table;
 } Table;
 
+// TODO add linked list of filtered rows (gemini) with 3 data lists for each type
+
 typedef struct Query Query;
 
 // prototypes

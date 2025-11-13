@@ -11,3 +11,7 @@ Group 2 ESGI 2A3
 void bubble_sort(){
 
 }
+
+void join(){
+    // return linked list of filtered rows and copy data in them
+}
