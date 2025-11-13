@@ -135,9 +135,7 @@ int main(int argc, char **argv){
             flush_extra();
 
             if(confirm == 'y'){
-                // call to drop
                 drop_table(parser_output);
-                //printf("DROP is called\n");
             }else printf("Execution of DROP statement aborted.\n");
             break;
         default:

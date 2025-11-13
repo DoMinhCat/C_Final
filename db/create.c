@@ -287,7 +287,7 @@ void create_table(Query* query){
     // global table count
     table_count++;
     // prints success message
-    fprintf(stdout, "Executed: '%s' table created successfuly with %d column(s).\n", new_tb_name, col_count);
+    fprintf(stdout, "Executed: '%s' table created successfuly with %d %s.\n", new_tb_name, col_count, col_count>1?"columns":"column");
     free(pk_col_name);
     pk_col_name = NULL;
 }

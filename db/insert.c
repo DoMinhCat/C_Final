@@ -326,12 +326,18 @@ void insert(Query* query){
     
     // handle auto incrementation of pk type int
     if(int_pk_provided && pk_is_int){
-        table->next_id = int_pk_val+1; // skip unused ids gap
+        table->next_id = int_pk_val+1; // skip unused id gap
     }else if(pk_is_int){
-        // auto set id and increase next_id
+        // auto set id, save value to insert into hash table later and increase next_id
         int_pk_index = get_data_list_index(table, pk_int_col_name);
         assert((int_list_to_insert[int_pk_index] = (int*)malloc(sizeof(int))) != NULL);
         int_list_to_insert[int_pk_index][0] = table->next_id;
+
+        assert((int_unique_val_list = (int*)realloc(int_unique_val_list, sizeof(int) * (unique_int_col_count+1))) != NULL);
+        int_unique_val_list[unique_int_col_count] = table->next_id;
+        assert((int_unique_col_name_list = (char**)realloc(int_unique_col_name_list, sizeof(char*) * (unique_int_col_count+1))) != NULL);
+        assert((int_unique_col_name_list[unique_int_col_count] = strdup(pk_int_col_name)) != NULL);
+        unique_int_col_count++;
         table->next_id++;
     }
 

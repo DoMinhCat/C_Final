@@ -48,9 +48,11 @@ Commands to test:
 
 CREATE TABLE team ( id int pk, name string unique, score double )
 CREATE TABLE player ( id int pk, name string, age int, weight double, team_id int fk references team id )
-INSERT INTO team ( id, name, score ) values ( 1, abc, 45.5s ) // id overflow for int type, 45.5s invalid for double type
+INSERT INTO team ( id, name, score ) values ( 1, abc, 45.5 )
 
 Ideas:
 default, auto increment
 
-IMPORTANT : replace first dummy node of row upon insertion
+Bugs known:
+
+- auto increment of int id didnt insert correctly? later manually inserting that id is still accepted
