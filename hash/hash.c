@@ -10,6 +10,7 @@ Group 2 ESGI 2A3
 #include "hash.h"
 #include "../db/db.h"
 #include "../init/init.h"
+#include "../db/helper_db.h"
 
 unsigned int hash_string(char* string_to_hash){
     //DJB2 Algorithm
