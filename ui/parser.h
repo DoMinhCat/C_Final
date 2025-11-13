@@ -27,7 +27,7 @@ typedef enum CommandType{
 typedef struct DescribeParams{
     char* table_name;
 } DescribeParams;
-// For Create table function
+
 typedef struct{
     char* table_name;
 
@@ -42,7 +42,6 @@ typedef struct{
     int fk_count; // number of fk to free 2 lists above, done in clean.c
 } CreateParams;
 
-// For Insert function
 typedef struct{
     char* table_name;
 
@@ -54,20 +53,20 @@ typedef struct{
 
 typedef struct {
     char* table_name;
-    char* condition_column; // need to check input length
-    char* condition_value; // need to check input length
+    char* condition_column; 
+    char* condition_value; 
 } DeleteParams;
 
 typedef struct {
-    char* table_name; // need to check input length
-    char* table_join_name; // need to check input length
+    char* table_name; 
+    char* table_join_name; 
 
     char** col_list;
     int col_count; //to free col_list
-    char* first_col_on;
-    char* second_col_on;
-    char* condition_col; // need to check input length
-    char* condition_val; // need to check input length
+    char* first_col_on; // from tab1
+    char* second_col_on; // join tab2
+    char* condition_col; 
+    char* condition_val; 
 } SelectParams;
 
 typedef struct {
