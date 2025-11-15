@@ -17,8 +17,7 @@ Group 2 ESGI 2A3
 typedef struct HashTable HashTable;
 
 // struct
-typedef struct Row
-{
+typedef struct Row{
     int **int_list; // unset int will be NULL, int_list[int_count][1]
     char **str_list;
     double **double_list; // unset double will be NULL, double_list[double_count][1]
@@ -30,8 +29,7 @@ typedef struct Row
     struct Row *next_row;
 } Row;
 
-typedef struct Col
-{
+typedef struct Col{
     char *name;
     ColType type;
     ColConstraintType constraint;
@@ -43,15 +41,12 @@ typedef struct Col
     struct Col *next_col;
 } Col;
 
-typedef struct Table
-{
+typedef struct Table{
     char *name;
     Row *first_row;
     Col *first_col;
     HashTable *first_hash_table; // linked list of hash tables of this table
     int next_id;
-
-    int col_count; // to free row and col
 
     struct Table *next_table;
 } Table;
@@ -70,7 +65,7 @@ typedef struct FilteredRow{
     int double_join_count;
     int str_join_count;
 
-    FilteredRow* next_filtered_row;
+    struct FilteredRow* next_filtered_row;
 } FilteredRow;
 
 typedef struct Query Query;

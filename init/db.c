@@ -19,7 +19,6 @@ Table* init_table(){
     table->first_row = init_row();
     table->first_col = init_col();
     table->next_table = NULL;
-    table->col_count = 0;
     table->first_hash_table = NULL;
     table->next_id = 1;
 
