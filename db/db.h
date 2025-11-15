@@ -60,6 +60,7 @@ typedef struct Query Query;
 void create_table(Query* query);
 void drop_table(Query* query);
 void insert(Query* query);
+void delete_from_table(Query* query);
 
 void describe_table(Query* query);
 void show(Query* query);

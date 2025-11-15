@@ -118,13 +118,13 @@ int main(int argc, char **argv){
                 
                 if(confirm == 'y'){
                     // call delete
-                    printf("DELETE is called\n");
+                    delete_from_table(parser_output);
                 }else printf("Execution of DELETE statement aborted.\n");
             }
             // execute normally if there is WHERE
             else{
                 // call delete
-                printf("DELETE is called\n");
+                delete_from_table(parser_output);
             }
             break;
 
