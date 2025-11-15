@@ -56,7 +56,22 @@ typedef struct Table
     struct Table *next_table;
 } Table;
 
-// TODO add linked list of filtered rows (gemini) with 3 data lists for each type
+// linked list of filtered rows for predicate pushdown for SELECT with WHERE/JOIN (for JOIN: 3 data lists for each type)
+typedef struct FilteredRow{
+    Row* row;
+
+    // list of joined data in JOIN clause
+    int** int_joined_list;
+    char** str_joined_list;
+    double** double_joined_list;
+
+    // to free above lists
+    int int_join_count;
+    int double_join_count;
+    int str_join_count;
+
+    FilteredRow* next_filtered_row;
+} FilteredRow;
 
 typedef struct Query Query;
 

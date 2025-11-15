@@ -154,3 +154,50 @@ void free_db(Table* first_table){
         tmp_table = NULL;
     }
 }
+
+void free_filtered_row(FilteredRow* filt_row){
+    int i;
+    
+    if(filt_row->int_joined_list){
+        for(i=0; i<filt_row->int_join_count;i++){
+            free(filt_row->int_joined_list[i]);
+            filt_row->int_joined_list[i] = NULL;
+        }
+        free(filt_row->int_joined_list);
+        filt_row->int_joined_list = NULL;
+    }
+
+    if(filt_row->str_joined_list){
+        for(i=0; i<filt_row->str_join_count;i++){
+            free(filt_row->str_joined_list[i]);
+            filt_row->str_joined_list[i] = NULL;
+        }
+        free(filt_row->str_joined_list);
+        filt_row->str_joined_list = NULL;
+    }
+
+    if(filt_row->double_joined_list){
+        for(i=0; i<filt_row->double_join_count;i++){
+            free(filt_row->double_joined_list[i]);
+            filt_row->double_joined_list[i] = NULL;
+        }
+        free(filt_row->double_joined_list);
+        filt_row->double_joined_list = NULL;
+    }
+
+    free(filt_row);
+    filt_row = NULL;
+}
+
+void free_filtered_set(FilteredRow* first_filtered_row){
+    FilteredRow* current = first_filtered_row;
+    FilteredRow* tmp = NULL;
+
+    while(current!=NULL){
+        tmp = current;
+        current = current->next_filtered_row;
+
+        free_filtered_row(tmp);
+        tmp = NULL;
+    }
+}

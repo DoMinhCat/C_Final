@@ -56,3 +56,22 @@ Row* init_row(){
 
     return row;
 }
+
+FilteredRow* init_filtered_row(){
+    FilteredRow* filt_row = NULL;
+    assert((filt_row = (FilteredRow*)malloc(sizeof(FilteredRow))) != NULL);
+
+    filt_row->row = NULL;
+
+    filt_row->double_joined_list = NULL;
+    filt_row->int_joined_list = NULL;
+    filt_row->str_joined_list = NULL;
+
+    filt_row->int_join_count=0;
+    filt_row->double_join_count=0;
+    filt_row->str_join_count=0;
+
+    filt_row->next_filtered_row = NULL;
+
+    return filt_row;
+}
