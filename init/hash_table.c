@@ -15,6 +15,7 @@ Node* init_node(){
     assert((node = (Node*)malloc(sizeof(Node))) != NULL);
 
     node->row = NULL;
+    node->prev_row = NULL;
     node->original_value = NULL;
     node->next_node = NULL;
     return node;

@@ -64,7 +64,7 @@ void free_node(Node* node){
     node->original_value = NULL;
     free(node);
     node = NULL;
-    // dont free row that node points to, row will be free when freeing table else we free row 2 times
+    // dont free row that node points to or prev row, row will be free when freeing table else we free row 2 times
 }
 
 void free_hash_table(HashTable* hash_table){
