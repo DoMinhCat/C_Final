@@ -51,15 +51,14 @@ typedef struct Table{
     struct Table *next_table;
 } Table;
 
-// linked list of filtered rows for predicate pushdown for SELECT with WHERE/JOIN (for JOIN: 3 data lists for each type)
+// linked list of filtered rows for predicate pushdown for SELECT with WHERE/JOIN
 typedef struct FilteredRow{
     Row* row;
 
-    // list of joined data in JOIN clause
+    // list of joined data if JOIN clause provided
     int** int_joined_list;
     char** str_joined_list;
     double** double_joined_list;
-
     // to free above lists
     int int_join_count;
     int double_join_count;
@@ -76,4 +75,6 @@ void drop_table(Query *query);
 void insert(Query *query);
 void describe_table(Query *query);
 void show(Query *query);
+
+FilteredRow* where_for_select(Table* table, char* condition_col_name, char* str_condition, int int_condition);
 #endif

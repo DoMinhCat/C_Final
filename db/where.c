@@ -5,52 +5,47 @@ Group 2 ESGI 2A3
 */
 
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "db.h"
+#include "helper_db.h"
 #include "../hash/hash.h"
+#include "../init/init.h"
 
-Row** hash_lookup(HashTable* hash_table, int condition_int, char* condition_str){
-    // perform a hash look up to the hash table of pk/unique column and return all the Rows* that satisfies the condition
+FilteredRow* hash_lookup(HashTable* hash_table, int condition_int, char* condition_str){
+    // perform a hash look up to the hash table of pk/unique column and return linked list of FilteredRow (but 1 item only because hash table is for unique/pk col) for WHERE clause in SELECT
 
-    int key;
-    int size = 0;
-    Row** result = NULL;
-    Node* current_node = NULL;
-    char* val_to_cmp = NULL;
+    FilteredRow* result = init_filtered_row();
+    // do hash lookup and get the matching hash node
+    Node* hash_node = exist_in_ht(hash_table, condition_int, condition_str);
 
-    if(!condition_str) {
-        val_to_cmp = int_to_str(condition_int);
-        key = hash_int(condition_int);
-    } else {
-        val_to_cmp = strdup(condition_str);
-        key = hash_string(condition_str);
+    if(hash_node){
+        result->row = hash_node->row;
+        return result;
     }
-
-    // no key inserted
-    if(!hash_table->bucket[key]) {
-        free(val_to_cmp);
-        val_to_cmp = NULL;  
-        return NULL;
-    }
-
-    // loop the node list that handles collision
-    for(current_node=hash_table->bucket[key]; current_node!=NULL; current_node=current_node->next_node){     
-        if(strcmp(val_to_cmp,current_node->original_value)==0){
-            assert((result = (Row**)realloc(result, sizeof(Row*) * (size+1)))!=NULL);
-            result[size] = current_node->row;
-            size++;
-        }
-    }
-    
-    if(size==0){
-        free(val_to_cmp);
-        val_to_cmp = NULL;
-        return NULL;
-    }
-    // terminate with NULL
-    assert((result = (Row**)realloc(result, sizeof(Row*) * (size+1)))!=NULL);
-    result[size] = NULL;
-    return result;
+    return NULL;
 }
 
-// TODO : traverse rows in case no indexing
+FilteredRow* where_for_select(Table* table, char* condition_col_name, char* str_condition, int int_condition){
+    FilteredRow* res = NULL;
+    HashTable* ht_of_col = NULL;
+    Col* current_col = NULL;
+
+    bool col_is_indexed = false;
+
+    //check if condition col is indexed
+    for(ht_of_col = table->first_hash_table; ht_of_col!=NULL; ht_of_col = ht_of_col->next_hash_table){
+        if(strcmp(ht_of_col->col_name, condition_col_name) == 0){
+            col_is_indexed = true;
+            break;
+        }
+    }
+
+    if(col_is_indexed){
+        res = hash_lookup(ht_of_col, int_condition, str_condition);
+        return res;        
+    }else{
+
+    }
+
+}

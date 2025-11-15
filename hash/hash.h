@@ -35,5 +35,6 @@ typedef struct HashTable{
 unsigned int hash_int(int);
 unsigned int hash_string(char*);
 void add_to_ht(HashTable* hash_table, int key, char* value, Row* corresponding_row);
+Node* exist_in_ht(HashTable* hash_tab, int condition_int, char* condition_str);
 
 #endif

@@ -6,6 +6,7 @@ Group 2 ESGI 2A3
 
 #include <string.h>
 #include <assert.h>
+#include <stdbool.h>
 
 #include "hash.h"
 #include "../db/db.h"
@@ -51,4 +52,42 @@ void add_to_ht(HashTable* hash_table, int key, char* value, Row* corresponding_r
         new_node->next_node = hash_table->bucket[key];
         hash_table->bucket[key] = new_node;
     }
+}
+
+Node* exist_in_ht(HashTable* hash_tab, int condition_int, char* condition_str){
+    // used for WHERE clause, do a hash lookup then return the matching hash node for later processing, NULL if not found 
+    int key;
+    Node* current_node = NULL;
+    char* val_to_cmp = NULL;
+
+    // convert and hash int/str condition value 
+    if(!condition_str) {
+        val_to_cmp = int_to_str(condition_int);
+        key = hash_int(condition_int);
+    } else {
+        val_to_cmp = strdup(condition_str);
+        key = hash_string(condition_str);
+    }
+
+    // no key found
+    if(!hash_tab->bucket[key]) {
+        free(val_to_cmp);
+        val_to_cmp = NULL;  
+        return NULL;
+    }
+
+    // loop the node list that handles collision
+    for(current_node=hash_tab->bucket[key]; current_node!=NULL; current_node=current_node->next_node){     
+        if(strcmp(val_to_cmp,current_node->original_value)==0){
+            // found a match
+            free(val_to_cmp);
+            val_to_cmp = NULL;  
+            return current_node;
+        }
+    }   
+
+    // not in collision linked list (other values hashed into the same key as this value)
+    free(val_to_cmp);
+    val_to_cmp = NULL;  
+    return NULL;
 }
