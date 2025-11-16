@@ -13,5 +13,5 @@ void bubble_sort(){
 }
 
 void join(){
-    // return linked list of filtered rows and copy data in them
+    //TODO return linked list of filtered rows and copy data in them
 }
