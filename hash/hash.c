@@ -41,7 +41,7 @@ void add_to_ht(HashTable* hash_table, int key, char* value, Row* corresponding_r
     Node* new_node = NULL;
 
     new_node = init_node();
-    assert((new_node->original_value = strdup(value)) != NULL);
+    new_node->original_value = value;
     new_node->row = corresponding_row;
 
     // set pointer for node in the linked list that handles collisions

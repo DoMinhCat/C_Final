@@ -17,25 +17,6 @@ Group 2 ESGI 2A3
 #include "../hash/hash.h"
 #include "../init/init.h"
 
-typedef struct {
-    int** int_list;
-    char** str_list;
-    double** double_list;
-
-    int* int_unique_vals;
-    char** str_unique_vals;
-    char** int_unique_cols;
-    char** str_unique_cols;
-
-    int int_col_count;
-    int str_col_count;
-    int double_col_count;
-
-    int unique_int_count;
-    int unique_str_count;
-
-    char* pk_int_col_name;
-} FreeParams;
 void free_insert_before_exit(
     int*** int_list_to_insert, char*** str_list_to_insert, double*** double_list_to_insert, char** pk_int_col_name, 
     int str_col_count, int int_col_count, int double_col_count, int** int_unique_val_list, char*** str_unique_val_list,
@@ -127,7 +108,9 @@ void insert(Query* query){
     char** int_unique_col_name_list = NULL;
     char** str_unique_col_name_list = NULL;
     int unique_int_col_count = 0;
+    int unique_int_col_index = 0;
     int unique_str_col_count = 0;
+    int unique_str_col_index = 0;
 
     // vars for type conversion
     double double_val;
@@ -136,7 +119,7 @@ void insert(Query* query){
     int int_pk_val;
     int int_pk_index;
     int col_index;
-    int i;
+    int i,j;
 
     // check table exist
     table = get_table_by_name(query->params.insert_params.table_name);
@@ -145,6 +128,17 @@ void insert(Query* query){
         return;
     }
     first_hash_tab = table->first_hash_table;
+
+    // check no duplicate of col to insert
+    for(i=0; i<col_count-1;i++){
+        for(j=i+1; j<col_count;j++){
+            if(strcmp(col_list[i], col_list[j])==0){
+                fprintf(stderr, "Execution error: duplicate '%s' column not allowed.\n", col_list[i]);
+                free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
+                return;
+            }
+        }
+    }
 
     // gather general info of table
     for(current_col = table->first_col; current_col!=NULL; current_col = current_col->next_col) {
@@ -161,6 +155,12 @@ void insert(Query* query){
                 assert((pk_int_col_name = strdup(current_col->name)) != NULL);
             }
         }
+
+        //get size to malloc for list of unique cols
+        if(current_col->constraint == PK || current_col->constraint == UNIQUE){ 
+            if(current_col->type == INT) unique_int_col_count++;
+            else unique_str_col_count++;
+        }
     }
 
     // calloc 3 lists str/int/double of Row
@@ -170,6 +170,12 @@ void insert(Query* query){
     assert(int_list_to_insert!=NULL);
     str_list_to_insert = (char**)calloc(str_col_count, sizeof(char*));
     assert(str_list_to_insert!=NULL);
+
+    //malloc for unique lists
+    assert((int_unique_val_list = (int*)malloc(sizeof(int) * unique_int_col_count)) != NULL);
+    assert((str_unique_val_list = (char**)malloc(sizeof(char*) * unique_str_col_count)) != NULL);
+    assert((int_unique_col_name_list = (char**)malloc(sizeof(char*) * unique_int_col_count)) != NULL);
+    assert((str_unique_col_name_list = (char**)malloc(sizeof(char*) * unique_str_col_count)) != NULL);
 
     // checks for cols to insert and init list for later insert
     for(i=0; i<col_count; i++){
@@ -214,11 +220,9 @@ void insert(Query* query){
                     int_pk_val = safe_val;
                 }
                 // save value and col name to insert into hash table later
-                assert((int_unique_val_list = (int*)realloc(int_unique_val_list, sizeof(int) * (unique_int_col_count+1))) != NULL);
-                int_unique_val_list[unique_int_col_count] = safe_val;
-                assert((int_unique_col_name_list = (char**)realloc(int_unique_col_name_list, sizeof(char*) * (unique_int_col_count+1))) != NULL);
-                assert((int_unique_col_name_list[unique_int_col_count] = strdup(current_col->name)) != NULL);
-                unique_int_col_count++;
+                int_unique_val_list[unique_int_col_index] = safe_val;
+                assert((int_unique_col_name_list[unique_int_col_index] = strdup(current_col->name)) != NULL);
+                unique_int_col_index++;
 
                 // check uniqueness of values to be inserted
                 hash_tab_of_col = get_ht_by_col_name(first_hash_tab, current_col->name);
@@ -279,11 +283,9 @@ void insert(Query* query){
                     return;
                 }
                 // save value and col name to insert into hash table later
-                assert((str_unique_val_list = (char**)realloc(str_unique_val_list, sizeof(char*) * (unique_str_col_count+1))) != NULL);
-                assert((str_unique_val_list[unique_str_col_count] = strdup(data_list[i])) != NULL);
-                assert((str_unique_col_name_list = (char**)realloc(str_unique_col_name_list, sizeof(char*) * (unique_str_col_count+1))) != NULL);
-                assert((str_unique_col_name_list[unique_str_col_count] = strdup(current_col->name)) != NULL);
-                unique_str_col_count++;
+                assert((str_unique_val_list[unique_str_col_index] = strdup(data_list[i])) != NULL);
+                assert((str_unique_col_name_list[unique_str_col_index] = strdup(current_col->name)) != NULL);
+                unique_str_col_index++;
             }
 
             // expand temp list and store validated value
@@ -320,11 +322,9 @@ void insert(Query* query){
         assert((int_list_to_insert[int_pk_index] = (int*)malloc(sizeof(int))) != NULL);
         int_list_to_insert[int_pk_index][0] = table->next_id;
 
-        assert((int_unique_val_list = (int*)realloc(int_unique_val_list, sizeof(int) * (unique_int_col_count+1))) != NULL);
-        int_unique_val_list[unique_int_col_count] = table->next_id;
-        assert((int_unique_col_name_list = (char**)realloc(int_unique_col_name_list, sizeof(char*) * (unique_int_col_count+1))) != NULL);
-        assert((int_unique_col_name_list[unique_int_col_count] = strdup(pk_int_col_name)) != NULL);
-        unique_int_col_count++;
+        int_unique_val_list[unique_int_col_index] = table->next_id;
+        assert((int_unique_col_name_list[unique_int_col_index] = strdup(pk_int_col_name)) != NULL);
+        unique_int_col_index++;
         table->next_id++;
     }
 
@@ -336,7 +336,7 @@ void insert(Query* query){
     // hash int values of unique int cols and add to their hash table
     int hashed_val;
     char* value = NULL;
-    for(i=0; i<unique_int_col_count; i++){
+    for(i=0; i<unique_int_col_index; i++){
         value = int_to_str(int_unique_val_list[i]);
         hashed_val = hash_int(int_unique_val_list[i]);
         hash_tab_of_col = get_ht_by_col_name(first_hash_tab, int_unique_col_name_list[i]);
@@ -345,7 +345,7 @@ void insert(Query* query){
         add_to_ht(hash_tab_of_col, hashed_val, value, new_row);
     }
     // hash str values of unique str cols and add to their hash table
-    for(i=0; i<unique_str_col_count; i++){
+    for(i=0; i<unique_str_col_index; i++){
         hashed_val = hash_string(str_unique_val_list[i]);
         hash_tab_of_col = get_ht_by_col_name(first_hash_tab, str_unique_col_name_list[i]);
 
