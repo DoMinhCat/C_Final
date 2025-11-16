@@ -61,13 +61,15 @@ void describe_table(Query* query){
         } else col_refer = NULL;
 
         printf("%-20s %-20s %-20s %-25s %-20s\n", name, type, constraint, table_refer?table_refer:"None", col_refer?col_refer:"None");
-
+        
+        
         free(name);
         name = NULL;
         free(col_refer);
         col_refer = NULL;
         free(table_refer);
         table_refer = NULL;
-    
     }
+    for(i=0; i<110; i++) printf("-");
+    printf("\n%d %s, %d %s in total.\n", table->col_count, table->col_count>1?"columns":"column", table->row_count,  table->row_count>1?"rows":"row");
 }

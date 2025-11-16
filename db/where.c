@@ -51,7 +51,7 @@ FilteredRow* traverse_and_compare(Table* table, Col* condition_col, char* str_co
             break;
         case STRING:
             if ((check_with_null && !current_row->str_list[data_list_index]) ||
-            (!check_with_null && current_row->str_list[data_list_index] && strcmp(current_row->str_list[data_list_index][0],str_condition)==0)) should_add = true; 
+            (!check_with_null && current_row->str_list[data_list_index] && strcmp(current_row->str_list[data_list_index],str_condition)==0)) should_add = true; 
             break;
         case DOUBLE:
             if ((check_with_null && !current_row->double_list[data_list_index]) ||
