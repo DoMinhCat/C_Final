@@ -16,22 +16,35 @@ Table* init_table(){
 
     assert((table = (Table*)malloc(sizeof(Table))) != NULL);
     table->name = NULL;
-    table->first_row = NULL;
-    table->first_col = NULL;
+    table->first_row = init_row();
+    table->first_col = init_col();
     table->next_table = NULL;
     table->col_count = 0;
+    table->hash_table = NULL;
 
     return table;
 }
 
 Col* init_col(){
     Col* col = NULL;
-
     assert((col = (Col*)malloc(sizeof(Col))) != NULL);
+
     col->name = NULL;
+    col->refer_col = NULL;
+    col->refer_table = NULL;
     col->constraint = NONE;
     col->type = INT;
     col->next_col = NULL;
 
     return col;
+}
+
+Row* init_row(){
+    Row* row = NULL;
+    assert((row = (Row*)malloc(sizeof(Row))) != NULL);
+
+    row->data_field = NULL;
+    row->next_row = NULL;    
+
+    return row;
 }

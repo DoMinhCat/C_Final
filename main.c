@@ -15,6 +15,7 @@ Group 2 ESGI 2A3
 #include "clean/clean.h"
 #include "init/init.h"
 #include "global_var.h"
+#include "hash/hash.h"
 
 void print_divider(){
     for(int i=0; i<20; i++) printf("-");
@@ -34,7 +35,6 @@ int main(int argc, char **argv){
     char confirm;
 
     Query* parser_output = NULL;
-    Response* db_response = NULL;
 
     printf("Welcome to MiniDB !\n");
     printf("The Final Project developed in C by Minh Cat, Paco, Bamba. 2A3 ESGI 2025-2026.\n");
@@ -50,8 +50,11 @@ int main(int argc, char **argv){
     
     
     if(import_export_choice == 'y' || import_export_choice == 'Y'){
+        print_divider();
+        printf("Import confirmed\n");
+        print_divider();
+        
         // Call import function from file folder
-        printf("Import confirmed");
     }else {
         print_divider();
         printf("Database importation aborted.\n");
@@ -65,7 +68,6 @@ int main(int argc, char **argv){
         cmd_input = read_cmd(cmd_buffer);
         // if nothing or command too long (read_cmd returns NULL)
         if (cmd_input == NULL){
-            printf("\n");
             continue;
         } else if(strcmp("long", cmd_input) == 0){
             printf("\n");
@@ -89,27 +91,23 @@ int main(int argc, char **argv){
 
         // Execute commands
         switch (parser_output->cmd_type){
-        case CREATE:
-            // Call create() 
-            //db_response = create_table(parser_output);
-
-            printf("CREATE is called\n");
+        case SHOW:
+            show(parser_output);
             break;
-
+        case DESCRIBE:
+            describe_table(parser_output);
+            break;
+        case CREATE:
+            create_table(parser_output);
+            break;
         case INSERT:
             // Call insert() of db
-
-            //placeholder
-            //no need to init response, it will be init in db functions
             
             printf("INSERT is called\n");
             break;
 
         case SELECT:
             // Call select() of db
-
-            //placeholder
-            //no need to init response, it will be init in db functions
             
             printf("SELECT is called\n");
             break;
@@ -140,31 +138,18 @@ int main(int argc, char **argv){
 
             if(confirm == 'y'){
                 // call to drop
-                printf("DROP is called\n");
+                drop_table(parser_output);
+                //printf("DROP is called\n");
             }else printf("Execution of DROP statement aborted.\n");
             break;
         default:
             printf("Invalid command, please check the syntax.\n");
             break;
-        }
+        }          
 
-        // Check execution status
-
-        /*
-        if(db_response->status == FAILURE && db_response->message){
-            printf("%s\n", db_response->message);
-            free(db_response);
-            free_current_cmd(&cmd_input, &parser_output);
-            continue;
-        } else if(db_response->status == SUCCESS && db_response->message){
-            printf("Executed : %s\n", db_response->message);
-        }
-            */
-            
+        // in both case success and failure, msg will be printed by db function
 
         // free before getting new command
-
-        if(db_response) free(db_response); // in case no confirm for DROP/DELETE
         free_current_cmd(&cmd_input, &parser_output);
     }
 
@@ -177,15 +162,17 @@ int main(int argc, char **argv){
     } while (import_export_choice != 'y' && import_export_choice != 'Y' && import_export_choice != 'n' && import_export_choice != 'N');
 
     if(import_export_choice == 'y' || import_export_choice == 'Y'){
+        print_divider();
+        printf("Export confirmed.\n");
+        print_divider();
+
         // Call export func from file folder
-        printf("Export confirmed\n");
     }else {
         print_divider();
         printf("Database exportation aborted.\n");
         print_divider();
     }
 
-    
     // Call to functions in clean.c to free all db struct before exit
     free_db(first_table);
 

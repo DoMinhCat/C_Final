@@ -3,3 +3,9 @@
 *.txt
 sandbox.c
 *.out
+/dataSources/
+/dataSources.local.xml
+/httpRequests/
+/shelf/
+/workspace.xml
+.idea
