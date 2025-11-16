@@ -5,6 +5,7 @@ Group 2 ESGI 2A3
 */
 
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "../db/db.h"
 #include "../hash/hash.h"
@@ -61,7 +62,8 @@ void export_table(FILE* output_file, Table* table){
     
 }
 
-void export_db(){
+bool export_db(char* output_file_name, Table* first_table){
     FILE* output_file = NULL;
-    char* output_file_name = "minidb.bin"; 
+
+
 }

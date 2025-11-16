@@ -4,3 +4,8 @@ Description : header file for i/o
 Group 2 ESGI 2A3
 */
 
+#include <stdbool.h>
+
+#include "../db/db.h"
+
+bool export_db(char* output_file_name, Table* first_table);

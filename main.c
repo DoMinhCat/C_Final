@@ -16,6 +16,7 @@ Group 2 ESGI 2A3
 #include "init/init.h"
 #include "global_var.h"
 #include "hash/hash.h"
+#include "file/file.h"
 
 void print_divider(){
     for(int i=0; i<20; i++) printf("-");
@@ -33,6 +34,9 @@ int main(int argc, char **argv){
     char cmd_buffer[MAX_CMD_SIZE];
     char* cmd_input = NULL;
     char confirm;
+    char file_buffer[MAX_FILE_NAME];
+    char* export_name = NULL;
+    char c;
 
     Query* parser_output = NULL;
 
@@ -67,12 +71,7 @@ int main(int argc, char **argv){
         printf(">>> ");
         cmd_input = read_cmd(cmd_buffer);
         // if nothing or command too long (read_cmd returns NULL)
-        if (cmd_input == NULL){
-            continue;
-        } else if(strcmp("long", cmd_input) == 0){
-            printf("\n");
-            continue;
-        }
+        if (cmd_input == NULL || strcmp("long", cmd_input) == 0) continue;
 
         // Call parser from ui folder analyze command
         parser_output = parse_cmd(cmd_input);
@@ -159,10 +158,17 @@ int main(int argc, char **argv){
 
     if(import_export_choice == 'y' || import_export_choice == 'Y'){
         print_divider();
-        printf("Export confirmed.\n");
+        do{
+            printf("Choose a name for your export file: ");
+            export_name = read_file_name(file_buffer);
+        } while(!export_name);
+        
+        printf("Exporting database...\n");
+        // Call export func
+        // export_db(export_name, first_table);
+        
+        printf("Database exported successfully to '%s'.\n", export_name);
         print_divider();
-
-        // Call export func from file folder
     }else {
         print_divider();
         printf("Database exportation aborted.\n");

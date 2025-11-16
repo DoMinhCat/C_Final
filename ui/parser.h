@@ -10,6 +10,7 @@ Group 2 ESGI 2A3
 
 #define MAX_CMD_SIZE 1024
 #define TABLE_NAME_MAX 101
+#define MAX_FILE_NAME 255
 
 #include "../main.h"
 typedef enum CommandType{
@@ -90,6 +91,7 @@ typedef struct Query{
 
 
 char* read_cmd(char* cmd_buffer);
+char* read_file_name(char* file_buffer);
 
 void parse_delete(Query** query);
 void parse_drop(Query** query);
