@@ -31,8 +31,8 @@ void describe_table(Query* query){
         return;
     } 
 
-    printf("%-20s %-20s %-20s %-25s %-20s\n", "Column", "Type", "Constraint", "References Table", "References Column");
-    for(i=0; i<110; i++) printf("-");
+    printf("%-20s | %-20s | %-20s | %-25s | %-20s\n", "Column", "Type", "Constraint", "Table of Reference", "Column of Reference");
+    for(i=0; i<120; i++) printf("-");
     printf("\n");
 
     for(current_col=table->first_col; current_col!=NULL; current_col = current_col->next_col){
@@ -60,7 +60,7 @@ void describe_table(Query* query){
             assert(col_refer!=NULL);
         } else col_refer = NULL;
 
-        printf("%-20s %-20s %-20s %-25s %-20s\n", name, type, constraint, table_refer?table_refer:"None", col_refer?col_refer:"None");
+        printf("%-20s | %-20s | %-20s | %-25s | %-20s\n", name, type, constraint, table_refer?table_refer:"None", col_refer?col_refer:"None");
         
         
         free(name);
@@ -70,6 +70,6 @@ void describe_table(Query* query){
         free(table_refer);
         table_refer = NULL;
     }
-    for(i=0; i<110; i++) printf("-");
+    for(i=0; i<120; i++) printf("-");
     printf("\n%d %s, %d %s in total.\n", table->col_count, table->col_count>1?"columns":"column", table->row_count,  table->row_count>1?"rows":"row");
 }
