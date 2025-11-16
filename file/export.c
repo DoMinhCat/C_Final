@@ -6,6 +6,9 @@ Group 2 ESGI 2A3
 
 #include <stdio.h>
 
+#include "../db/db.h"
+#include "../hash/hash.h"
+
 /*
 NOTE: export structure for table to fwrite in order:
     # metadata
@@ -38,6 +41,27 @@ NOTE: export structure for table to fwrite in order:
 
 */ 
 
+void export_table(FILE* output_file, Col* col){
+    
+}
+
+void export_table(FILE* output_file, Row* row){
+    
+}
+
+void export_hash_node(FILE* output_file, Node* hash_node){
+
+}
+
+void export_hash_table(FILE* output_file, HashTable* ht_to_export){
+
+}
+
+void export_table(FILE* output_file, Table* table){
+    
+}
+
 void export_db(){
+    FILE* output_file = NULL;
     char* output_file_name = "minidb.bin"; 
 }
