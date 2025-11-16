@@ -8,6 +8,7 @@ Group 2 ESGI 2A3
 #include <string.h>
 #include <stdio.h>
 #include <stdbool.h>
+
 #include "db.h"
 #include "helper_db.h"
 #include "../main.h"
@@ -18,26 +19,30 @@ Group 2 ESGI 2A3
 
 void select(Query* query) {
     SelectParams* params = &query->params.select_params;
+    bool select_all = params->col_count == 1 && strcmp(params->col_list[0], "*") == 0;
+
+    int i;
 
     // Make sure table exists
     Table* table = get_table_by_name(params->table_name);
     if (table == NULL) {
-        fprintf(stderr, "Execution error: table '%s' does not exist.\n", params->table_name);
+        fprintf(stderr, "Execution error: '%s' table not found.\n", params->table_name);
         return;
     }
 
     //make sure all columns exist
-    if (params->col_count > 0 && !(params->col_count == 1 && strcmp(params->col_list[0], "*") == 0)) {
+    if (params->col_count > 0 && !select_all) {
         for (int i = 0; i < params->col_count; i++) {
             if (get_col_by_name(table, params->col_list[i]) == NULL) {
-                fprintf(stderr, "Execution error: column '%s' does not exist.\n", params->col_list[i]);
+                fprintf(stderr, "Execution error: '%s' column not found.\n", params->col_list[i]);
                 return;
             }
         }
     }
     printf("\n");
 
-    if (params->col_count == 1 && strcmp(params->col_list[0], "*") == 0) {
+    // print header row (column names)
+    if (select_all) {
         //  SELECT *
         printf("|");
         Col* current_col = table->first_col;
@@ -74,10 +79,25 @@ void select(Query* query) {
     Row* current_row = table->first_row;
     int row_count = 0;
 
+    // if table is empty
+    if(!table->first_row){
+        printf("|");
+        if(select_all){
+            for(i=0; i<table->col_count; i++) printf("%17s|", " ");
+        }else{
+            for(int i = 0; i < params->col_count; i++) printf("%17s|", " ");
+        }
+        printf("\n");
+        print_divider();
+        printf("Found 0 row.\n");
+        return;
+    }
+
+    // table is not empty
     while (current_row != NULL) {
         printf("|");
 
-        if (params->col_count == 1 && strcmp(params->col_list[0], "*") == 0) {
+        if (select_all) {
             // SELECT *:print all columns in the right order
             Col* current_col = table->first_col;
             while (current_col != NULL) {
