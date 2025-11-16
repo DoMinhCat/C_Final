@@ -152,13 +152,13 @@ HashTable* get_ht_by_col_name(HashTable* first_ht, char* col_name){
     return NULL;
 }
 
-void* get_col_value(Table* table, Row* row, const char* col_name, ColType* col_type) {
+void* get_col_value(Table* table, Row* row, char* col_name, ColType col_type) {
     if (table == NULL || row == NULL || col_name == NULL) return NULL;
 
     int list_index = get_data_list_index(table, col_name);
     if (list_index == -1) return NULL;
 
-    switch (*col_type) {
+    switch (col_type) {
         case INT:
             if (list_index < row->int_count) {
                 return &(row->int_list[list_index]);
@@ -373,7 +373,7 @@ char* int_to_str(int val){
     return res;
 }
 
-bool str_to_int(const char *str_val, int *int_output, const char *col_name) {
+bool str_to_int(char *str_val, int *int_output, char *col_name) {
     errno = 0;
     char *endptr;
     long long parsed_val = strtoll(str_val, &endptr, 10);
@@ -395,7 +395,7 @@ bool str_to_int(const char *str_val, int *int_output, const char *col_name) {
     return true;
 }
 
-bool str_to_double(const char *str_val, double *double_output, const char *col_name) {
+bool str_to_double(char *str_val, double *double_output, char *col_name) {
     errno = 0;
     char *endptr;
 

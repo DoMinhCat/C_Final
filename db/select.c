@@ -16,11 +16,11 @@ Group 2 ESGI 2A3
 #include "../hash/hash.h"
 #include "../global_var.h"
 
-void select_data(Query* query) {
+void select(Query* query) {
     SelectParams* params = &query->params.select_params;
 
     // Make sure table exists
-    Table* table = find_table(params->table_name);
+    Table* table = get_table_by_name(params->table_name);
     if (table == NULL) {
         fprintf(stderr, "Execution error: table '%s' does not exist.\n", params->table_name);
         return;
@@ -29,14 +29,12 @@ void select_data(Query* query) {
     //make sure all columns exist
     if (params->col_count > 0 && !(params->col_count == 1 && strcmp(params->col_list[0], "*") == 0)) {
         for (int i = 0; i < params->col_count; i++) {
-            if (find_col(table, params->col_list[i]) == NULL) {
+            if (get_col_by_name(table, params->col_list[i]) == NULL) {
                 fprintf(stderr, "Execution error: column '%s' does not exist.\n", params->col_list[i]);
                 return;
             }
         }
     }
-
-
     printf("\n");
 
     if (params->col_count == 1 && strcmp(params->col_list[0], "*") == 0) {
@@ -84,7 +82,7 @@ void select_data(Query* query) {
             Col* current_col = table->first_col;
             while (current_col != NULL) {
                 ColType col_type;
-                void* value = get_col_value(table, current_row, current_col->name, &col_type);
+                void* value = get_col_value(table, current_row, current_col->name, col_type);
                 format_value(col_type, value);
                 printf(" |");
                 current_col = current_col->next_col;
@@ -93,7 +91,7 @@ void select_data(Query* query) {
             // SELECT col1, col2: print the right columns
             for (int i = 0; i < params->col_count; i++) {
                 ColType col_type;
-                void* value = get_col_value(table, current_row, params->col_list[i], &col_type);
+                void* value = get_col_value(table, current_row, params->col_list[i], col_type);
                 format_value(col_type, value);
                 printf(" |");
             }
