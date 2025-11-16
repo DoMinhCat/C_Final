@@ -88,7 +88,7 @@ void select(Query* query) {
         }else{
             for(int i = 0; i < params->col_count; i++) printf("%23s|", " ");
         }
-        printf("\n");
+        printf("\n\n");
         printf("Found 0 row.\n");
         return;
     }

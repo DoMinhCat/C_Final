@@ -156,25 +156,25 @@ void* get_col_value(Table* table, Row* row, char* col_name, ColType col_type) {
     if (table == NULL || row == NULL || col_name == NULL) return NULL;
 
     int list_index = get_data_list_index(table, col_name);
-    if (list_index == -1) return NULL;
 
     switch (col_type) {
         case INT:
-            if (list_index < row->int_count) {
+            if (row->int_list[list_index]) {
                 return &(row->int_list[list_index][0]);
             }
             break;
         case STRING:
-            if (list_index < row->str_count) {
+            if (row->str_list[list_index]) {
                 return row->str_list[list_index];
             }
             break;
         case DOUBLE:
-            if (list_index < row->double_count) {
+            if (row->double_list[list_index]) {
                 return &(row->double_list[list_index][0]);
             }
             break;
         default:
+            return NULL;
             break;
     }
 
@@ -183,20 +183,20 @@ void* get_col_value(Table* table, Row* row, char* col_name, ColType col_type) {
 
 void format_value(ColType type, void* value) {
     if (value == NULL) {
-        printf("NULL");
+        printf(" %-22s", "NULL");
         return;
     }
 
     switch (type) {
         case INT:
-            printf(" %-23d", *(int*)value);
+            printf(" %-22d", *(int*)value);
             break;
             break;
         case DOUBLE:
-            printf(" %-23lf", *(double*)value);
+            printf(" %-22lf", *(double*)value);
             break;
         case STRING:
-            printf(" %-23s", (char*)value);
+            printf(" %-22s", (char*)value);
             break;
         default:
             fprintf(stderr, "Execution error: an unexpected error occured during formatting value.\n");
