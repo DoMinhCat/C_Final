@@ -44,7 +44,7 @@ typedef struct Table{
 
 typedef struct Query Query;  
 
-// prototypes
+// prototypestg
 void create_table(Query* query);
 void drop_table(Query* query);
 void select_data(Query* query);
