@@ -101,3 +101,133 @@ Col* get_col_by_name(Table* table, const char* col_name) {
     }
     return NULL;
 }
+// New functions for select.c
+Table* find_table(const char* table_name) {
+    Table* current = first_table;
+    while (current != NULL) {
+        if (strcmp(current->name, table_name) == 0) {
+            return current;
+        }
+        current = current->next_table;
+    }
+    return NULL;
+}
+
+Col* find_col(Table* table, const char* col_name) {
+    if (table == NULL || col_name == NULL) return NULL;
+
+    Col* current = table->first_col;
+    while (current != NULL) {
+        if (strcmp(current->name, col_name) == 0) {
+            return current;
+        }
+        current = current->next_col;
+    }
+    return NULL;
+}
+
+int get_col_list_index(Table* table, Row* row, const char* col_name, ColType* col_type) {
+    if (table == NULL || row == NULL || col_name == NULL) return -1;
+
+    Col* current_col = table->first_col;
+    int int_index = 0;
+    int str_index = 0;
+    int double_index = 0;
+
+    while (current_col != NULL) {
+        if (strcmp(current_col->name, col_name) == 0) {
+            *col_type = current_col->type;
+
+            switch (current_col->type) {
+                case INT:
+                case BOOL:
+                    return int_index;
+                case STRING:
+                    return str_index;
+                case FLOAT:
+                case DOUBLE:
+                    return double_index;
+                default:
+                    return -1;
+            }
+        }
+
+        switch (current_col->type) {
+            case INT:
+            case BOOL:
+                int_index++;
+                break;
+            case STRING:
+                str_index++;
+                break;
+            case FLOAT:
+            case DOUBLE:
+                double_index++;
+                break;
+            default:
+                break;
+        }
+
+        current_col = current_col->next_col;
+    }
+
+    return -1;
+}
+
+void* get_col_value(Table* table, Row* row, const char* col_name, ColType* col_type) {
+    if (table == NULL || row == NULL || col_name == NULL) return NULL;
+
+    int list_index = get_col_list_index(table, row, col_name, col_type);
+    if (list_index == -1) return NULL;
+
+    switch (*col_type) {
+        case INT:
+        case BOOL:
+            if (list_index < row->int_count) {
+                return &(row->int_list[list_index]);
+            }
+            break;
+        case STRING:
+            if (list_index < row->str_count) {
+                return row->str_list[list_index];
+            }
+            break;
+        case FLOAT:
+        case DOUBLE:
+            if (list_index < row->double_count) {
+                return &(row->double_list[list_index]);
+            }
+            break;
+        default:
+            break;
+    }
+
+    return NULL;
+}
+
+void format_value(ColType type, void* value) {
+    if (value == NULL) {
+        printf("NULL");
+        return;
+    }
+
+    switch (type) {
+        case INT:
+            printf("%d", *(int*)value);
+            break;
+        case FLOAT:
+            printf("%g", *(float*)value);
+            break;
+        case DOUBLE:
+            printf("%fg", *(double*)value);
+            break;
+        case STRING:
+            printf("%s", (char*)value);
+            break;
+        case BOOL:
+            printf("%s", *(bool*)value ? "true" : "false");
+            break;
+        default:
+            printf("error");
+    }
+}
