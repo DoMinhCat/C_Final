@@ -153,6 +153,7 @@ HashTable* get_ht_by_col_name(HashTable* first_ht, char* col_name){
 }
 
 void* get_col_value(Table* table, Row* row, char* col_name, ColType col_type) {
+    // for SELECT : get the right pointer to data field of row based on requested col
     if (table == NULL || row == NULL || col_name == NULL) return NULL;
 
     int list_index = get_data_list_index(table, col_name);
@@ -182,6 +183,8 @@ void* get_col_value(Table* table, Row* row, char* col_name, ColType col_type) {
 }
 
 void format_value(ColType type, void* value) {
+    // prints out selected value, get value from get_col_value
+    
     if (value == NULL) {
         printf(" %-22s", "NULL");
         return;
