@@ -7,6 +7,7 @@ Group 2 ESGI 2A3
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "db.h"
 #include "helper_db.h"
@@ -44,7 +45,7 @@ FilteredRow* traverse_and_compare(Table* table, Col* condition_col, char* str_co
         switch (col_type)
         {
         case INT:
-            if(current_row->int_list[data_list_index] == int_condition) should_add = true;
+            if(current_row->int_list[data_list_index][0] == int_condition) should_add = true;
             break;
         case STRING:
             if(strcmp(current_row->str_list[data_list_index], str_condition) == 0) should_add = true;
