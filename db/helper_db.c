@@ -153,7 +153,8 @@ HashTable* get_ht_by_col_name(HashTable* first_ht, char* col_name){
 }
 
 int get_data_list_index(Table* table, char* col_name){
-    // get the index of data list of Row for the corresponding type list, use this to access to data field of row (same as SELECT col1) or to insert into the right place of the list of row struct
+    // get the index of data list of Row for the corresponding type list
+    // use this to access to data field of row (same as SELECT col1) or to insert into the right place of the list of row struct
     /* ex: 
     col1 int, col2 str, col3 str, col4 int
         0                            1
@@ -190,18 +191,18 @@ int get_data_list_index(Table* table, char* col_name){
     return -1; // if col not found
 }
 
-/*
 int compare_double(double val1, double val2){
-    //safely compare double
-    // return 0 if val1=val2
-    // return 1 if val1>val2
-    // return -1 if val1<val2
+    /*safely compare double, used for where with double column (no hash table available)
+    return 0 if val1=val2
+    return 1 if val1>val2
+    return -1 if val1<val2
+    */
     double epsilon = DBL_EPSILON * 10.0;
 
     if (fabs(val1 - val2) <= epsilon) return 0;
     else if(val1<val2) return -1;
     else return 1;
-}*/
+}
 
 bool refer_val_exists(char* str_to_check, int val_to_check, char* ref_table_name, char* ref_col_name){
     // this func check if the inserted value for fk exists in the referenced column of the referenced table
@@ -320,4 +321,42 @@ char* int_to_str(int val){
     snprintf(buffer, 20, "%d", val);
     assert((res = strdup(buffer))!=NULL);
     return res;
+}
+
+bool str_to_int(const char *str_val, int *int_output, const char *col_name) {
+    errno = 0;
+    char *endptr;
+    long long parsed_val = strtoll(str_val, &endptr, 10);
+
+    // check conversion error
+    if (endptr == str_val || *endptr != '\0') {
+        fprintf(stderr, "Execution error: invalid value '%s' for '%s' column type INT.\n", str_val, col_name);
+        return false;
+    }
+
+    // check overflow
+    if (errno == ERANGE || parsed_val > INT_MAX || parsed_val < INT_MIN) {
+        fprintf(stderr, "Execution error: incompatible size of '%s' for type INT.\n", str_val);
+        return false;
+    }
+
+    // store converted value
+    *int_output = (int)parsed_val;
+    return true;
+}
+
+bool str_to_double(const char *str_val, double *double_output, const char *col_name) {
+    errno = 0;
+    char *endptr;
+
+    double parsed_val = strtod(str_val, &endptr);
+
+    //Check conversion errors
+    if (errno == ERANGE || isinf(parsed_val) || isnan(parsed_val) || endptr == str_val || *endptr != '\0') {
+        fprintf(stderr, "Execution error: invalid value '%s' for '%s' column type DOUBLE.\n", str_val, col_name);
+        return false;
+    }
+
+    *double_output = parsed_val;
+    return true;
 }

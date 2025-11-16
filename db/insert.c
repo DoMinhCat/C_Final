@@ -174,22 +174,11 @@ void insert(Query* query){
                 case INT:
                     errno = 0;
                     parsed_val = strtoll(data_list[i], &endptr, 10);
-                    
-                    // check conversion error
-                    if (endptr == data_list[i] || *endptr != '\0') {
-                        fprintf(stderr, "Execution error: invalid value '%s' for '%s' column  type INT.\n", data_list[i], col_list[i]);
+
+                    if(!str_to_int(data_list[i],&safe_val, col_list[i])){
                         free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
                         return;
                     }
-
-                    // check overflow for type int
-                    if (errno == ERANGE || parsed_val > INT_MAX || parsed_val < INT_MIN) {
-                        fprintf(stderr, "Execution error: incompatible size of value '%s' for type INT.\n", data_list[i]);
-                        free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
-                        return;
-                    }
-
-                    safe_val = (int)parsed_val;
 
                     // FK check for referential integrity
                     if (current_col->constraint == FK) {
@@ -231,16 +220,10 @@ void insert(Query* query){
                     int_list_to_insert[col_index][0] = safe_val;
                     break;
                 case DOUBLE:
-                    errno = 0;
-                    double_val = strtod(data_list[i], &endptr);
-
-                    // check conversion error
-                    if (endptr == data_list[i] || *endptr != '\0' || isinf(double_val) || isnan(double_val) || errno == ERANGE) {
-                        fprintf(stderr, "Execution error: invalid value '%s' for '%s' column  type DOUBLE.\n", data_list[i], col_list[i]);
+                    if(!str_to_double(data_list[i],&double_val, col_list[i])){
                         free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
                         return;
                     }
-
                     // no check for unique/pk/fk needed, double type not allowed to have unique/pk/fk constraint
 
                     // expand temp list and store validated value

@@ -275,7 +275,6 @@ void create_table(Query* query){
             }
         }
     }
-    new_tb->col_count = col_count;
 
     // add table to the linked list
     if(!first_table) first_table = new_tb;

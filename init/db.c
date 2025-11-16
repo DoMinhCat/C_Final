@@ -19,7 +19,6 @@ Table* init_table(){
     table->first_row = init_row();
     table->first_col = init_col();
     table->next_table = NULL;
-    table->col_count = 0;
     table->first_hash_table = NULL;
     table->next_id = 1;
 
@@ -55,4 +54,23 @@ Row* init_row(){
     row->next_row = NULL;    
 
     return row;
+}
+
+FilteredRow* init_filtered_row(){
+    FilteredRow* filt_row = NULL;
+    assert((filt_row = (FilteredRow*)malloc(sizeof(FilteredRow))) != NULL);
+
+    filt_row->row = NULL;
+
+    filt_row->double_joined_list = NULL;
+    filt_row->int_joined_list = NULL;
+    filt_row->str_joined_list = NULL;
+
+    filt_row->int_join_count=0;
+    filt_row->double_join_count=0;
+    filt_row->str_join_count=0;
+
+    filt_row->next_filtered_row = NULL;
+
+    return filt_row;
 }

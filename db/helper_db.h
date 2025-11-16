@@ -26,8 +26,7 @@ int get_data_list_index(Table* table, char* col_name);
 Table* get_table_by_name(char* table_name);
 Col* get_col_by_name(Table* table, char* col_name);
 HashTable* get_ht_by_col_name(HashTable* first_ht, char* col_name);
-
-//int compare_double(double val1, double val2); not sure needed or not, just leave here
+int compare_double(double val1, double val2); 
 
 // check functions
 bool table_exists(char* table_name);
@@ -35,6 +34,8 @@ bool col_exists(Table* table, char* col_name);
 bool refer_val_exists(char* str_to_check, int val_to_check, char* ref_table_name, char* ref_col_name);
 bool pk_value_is_unique(char* str_to_check, int val_to_check, HashTable* hash_tab, char* constraint);
 
+// type conversion
 char* int_to_str(int val);
-
+bool str_to_int(const char *str_val, int *int_output, const char *col_name);
+bool str_to_double(const char *str_val, double *double_output, const char *col_name);
 #endif

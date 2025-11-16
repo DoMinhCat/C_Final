@@ -13,6 +13,7 @@ typedef struct Row Row;
 typedef struct Table Table; 
 typedef struct HashTable HashTable;  
 typedef struct Node Node;  
+typedef struct FilteredRow FilteredRow;  
 
 void free_current_cmd(char** cmd_string, Query** query);
 void free_query(Query** query);
@@ -23,5 +24,7 @@ void free_table(Table* table);
 void free_db(Table* first_table);
 void free_hash_table(HashTable* hash_table);
 void free_node(Node* node);
+void free_filtered_row(FilteredRow* filt_row);
+void free_filtered_set(FilteredRow* first_filtered_row);
 
 #endif
