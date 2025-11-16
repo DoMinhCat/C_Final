@@ -48,6 +48,9 @@ typedef struct Table{
     HashTable *first_hash_table; // linked list of hash tables of this table
     int next_id;
 
+    int col_count;
+    int row_count;
+
     struct Table *next_table;
 } Table;
 

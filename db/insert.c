@@ -362,6 +362,7 @@ void insert(Query* query){
         last_row = get_last_row(table->first_row);
         last_row->next_row = new_row;
     }
+    table->row_count++;
     // row insertion complete
     fprintf(stdout, "Executed: a new row was inserted into '%s' table.\n", table->name);
 }
