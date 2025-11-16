@@ -17,6 +17,25 @@ Group 2 ESGI 2A3
 #include "../hash/hash.h"
 #include "../init/init.h"
 
+typedef struct {
+    int** int_list;
+    char** str_list;
+    double** double_list;
+
+    int* int_unique_vals;
+    char** str_unique_vals;
+    char** int_unique_cols;
+    char** str_unique_cols;
+
+    int int_col_count;
+    int str_col_count;
+    int double_col_count;
+
+    int unique_int_count;
+    int unique_str_count;
+
+    char* pk_int_col_name;
+} FreeParams;
 void free_insert_before_exit(
     int*** int_list_to_insert, char*** str_list_to_insert, double*** double_list_to_insert, char** pk_int_col_name, 
     int str_col_count, int int_col_count, int double_col_count, int** int_unique_val_list, char*** str_unique_val_list,
@@ -84,13 +103,11 @@ void insert(Query* query){
     char** col_list = query->params.insert_params.col_list;
     int col_count = query->params.insert_params.col_count;
     char** data_list = query->params.insert_params.data_list;
-
     Table* table = NULL;
     Col* current_col = NULL;
     Row* new_row = NULL;
     HashTable* first_hash_tab = NULL;
     HashTable* hash_tab_of_col = NULL;
-    bool col_exist = false;
     bool int_pk_provided = false;
     bool str_pk_provided = false;
     bool pk_is_int = false;
@@ -113,14 +130,13 @@ void insert(Query* query){
     int unique_str_col_count = 0;
 
     // vars for type conversion
-    char* endptr;
-    long long parsed_val;
     double double_val;
-    int i;
+    int safe_val;
+
     int int_pk_val;
     int int_pk_index;
     int col_index;
-    int safe_val;
+    int i;
 
     // check table exist
     table = get_table_by_name(query->params.insert_params.table_name);
@@ -157,140 +173,128 @@ void insert(Query* query){
 
     // checks for cols to insert and init list for later insert
     for(i=0; i<col_count; i++){
-        col_exist = false;
+        current_col = get_col_by_name(table, col_list[i]);
 
-        // Loop through cols of table
-        for(current_col = table->first_col; current_col!=NULL; current_col = current_col->next_col) {
-            col_index = get_data_list_index(table, current_col->name);
-
-            // search for col
-            if (strcmp(current_col->name, col_list[i]) == 0) {
-                col_exist = true;
-                errno = 0;
-
-                // found col, do checks based on data type of col
-                switch (current_col->type)
-                {
-                case INT:
-                    errno = 0;
-                    parsed_val = strtoll(data_list[i], &endptr, 10);
-
-                    if(!str_to_int(data_list[i],&safe_val, col_list[i])){
-                        free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
-                        return;
-                    }
-
-                    // FK check for referential integrity
-                    if (current_col->constraint == FK) {
-                        if(safe_val <= 0){
-                            fprintf(stderr, "Execution error: values with FOREIGN KEY constraint must be 1 or larger.\n");
-                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
-                            return;
-                        }
-                        if(!refer_val_exists(NULL, safe_val, current_col->refer_table, current_col->refer_col)){
-                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
-                            return;
-                        }
-                    }
-
-                    // checks for unique cols
-                    if (current_col->constraint == PK || current_col->constraint == UNIQUE) {
-                        // flag for auto increment later
-                        if(current_col->constraint == PK){
-                            int_pk_provided = true;
-                            int_pk_val = safe_val;
-                        }
-                        // save value and col name to insert into hash table later
-                        assert((int_unique_val_list = (int*)realloc(int_unique_val_list, sizeof(int) * (unique_int_col_count+1))) != NULL);
-                        int_unique_val_list[unique_int_col_count] = safe_val;
-                        assert((int_unique_col_name_list = (char**)realloc(int_unique_col_name_list, sizeof(char*) * (unique_int_col_count+1))) != NULL);
-                        assert((int_unique_col_name_list[unique_int_col_count] = strdup(current_col->name)) != NULL);
-                        unique_int_col_count++;
-
-                        // check uniqueness of values to be inserted
-                        hash_tab_of_col = get_ht_by_col_name(first_hash_tab, current_col->name);
-                        if(!pk_value_is_unique(NULL, safe_val, hash_tab_of_col, current_col->constraint == UNIQUE?"UNIQUE":"PRIMARY KEY")){
-                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
-                            return;
-                        }
-                    }
-
-                    // Store validated value in int list to insert later
-                    assert((int_list_to_insert[col_index] = (int*)malloc(sizeof(int))) != NULL);
-                    int_list_to_insert[col_index][0] = safe_val;
-                    break;
-                case DOUBLE:
-                    if(!str_to_double(data_list[i],&double_val, col_list[i])){
-                        free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
-                        return;
-                    }
-                    // no check for unique/pk/fk needed, double type not allowed to have unique/pk/fk constraint
-
-                    // expand temp list and store validated value
-                    assert((double_list_to_insert[col_index] = (double*)malloc(sizeof(double))) != NULL);
-                    double_list_to_insert[col_index][0] = (double)double_val;
-                    break;
-                case STRING:
-                    // no need to convert type, data_list is stored as string
-
-                    // empty value not allowed
-                    if(data_list[i]){
-                        if(strcmp(data_list[i], "") == 0){
-                            fprintf(stderr, "Execution error: empty string not allowed.\n");
-                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
-                            return;
-                        }
-                    }
-
-                    // check max_len 256
-                    if(strlen(data_list[i]) > MAX_STR_LEN){
-                        fprintf(stderr, "Execution error: 256 characters maximum allowed for STRING values.\n");
-                        free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
-                        return;
-                    }
-
-                    //check fk: referential integrity
-                    if(current_col->constraint == FK){
-                        if(!refer_val_exists(data_list[i], 0, current_col->refer_table, current_col->refer_col)){
-                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
-                            return;
-                        }
-                    }
-                  
-                    // check UNIQUE constraint and pk uniqueness
-                    if(current_col->constraint == PK || current_col->constraint == UNIQUE){ 
-                        if(current_col->constraint == PK) str_pk_provided = true;
-                        hash_tab_of_col = get_ht_by_col_name(first_hash_tab, current_col->name);
-                        if(!pk_value_is_unique(data_list[i], 0, hash_tab_of_col, current_col->constraint == UNIQUE?"UNIQUE":"PRIMARY KEY")){
-                            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
-                            return;
-                        }
-                        // save value and col name to insert into hash table later
-                        assert((str_unique_val_list = (char**)realloc(str_unique_val_list, sizeof(char*) * (unique_str_col_count+1))) != NULL);
-                        assert((str_unique_val_list[unique_str_col_count] = strdup(data_list[i])) != NULL);
-                        assert((str_unique_col_name_list = (char**)realloc(str_unique_col_name_list, sizeof(char*) * (unique_str_col_count+1))) != NULL);
-                        assert((str_unique_col_name_list[unique_str_col_count] = strdup(current_col->name)) != NULL);
-                        unique_str_col_count++;
-                    }
-
-                    // expand temp list and store validated value
-                    str_list_to_insert[col_index] = strdup(data_list[i]);
-                    assert(str_list_to_insert[col_index]!=NULL);
-                    break;
-                default:
-                    fprintf(stderr, "Execution error: unknown type for '%s' column .\n", col_list[i]);
-                    free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
-                    return;
-                    break;
-                }
-                break;
-            }
-        }
-
-        if(!col_exist){
+        //check for col existence
+        if(!current_col){
             fprintf(stderr, "'%s' column  not found.\n", col_list[i]);
             free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
             return;
+        }
+
+        col_index = get_data_list_index(table, current_col->name);
+        errno = 0;
+
+        // based on col type
+        switch (current_col->type){
+        case INT:
+            if(!str_to_int(data_list[i],&safe_val, col_list[i])){
+                free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
+                return;
+            }
+
+            // FK check for referential integrity
+            if (current_col->constraint == FK) {
+                if(safe_val <= 0){
+                    fprintf(stderr, "Execution error: values with FOREIGN KEY constraint must be 1 or larger.\n");
+                    free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
+                    return;
+                }
+                if(!refer_val_exists(NULL, safe_val, current_col->refer_table, current_col->refer_col)){
+                    free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
+                    return;
+                }
+            }
+
+            // checks for unique cols
+            if (current_col->constraint == PK || current_col->constraint == UNIQUE) {
+                // flag for auto increment later
+                if(current_col->constraint == PK){
+                    int_pk_provided = true;
+                    int_pk_val = safe_val;
+                }
+                // save value and col name to insert into hash table later
+                assert((int_unique_val_list = (int*)realloc(int_unique_val_list, sizeof(int) * (unique_int_col_count+1))) != NULL);
+                int_unique_val_list[unique_int_col_count] = safe_val;
+                assert((int_unique_col_name_list = (char**)realloc(int_unique_col_name_list, sizeof(char*) * (unique_int_col_count+1))) != NULL);
+                assert((int_unique_col_name_list[unique_int_col_count] = strdup(current_col->name)) != NULL);
+                unique_int_col_count++;
+
+                // check uniqueness of values to be inserted
+                hash_tab_of_col = get_ht_by_col_name(first_hash_tab, current_col->name);
+                if(!pk_value_is_unique(NULL, safe_val, hash_tab_of_col, current_col->constraint == UNIQUE?"UNIQUE":"PRIMARY KEY")){
+                    free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
+                    return;
+                }
+            }
+
+            // Store validated value in int list to insert later
+            assert((int_list_to_insert[col_index] = (int*)malloc(sizeof(int))) != NULL);
+            int_list_to_insert[col_index][0] = safe_val;
+            break;
+        case DOUBLE:
+            if(!str_to_double(data_list[i],&double_val, col_list[i])){
+                free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
+                return;
+            }
+            // no check for unique/pk/fk needed, double type not allowed to have unique/pk/fk constraint
+
+            // expand temp list and store validated value
+            assert((double_list_to_insert[col_index] = (double*)malloc(sizeof(double))) != NULL);
+            double_list_to_insert[col_index][0] = (double)double_val;
+            break;
+        case STRING:
+            // no need to convert type, data_list is stored as string
+
+            // empty value not allowed
+            if(data_list[i]){
+                if(strcmp(data_list[i], "") == 0){
+                    fprintf(stderr, "Execution error: empty string not allowed.\n");
+                    free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
+                    return;
+                }
+            }
+
+            // check max_len 256
+            if(strlen(data_list[i]) > MAX_STR_LEN){
+                fprintf(stderr, "Execution error: 256 characters maximum allowed for STRING values.\n");
+                free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
+                return;
+            }
+
+            //check fk: referential integrity
+            if(current_col->constraint == FK){
+                if(!refer_val_exists(data_list[i], 0, current_col->refer_table, current_col->refer_col)){
+                    free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
+                    return;
+                }
+            }
+            
+            // check UNIQUE constraint and pk uniqueness
+            if(current_col->constraint == PK || current_col->constraint == UNIQUE){ 
+                if(current_col->constraint == PK) str_pk_provided = true;
+                hash_tab_of_col = get_ht_by_col_name(first_hash_tab, current_col->name);
+                if(!pk_value_is_unique(data_list[i], 0, hash_tab_of_col, current_col->constraint == UNIQUE?"UNIQUE":"PRIMARY KEY")){
+                    free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
+                    return;
+                }
+                // save value and col name to insert into hash table later
+                assert((str_unique_val_list = (char**)realloc(str_unique_val_list, sizeof(char*) * (unique_str_col_count+1))) != NULL);
+                assert((str_unique_val_list[unique_str_col_count] = strdup(data_list[i])) != NULL);
+                assert((str_unique_col_name_list = (char**)realloc(str_unique_col_name_list, sizeof(char*) * (unique_str_col_count+1))) != NULL);
+                assert((str_unique_col_name_list[unique_str_col_count] = strdup(current_col->name)) != NULL);
+                unique_str_col_count++;
+            }
+
+            // expand temp list and store validated value
+            str_list_to_insert[col_index] = strdup(data_list[i]);
+            assert(str_list_to_insert[col_index]!=NULL);
+            break;
+        default:
+            fprintf(stderr, "Execution error: unknown type for '%s' column .\n", col_list[i]);
+            free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
+            return;
+            break;
         }
     }
 
