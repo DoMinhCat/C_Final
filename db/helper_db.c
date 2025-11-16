@@ -322,3 +322,41 @@ char* int_to_str(int val){
     assert((res = strdup(buffer))!=NULL);
     return res;
 }
+
+bool str_to_int(const char *str_val, int *int_output, const char *col_name) {
+    errno = 0;
+    char *endptr;
+    long long parsed_val = strtoll(str_val, &endptr, 10);
+
+    // check conversion error
+    if (endptr == str_val || *endptr != '\0') {
+        fprintf(stderr, "Execution error: invalid value '%s' for '%s' column type INT.\n", str_val, col_name);
+        return false;
+    }
+
+    // check overflow
+    if (errno == ERANGE || parsed_val > INT_MAX || parsed_val < INT_MIN) {
+        fprintf(stderr, "Execution error: incompatible size of '%s' for type INT.\n", str_val);
+        return false;
+    }
+
+    // store converted value
+    *int_output = (int)parsed_val;
+    return true;
+}
+
+bool str_to_double(const char *str_val, double *double_output, const char *col_name) {
+    errno = 0;
+    char *endptr;
+
+    double parsed_val = strtod(str_val, &endptr);
+
+    //Check conversion errors
+    if (errno == ERANGE || isinf(parsed_val) || isnan(parsed_val) || endptr == str_val || *endptr != '\0') {
+        fprintf(stderr, "Execution error: invalid value '%s' for '%s' column type DOUBLE.\n", str_val, col_name);
+        return false;
+    }
+
+    *double_output = parsed_val;
+    return true;
+}

@@ -58,6 +58,8 @@ INSERT INTO player ( id , name , age , weight , team_id ) values ( 15 , stringfk
 Ideas:
 default constraint
 end with ; to be able to execute multiple cmds in one run
+where x = NULL
+
 SELECT without where: print on the go
 SELECT with WHERE (no indexing) : print on the go with a compare to check condition (like above + check)
 SELECT with WHERE (indexing) : look up hash table, return list of Row*, loop through result rows and print on the go

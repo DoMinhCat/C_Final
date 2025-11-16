@@ -34,6 +34,8 @@ bool col_exists(Table* table, char* col_name);
 bool refer_val_exists(char* str_to_check, int val_to_check, char* ref_table_name, char* ref_col_name);
 bool pk_value_is_unique(char* str_to_check, int val_to_check, HashTable* hash_tab, char* constraint);
 
+// type conversion
 char* int_to_str(int val);
-
+bool str_to_int(const char *str_val, int *int_output, const char *col_name);
+bool str_to_double(const char *str_val, double *double_output, const char *col_name);
 #endif
