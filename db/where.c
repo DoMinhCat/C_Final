@@ -84,7 +84,7 @@ FilteredRow* traverse_and_compare(Table* table, Col* condition_col, char* str_co
 FilteredRow* where_for_select(Table* table, Col* condition_col, char* str_condition, double double_condition, int int_condition, ColType col_type){
     // SELECT db needs to convert condition value before passing to this func
     // IMPORTANT, if type is not STRING then must pass NULL for str_condition
-    // IMPORTANT, condition col is NULL, always pass NULL to str_condition regardless of col_type
+    // IMPORTANT, if condition_col is NULL (comparing with NULL e,g. WHERE col1 = NULL), always pass "NULL" to str_condition regardless of col_type
 
     FilteredRow* res = NULL;
     HashTable* ht_of_col = NULL;
