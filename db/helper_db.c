@@ -161,7 +161,7 @@ void* get_col_value(Table* table, Row* row, char* col_name, ColType col_type) {
     switch (col_type) {
         case INT:
             if (list_index < row->int_count) {
-                return &(row->int_list[list_index]);
+                return &(row->int_list[list_index][0]);
             }
             break;
         case STRING:
@@ -171,7 +171,7 @@ void* get_col_value(Table* table, Row* row, char* col_name, ColType col_type) {
             break;
         case DOUBLE:
             if (list_index < row->double_count) {
-                return &(row->double_list[list_index]);
+                return &(row->double_list[list_index][0]);
             }
             break;
         default:
@@ -189,19 +189,21 @@ void format_value(ColType type, void* value) {
 
     switch (type) {
         case INT:
-            printf("%d", *(int*)value);
+            printf(" %-23d", *(int*)value);
             break;
             break;
         case DOUBLE:
-            printf("%fg", *(double*)value);
+            printf(" %-23lf", *(double*)value);
             break;
         case STRING:
-            printf("%s", (char*)value);
+            printf(" %-23s", (char*)value);
             break;
         default:
-            printf("error");
+            fprintf(stderr, "Execution error: an unexpected error occured during formatting value.\n");
+            break;
     }
 }
+
 int get_data_list_index(Table* table, char* col_name){
     // get the index of data list of Row for the corresponding type list
     // use this to access to data field of row (same as SELECT col1) or to insert into the right place of the list of row struct
@@ -410,3 +412,4 @@ bool str_to_double(char *str_val, double *double_output, char *col_name) {
     *double_output = parsed_val;
     return true;
 }
+

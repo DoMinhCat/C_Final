@@ -16,7 +16,6 @@ Group 2 ESGI 2A3
 
 typedef struct HashTable HashTable;
 
-// struct
 typedef struct Row{
     int **int_list; // unset int will be NULL, int_list[int_count][1]
     char **str_list;

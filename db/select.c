@@ -20,6 +20,7 @@ Group 2 ESGI 2A3
 void select(Query* query) {
     SelectParams* params = &query->params.select_params;
     bool select_all = params->col_count == 1 && strcmp(params->col_list[0], "*") == 0;
+    ColType col_type;
 
     int i;
 
@@ -47,7 +48,7 @@ void select(Query* query) {
         printf("|");
         Col* current_col = table->first_col;
         while (current_col != NULL) {
-            printf(" %-15s |", current_col->name);
+            printf(" %-21s |", current_col->name);
             current_col = current_col->next_col;
         }
         printf("\n");
@@ -55,7 +56,7 @@ void select(Query* query) {
     printf("|");
         current_col = table->first_col;
         while (current_col != NULL) {
-            printf("-----------------|");
+            printf("-----------------------|");
             current_col = current_col->next_col;
         }
         printf("\n");
@@ -63,14 +64,14 @@ void select(Query* query) {
         // SELECT col1, col2, ... :/
         printf("|");
         for (int i = 0; i < params->col_count; i++) {
-            printf(" %-15s |", params->col_list[i]);
+            printf(" %-21s |", params->col_list[i]);
         }
         printf("\n");
 
 
         printf("|");
         for (int i = 0; i < params->col_count; i++) {
-            printf("-----------------|");
+            printf("-----------------------|");
         }
         printf("\n");
     }
@@ -83,12 +84,11 @@ void select(Query* query) {
     if(!table->first_row){
         printf("|");
         if(select_all){
-            for(i=0; i<table->col_count; i++) printf("%17s|", " ");
+            for(i=0; i<table->col_count; i++) printf("%23s|", " ");
         }else{
-            for(int i = 0; i < params->col_count; i++) printf("%17s|", " ");
+            for(int i = 0; i < params->col_count; i++) printf("%23s|", " ");
         }
         printf("\n");
-        print_divider();
         printf("Found 0 row.\n");
         return;
     }
@@ -97,23 +97,23 @@ void select(Query* query) {
     while (current_row != NULL) {
         printf("|");
 
+        Col* current_col = table->first_col;
         if (select_all) {
-            // SELECT *:print all columns in the right order
-            Col* current_col = table->first_col;
+            // print all columns in the right order
             while (current_col != NULL) {
-                ColType col_type;
+                col_type = current_col->type;
                 void* value = get_col_value(table, current_row, current_col->name, col_type);
                 format_value(col_type, value);
-                printf(" |");
+                printf("|");
                 current_col = current_col->next_col;
             }
         } else {
             // SELECT col1, col2: print the right columns
             for (int i = 0; i < params->col_count; i++) {
-                ColType col_type;
+                col_type = get_col_by_name(table, params->col_list[i])->type;
                 void* value = get_col_value(table, current_row, params->col_list[i], col_type);
                 format_value(col_type, value);
-                printf(" |");
+                printf("|");
             }
         }
 
@@ -123,5 +123,5 @@ void select(Query* query) {
     }
 
     // print number of rows
-    printf("\nFound %d row(s)\n", row_count);
+    printf("\nFound %d %s.\n", row_count, row_count>1?"rows":"row");
 }
