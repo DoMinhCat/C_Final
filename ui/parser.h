@@ -9,7 +9,6 @@ Group 2 ESGI 2A3
 #define PARSER_H
 
 #define MAX_CMD_SIZE 1024
-#define MAX_TOKEN_SIZE 257
 #define TABLE_NAME_MAX 101
 
 #include "../main.h"
@@ -28,12 +27,12 @@ typedef enum CommandType{
 typedef struct DescribeParams{
     char* table_name;
 } DescribeParams;
-// For Create table function
+
 typedef struct{
     char* table_name;
 
     char **col_list; // list of column names passed in the query
-    int col_count;          // number of columns
+    int col_count; // number of columns
 
     ColType *type_list;  // list of types corresponding order of col_list
     ColConstraintType *constraint_list; // list of constraint corresponding to order of col_list
@@ -43,20 +42,19 @@ typedef struct{
     int fk_count; // number of fk to free 2 lists above, done in clean.c
 } CreateParams;
 
-// For Insert function
 typedef struct{
     char* table_name;
 
     char **col_list; // list of column names passed in the query
     int col_count;          // number of columns to free col_list and
 
-    void **data_list; // list of input for each column
+    char **data_list; // list of input for each column, saved as string in rax form, process later in insert db
 } InsertParams;
 
 typedef struct {
     char* table_name;
-    char* condition_column; // need to check input length
-    char* condition_value; // need to check input length
+    char* condition_column; 
+    char* condition_value; 
 } DeleteParams;
 
 typedef struct {
@@ -65,8 +63,8 @@ typedef struct {
 
     char** col_list;
     int col_count; //to free col_list
-    char* first_col_on;
-    char* second_col_on;
+    char* first_col_on; // from tab1
+    char* second_col_on; // join tab2
     char* condition_col; 
     char* condition_val; 
 } SelectParams;

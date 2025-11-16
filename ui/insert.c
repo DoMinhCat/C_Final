@@ -79,7 +79,7 @@ void parse_insert(Query** query){
     token = strtok(data_list, " ,\t"); // got val1
     while(token != NULL){
         // increase size of data_list 
-        (*query)->params.insert_params.data_list = (void**)realloc((*query)->params.insert_params.data_list, (val_count+1) * sizeof(void*)); 
+        (*query)->params.insert_params.data_list = (char**)realloc((*query)->params.insert_params.data_list, (val_count+1) * sizeof(char*)); 
         assert(((*query)->params.insert_params.data_list) != NULL);
         // set value
         (*query)->params.insert_params.data_list[val_count] = strdup(token);
@@ -99,7 +99,7 @@ void parse_insert(Query** query){
     // check number of values passed and number of columns passed
     if(val_count != (*query)->params.insert_params.col_count){
         (*query)->cmd_type = INVALID;
-        fprintf(stderr, "Syntax error: %d value(s) provided for %d column(s).\n", val_count, (*query)->params.insert_params.col_count);
+        fprintf(stderr, "Syntax error: %d % provided for %d %s.\n", val_count, val_count>1?"values":"value", (*query)->params.insert_params.col_count, (*query)->params.insert_params.col_count>1?"columns":"column");
         return;
     }
 }

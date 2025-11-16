@@ -5,13 +5,38 @@ Group 2 ESGI 2A3
 */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <float.h>
+#include <math.h>
 
 #include "helper_db.h"
 #include "../ui/parser.h"
 #include "db.h"
 #include "../global_var.h"
+#include "../hash/hash.h"
+
+bool table_exists(char* table_name){
+    // check for table existence, print error if not.
+    // ex: if(!table_exists(tb_name)) return;
+    Table* table = get_table_by_name(table_name);
+    if(!table) {
+        fprintf(stderr, "Execution error: '%s' table not found.\n", table_name);
+        return false;
+    }
+    return true;
+}
+
+bool col_exists(Table* table, char* col_name){
+    // same as table_exists above but for col
+    Col* col = get_col_by_name(table, col_name);
+    if(!col) {
+        fprintf(stderr, "Execution error: '%s' column  not found.\n", col_name);
+        return false;
+    }
+    return true;
+}
 
 int* get_fk_col_list_index(Query* query){
     /*
@@ -64,17 +89,37 @@ Table* get_last_table(Table* first_table){
     return current_table;
 }
 
-Col* get_last_col(Col* first_col){
-    // this function assumes there are at least 1 col already
-    Col* current_col = first_col;
+// NOTE: DON'T DELETE, maybe will need this in the future for delete/where/select?
+// Col* get_last_col(Col* first_col){
+//     // this function assumes there are at least 1 col already
+//     Col* current_col = first_col;
     
-    while(current_col->next_col){
-        current_col = current_col->next_col;
+//     while(current_col->next_col){
+//         current_col = current_col->next_col;
+//     }
+//     return current_col;
+// }
+
+// HashTable* get_last_hash_table(HashTable* first_ht){
+//     // this function assumes there are at least 1 hash table already
+//     HashTable* current_ht = first_ht;
+    
+//     while(current_ht->next_hash_table){
+//         current_ht = current_ht->next_hash_table;
+//     }
+//     return current_ht;
+// }
+Row* get_last_row(Row* first_row){
+    // this function assumes there are at least 1 row already
+    Row* current_row = first_row;
+    
+    while(current_row->next_row){
+        current_row = current_row->next_row;
     }
-    return current_col;
+    return current_row;
 }
 
-Table* get_table_by_name(const char* table_name) {
+Table* get_table_by_name(char* table_name) {
     // this func return pointer to the table having input name
     Table* current = first_table;
 
@@ -87,102 +132,34 @@ Table* get_table_by_name(const char* table_name) {
     return NULL;
 }
 
-Col* get_col_by_name(Table* table, const char* col_name) {
+Col* get_col_by_name(Table* table, char* col_name) {
     // return pointer to column with input name of a given table
-    if (table == NULL || col_name == NULL) return NULL;
-
     Col* current = table->first_col;
     
     while (current != NULL) {
-        if (strcmp(current->name, col_name) == 0) {
-            return current;
-        }
-        current = current->next_col;
-    }
-    return NULL;
-}
-// New functions for select.c
-Table* find_table(const char* table_name) {
-    Table* current = first_table;
-    while (current != NULL) {
-        if (strcmp(current->name, table_name) == 0) {
-            return current;
-        }
-        current = current->next_table;
-    }
-    return NULL;
-}
-
-Col* find_col(Table* table, const char* col_name) {
-    if (table == NULL || col_name == NULL) return NULL;
-
-    Col* current = table->first_col;
-    while (current != NULL) {
-        if (strcmp(current->name, col_name) == 0) {
-            return current;
-        }
+        if (strcmp(current->name, col_name) == 0) return current;
         current = current->next_col;
     }
     return NULL;
 }
 
-int get_col_list_index(Table* table, Row* row, const char* col_name, ColType* col_type) {
-    if (table == NULL || row == NULL || col_name == NULL) return -1;
+HashTable* get_ht_by_col_name(HashTable* first_ht, char* col_name){
+    while(first_ht!=NULL){
+        if(strcmp(first_ht->col_name, col_name)==0) return first_ht;
 
-    Col* current_col = table->first_col;
-    int int_index = 0;
-    int str_index = 0;
-    int double_index = 0;
-
-    while (current_col != NULL) {
-        if (strcmp(current_col->name, col_name) == 0) {
-            *col_type = current_col->type;
-
-            switch (current_col->type) {
-                case INT:
-                case BOOL:
-                    return int_index;
-                case STRING:
-                    return str_index;
-                case FLOAT:
-                case DOUBLE:
-                    return double_index;
-                default:
-                    return -1;
-            }
-        }
-
-        switch (current_col->type) {
-            case INT:
-            case BOOL:
-                int_index++;
-                break;
-            case STRING:
-                str_index++;
-                break;
-            case FLOAT:
-            case DOUBLE:
-                double_index++;
-                break;
-            default:
-                break;
-        }
-
-        current_col = current_col->next_col;
+        first_ht = first_ht->next_hash_table;
     }
-
-    return -1;
+    return NULL;
 }
 
 void* get_col_value(Table* table, Row* row, const char* col_name, ColType* col_type) {
     if (table == NULL || row == NULL || col_name == NULL) return NULL;
 
-    int list_index = get_col_list_index(table, row, col_name, col_type);
+    int list_index = get_data_list_index(table, col_name);
     if (list_index == -1) return NULL;
 
     switch (*col_type) {
         case INT:
-        case BOOL:
             if (list_index < row->int_count) {
                 return &(row->int_list[list_index]);
             }
@@ -192,7 +169,6 @@ void* get_col_value(Table* table, Row* row, const char* col_name, ColType* col_t
                 return row->str_list[list_index];
             }
             break;
-        case FLOAT:
         case DOUBLE:
             if (list_index < row->double_count) {
                 return &(row->double_list[list_index]);
@@ -215,8 +191,6 @@ void format_value(ColType type, void* value) {
         case INT:
             printf("%d", *(int*)value);
             break;
-        case FLOAT:
-            printf("%g", *(float*)value);
             break;
         case DOUBLE:
             printf("%fg", *(double*)value);
@@ -224,10 +198,215 @@ void format_value(ColType type, void* value) {
         case STRING:
             printf("%s", (char*)value);
             break;
-        case BOOL:
-            printf("%s", *(bool*)value ? "true" : "false");
-            break;
         default:
             printf("error");
     }
+}
+int get_data_list_index(Table* table, char* col_name){
+    // get the index of data list of Row for the corresponding type list
+    // use this to access to data field of row (same as SELECT col1) or to insert into the right place of the list of row struct
+    /* ex: 
+    col1 int, col2 str, col3 str, col4 int
+        0                            1
+    get_data_list_index(table, "col4") -> 1 (col4 is INT so col4 is has index 1 for INT col)
+    */
+    Col* current = table->first_col;
+    int i_int = -1;
+    int i_str = -1;
+    int i_double = -1;
+    
+    while (current != NULL) {
+        if(current->type == INT) i_int++;
+        else if(current->type == DOUBLE) i_double++;
+        else if(current->type == STRING) i_str++;
+
+        if (strcmp(current->name, col_name) == 0) {
+            switch(current->type) {
+            case INT:
+                return i_int;
+                break;
+            case STRING:
+                return i_str;
+                break;
+            case DOUBLE:
+                return i_double;
+                break;
+            default:
+                return -1; // not gonna happen tho, all col type is INT/STR/DOUBLE
+                break;
+            }
+        }
+        current = current->next_col;
+    }
+    return -1; // if col not found
+}
+
+int compare_double(double val1, double val2){
+    /*safely compare double, used for where with double column (no hash table available)
+    return 0 if val1=val2
+    return 1 if val1>val2
+    return -1 if val1<val2
+    */
+    double epsilon = DBL_EPSILON * 10.0;
+
+    if (fabs(val1 - val2) <= epsilon) return 0;
+    else if(val1<val2) return -1;
+    else return 1;
+}
+
+bool refer_val_exists(char* str_to_check, int val_to_check, char* ref_table_name, char* ref_col_name){
+    // this func check if the inserted value for fk exists in the referenced column of the referenced table
+    int sscanf_check = 0;
+    int hashed_int;
+    Node* current_hash_node = NULL;
+    HashTable* hash_tab = get_ht_by_col_name(get_table_by_name(ref_table_name)->first_hash_table, ref_col_name); 
+
+    // no need to check if referenced table exists: this is restricted by drop (can't drop table if it is still refernced)
+
+    // str value check
+    if(str_to_check!=NULL){
+        //hash and check existenece with hash table
+        hashed_int = hash_string(str_to_check); // this is the key 0-66
+
+        // bucket null => value non existing, ref integrity violated 
+        if(hash_tab->bucket[hashed_int] == NULL){
+            fprintf(stderr, "Execution error: referential integrity violated. Value '%s' for '%s' column of '%s' table does not exist.\n", str_to_check, ref_col_name, ref_table_name);
+            return false;
+        }
+        
+        for(current_hash_node = hash_tab->bucket[hashed_int]; current_hash_node!=NULL; current_hash_node=current_hash_node->next_node){
+            if(strcmp(current_hash_node->original_value, str_to_check) == 0) return true;
+        }
+        
+        //no result found
+        fprintf(stderr, "Execution error: referential integrity violated. Value '%s' for '%s' column of '%s' table does not exist.\n", str_to_check, ref_col_name, ref_table_name);
+        return false;
+
+    // int value check
+    }else{
+        //hash and check existenece with hash table
+        hashed_int = hash_int(val_to_check); // this is the key 0-66
+        int val_db;
+
+        // bucket null => no duplicate value, no need to check 
+        if(hash_tab->bucket[hashed_int] == NULL){
+            fprintf(stderr, "Execution error: referential integrity violated. Value '%d' for '%s' column of '%s' table does not exist.\n", val_to_check, ref_col_name, ref_table_name);
+            return false;
+        }
+
+        for(current_hash_node = hash_tab->bucket[hashed_int]; current_hash_node!=NULL; current_hash_node=current_hash_node->next_node){
+            // convert back to int to compare, no need strol because we are sure it is int converted to string when inserted and passed earlier checks
+            sscanf_check = sscanf(current_hash_node->original_value, "%d", &val_db); 
+            if(sscanf_check != 1){
+                fprintf(stderr, "Execution error: an error occured while hashing.\n");
+                return false;
+            }
+            if(val_db == val_to_check) return true;
+        }
+        
+        //no result found
+        fprintf(stderr, "Execution error: referential integrity violated. Value '%d' for '%s' column of '%s' table does not exist.\n", val_to_check, ref_col_name, ref_table_name);
+        return false;
+    }
+}
+
+bool pk_value_is_unique(char* str_to_check, int val_to_check, HashTable* hash_tab, char* constraint){
+    // this func check uniqueness with hash table lookup, use for pk and unique cols
+    int sscanf_check = 0;
+    int hashed_int;
+    Node* current_hash_node = NULL;
+
+    // str value
+    if(str_to_check!=NULL){
+        //hash and check uniqueness with hash table
+        hashed_int = hash_string(str_to_check); // this is the key 0-66
+
+        // bucket null => no duplicate value, no need to check 
+        if(hash_tab->bucket[hashed_int] != NULL){
+            for(current_hash_node = hash_tab->bucket[hashed_int]; current_hash_node!=NULL; current_hash_node=current_hash_node->next_node){
+                if(strcmp(current_hash_node->original_value, str_to_check) == 0){
+                    fprintf(stderr, "Execution error: %s constraint violated.\n", constraint);
+                    return false;
+                }
+            }
+        }
+        //all checks passed
+        return true;
+    
+    // int value
+    }else{
+        // 0 and negative not allowed
+        if(strcasecmp("PRIMARY KEY", constraint)==0 && val_to_check<=0){
+            fprintf(stderr, "Execution error: values with PRIMARY KEY constraint must be 1 or larger.\n");
+            return false;
+        }
+        //hash and check uniqueness with hash table
+        hashed_int = hash_int(val_to_check); // this is the key 0-66
+        int val_db;
+
+        // bucket null => no duplicate value, no need to check 
+        if(hash_tab->bucket[hashed_int] != NULL){
+            for(current_hash_node = hash_tab->bucket[hashed_int]; current_hash_node!=NULL; current_hash_node=current_hash_node->next_node){
+                // convert back to int before cmp, no need strol because we are sure it is int converted to string when inserted and passed earlier checks
+                sscanf_check = sscanf(current_hash_node->original_value, "%d", &val_db); 
+                if(sscanf_check != 1){
+                    fprintf(stderr, "Execution error: an error occured while hashing.\n");
+                    return false;
+                }
+                if(val_db == val_to_check){
+                    fprintf(stderr, "Execution error: UNIQUE constraint violated.\n");
+                    return false;
+                }
+            }
+        }
+        //all checks passed
+        return true;
+    }
+}
+
+char* int_to_str(int val){
+    char buffer[20];
+    char* res = NULL;
+
+    snprintf(buffer, 20, "%d", val);
+    assert((res = strdup(buffer))!=NULL);
+    return res;
+}
+
+bool str_to_int(const char *str_val, int *int_output, const char *col_name) {
+    errno = 0;
+    char *endptr;
+    long long parsed_val = strtoll(str_val, &endptr, 10);
+
+    // check conversion error
+    if (endptr == str_val || *endptr != '\0') {
+        fprintf(stderr, "Execution error: invalid value '%s' for '%s' column type INT.\n", str_val, col_name);
+        return false;
+    }
+
+    // check overflow
+    if (errno == ERANGE || parsed_val > INT_MAX || parsed_val < INT_MIN) {
+        fprintf(stderr, "Execution error: incompatible size of '%s' for type INT.\n", str_val);
+        return false;
+    }
+
+    // store converted value
+    *int_output = (int)parsed_val;
+    return true;
+}
+
+bool str_to_double(const char *str_val, double *double_output, const char *col_name) {
+    errno = 0;
+    char *endptr;
+
+    double parsed_val = strtod(str_val, &endptr);
+
+    //Check conversion errors
+    if (errno == ERANGE || isinf(parsed_val) || isnan(parsed_val) || endptr == str_val || *endptr != '\0') {
+        fprintf(stderr, "Execution error: invalid value '%s' for '%s' column type DOUBLE.\n", str_val, col_name);
+        return false;
+    }
+
+    *double_output = parsed_val;
+    return true;
 }

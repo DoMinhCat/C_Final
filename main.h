@@ -20,7 +20,8 @@ typedef enum ColType{
 typedef enum{
     NONE,
     FK,
-    PK
+    PK,
+    UNIQUE
 } ColConstraintType;
 
 #endif

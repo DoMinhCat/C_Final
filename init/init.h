@@ -13,6 +13,7 @@ typedef struct Table Table;
 typedef struct Query Query;  
 typedef struct Col Col;  
 typedef struct Row Row;  
+typedef struct FilteredRow FilteredRow;  
 
 Query* init_query();
 
@@ -22,5 +23,6 @@ HashTable* init_hash_table();
 Table* init_table();
 Col* init_col();
 Row* init_row();
+FilteredRow* init_filtered_row();
 
 #endif

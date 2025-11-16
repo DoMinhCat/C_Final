@@ -90,8 +90,8 @@ void check_where(char* token, Query** query){
 
     //check condition value of where
     token = strtok(NULL, " \t");
-    if((*query)->cmd_type == SELECT) sprintf(error_msg, "1 value is required for column '%s' in WHERE clause", (*query)->params.select_params.condition_col);
-    else if((*query)->cmd_type == DELETE) sprintf(error_msg, "1 value is required for column '%s' in WHERE clause", (*query)->params.delete_params.condition_column);
+    if((*query)->cmd_type == SELECT) sprintf(error_msg, "1 value is required for '%s' column  in WHERE clause", (*query)->params.select_params.condition_col);
+    else if((*query)->cmd_type == DELETE) sprintf(error_msg, "1 value is required for '%s' column  in WHERE clause", (*query)->params.delete_params.condition_column);
     if(!contain_param(token, query, error_msg)) return; 
     
     if((*query)->cmd_type == SELECT) {
@@ -119,14 +119,17 @@ void check_where(char* token, Query** query){
 bool exceed_max_len(char* token, Query** query, int max_len, char* current_str){
     if (strlen(token)>max_len){
         (*query)->cmd_type = INVALID;
-        fprintf(stderr, "Syntax error: %d characters maximum allowed for %s.\n", max_len, current_str);
+        fprintf(stderr, "Syntax error: %d characters maximum allowed for %s.\n", max_len-1, current_str);
         return true;
     }
     return false;
 }
 
 bool is_valid_identifier(char* token, Query** query){
-    char* banned_name_list[] = {"SELECT", "INSERT", "VALUES", "DROP", "DELETE", "TABLE", "FROM", "INTO", "WHERE", "JOIN", "ON", "INT", "STRING", "DOUBLE"};
+    // check that value doesn't match reserved key word
+    char* banned_name_list[] = {
+        "SELECT", "INSERT", "VALUES", "DROP", "DELETE", "TABLE", "SHOW", "DESCRIBE", "TABLES", "PK", "FK", "UNIQUE", 
+        "FROM", "INTO", "WHERE", "JOIN", "ON", "INT", "STRING", "DOUBLE"};
     int i;
 
     for(i=0; i<sizeof(banned_name_list) / sizeof(banned_name_list[0]); i++){

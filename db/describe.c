@@ -25,10 +25,11 @@ void describe_table(Query* query){
 
     // check if table exists
     table = get_table_by_name(query->params.describe_params.table_name);
+
     if(!table){
-        fprintf(stderr, "Execution error: table '%s' not found.\n", query->params.describe_params.table_name);
+        fprintf(stderr, "Execution error: '%s' table not found.\n");
         return;
-    }
+    } 
 
     printf("%-20s %-20s %-20s %-25s %-20s\n", "Column", "Type", "Constraint", "References Table", "References Column");
     for(i=0; i<110; i++) printf("-");
@@ -45,6 +46,7 @@ void describe_table(Query* query){
 
         if(current_col->constraint == PK) constraint = "Primary key";
         else if(current_col->constraint == FK) constraint = "Foreign key";
+        else if(current_col->constraint == UNIQUE) constraint = "Unique";
         else if(current_col->constraint == NONE) constraint = "None";
         else constraint = "Unknown";
 
