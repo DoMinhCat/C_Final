@@ -76,5 +76,5 @@ void insert(Query *query);
 void describe_table(Query *query);
 void show(Query *query);
 
-FilteredRow* where_for_select(Table* table, char* condition_col_name, char* str_condition, int int_condition);
+FilteredRow* where_for_select(Table* table, Col* condition_col, char* str_condition, double double_condition, int int_condition, ColType col_type);
 #endif

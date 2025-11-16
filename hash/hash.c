@@ -65,14 +65,12 @@ Node* exist_in_ht(HashTable* hash_tab, int condition_int, char* condition_str){
         val_to_cmp = int_to_str(condition_int);
         key = hash_int(condition_int);
     } else {
-        val_to_cmp = strdup(condition_str);
+        val_to_cmp = condition_str;
         key = hash_string(condition_str);
     }
 
     // no key found
     if(!hash_tab->bucket[key]) {
-        free(val_to_cmp);
-        val_to_cmp = NULL;  
         return NULL;
     }
 
@@ -80,14 +78,10 @@ Node* exist_in_ht(HashTable* hash_tab, int condition_int, char* condition_str){
     for(current_node=hash_tab->bucket[key]; current_node!=NULL; current_node=current_node->next_node){     
         if(strcmp(val_to_cmp,current_node->original_value)==0){
             // found a match
-            free(val_to_cmp);
-            val_to_cmp = NULL;  
             return current_node;
         }
     }   
 
     // not in collision linked list (other values hashed into the same key as this value)
-    free(val_to_cmp);
-    val_to_cmp = NULL;  
     return NULL;
 }

@@ -5,6 +5,7 @@ Group 2 ESGI 2A3
 */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <stdbool.h>
 
 #include "db.h"
@@ -26,26 +27,71 @@ FilteredRow* hash_lookup(HashTable* hash_table, int condition_int, char* conditi
     return NULL;
 }
 
-FilteredRow* where_for_select(Table* table, char* condition_col_name, char* str_condition, int int_condition){
-    FilteredRow* res = NULL;
-    HashTable* ht_of_col = NULL;
-    Col* current_col = NULL;
+FilteredRow* traverse_and_compare(Table* table, Col* condition_col, char* str_condition, double double_condition, int int_condition, ColType col_type){
+    // traverse rows and compare for WHERE clause
 
-    bool col_is_indexed = false;
+    FilteredRow* first_filtered_row = NULL;
+    FilteredRow* new_filtered_row = NULL;
+    FilteredRow* last_filtered_row = NULL;
+    Row* current_row = NULL;
+    int data_list_index;
+    bool should_add;
 
-    //check if condition col is indexed
-    for(ht_of_col = table->first_hash_table; ht_of_col!=NULL; ht_of_col = ht_of_col->next_hash_table){
-        if(strcmp(ht_of_col->col_name, condition_col_name) == 0){
-            col_is_indexed = true;
+    for(current_row = table->first_row; current_row!=NULL; current_row=current_row->next_row){
+        data_list_index = get_data_list_index(table, condition_col->name);
+        should_add = false;
+
+        switch (col_type)
+        {
+        case INT:
+            if(current_row->int_list[data_list_index] == int_condition) should_add = true;
+            break;
+        case STRING:
+            if(strcmp(current_row->str_list[data_list_index], str_condition) == 0) should_add = true;
+            break;
+        case DOUBLE:
+            if(compare_double(current_row->double_list[data_list_index][0], double_condition)  == 0) should_add = true;
+            break;
+        
+        default: // ain't gonna happen 
+            return NULL;
             break;
         }
-    }
 
-    if(col_is_indexed){
-        res = hash_lookup(ht_of_col, int_condition, str_condition);
-        return res;        
+        // set pointers
+        if(should_add){
+            new_filtered_row = init_filtered_row();
+            new_filtered_row->row = current_row;
+
+            if(first_filtered_row == NULL) {
+                first_filtered_row = new_filtered_row;
+                last_filtered_row = first_filtered_row;
+            } else {
+                // append to the end
+                last_filtered_row->next_filtered_row = new_filtered_row;
+                last_filtered_row = new_filtered_row;
+            }
+        }
+    }
+    return first_filtered_row;
+}
+
+FilteredRow* where_for_select(Table* table, Col* condition_col, char* str_condition, double double_condition, int int_condition, ColType col_type){
+    // SELECT db needs to convert condition value before passing to this func
+    // IMPORTANT, if type is not STRING then must pass NULL for str_condition
+
+    FilteredRow* res = NULL;
+    HashTable* ht_of_col = NULL;
+    char* col_name = condition_col->name;
+
+    //check if condition col is indexed
+    ht_of_col = get_ht_by_col_name(table->first_hash_table, col_name);
+
+    if(ht_of_col){
+        res = hash_lookup(ht_of_col, int_condition, str_condition);        
     }else{
-
+        res = traverse_and_compare(table, condition_col, str_condition, double_condition, int_condition, col_type);
     }
 
+    return res;
 }
