@@ -13,9 +13,9 @@ Group 2 ESGI 2A3
 #include <stdbool.h>
 
 #include "../main.h"
+#include "../ui/parser.h"
 
 typedef struct HashTable HashTable;
-typedef struct SelectParams SelectParams;
 
 typedef struct Row{
     int **int_list; // unset int will be NULL, int_list[int_count][1]

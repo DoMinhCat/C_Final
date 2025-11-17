@@ -252,12 +252,12 @@ void select(Query* query) {
     printf("\n");
 
     if (include_join && include_where) {
-        select_join_where(params);
+        //select_join_where(params);
         return;
     }
 
     if (include_join) {
-        select_join_only(params);
+        //select_join_only(params);
         return;
     }
 
