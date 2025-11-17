@@ -29,7 +29,7 @@ FilteredRow* hash_lookup(HashTable* hash_table, int condition_int, char* conditi
 }
 
 FilteredRow* traverse_and_compare(Table* table, Col* condition_col, char* str_condition, double double_condition, int int_condition, ColType col_type){
-    // traverse rows and compare for WHERE clause
+    // traverse rows and compare for WHERE clause, return the first node of the linked list FilteredRow
 
     FilteredRow* first_filtered_row = NULL;
     FilteredRow* new_filtered_row = NULL;
@@ -68,14 +68,7 @@ FilteredRow* traverse_and_compare(Table* table, Col* condition_col, char* str_co
             new_filtered_row = init_filtered_row();
             new_filtered_row->row = current_row;
 
-            if(first_filtered_row == NULL) {
-                first_filtered_row = new_filtered_row;
-                last_filtered_row = first_filtered_row;
-            } else {
-                // append to the end
-                last_filtered_row->next_filtered_row = new_filtered_row;
-                last_filtered_row = new_filtered_row;
-            }
+            add_filtered_row(first_filtered_row, new_filtered_row);
         }
     }
     return first_filtered_row;
