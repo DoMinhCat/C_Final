@@ -184,7 +184,7 @@ void* get_col_value(Table* table, Row* row, char* col_name, ColType col_type) {
 
 void format_value(ColType type, void* value) {
     // prints out selected value, get value from get_col_value
-    
+
     if (value == NULL) {
         printf(" %-22s", "NULL");
         return;
