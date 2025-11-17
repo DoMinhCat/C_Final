@@ -220,15 +220,20 @@ void select(Query* query) {
 
     // check join params
     if(params->table_join_name){
+        Col* col_on1 = NULL;
+        Col* col_on2 = NULL;
         include_join = true;
-        join_table = get_table_by_name(params->table_join_name);
+        
         // join table exists ?
+        join_table = get_table_by_name(params->table_join_name);
         if(!join_table){
             fprintf(stderr, "Execution error: '%s' table not found.\n", params->table_join_name);
             return;
         }
         // join columns exist ?
-        if(!col_exists(table, params->first_col_on) || !col_exists(join_table, params->second_col_on)) return;
+        col_on1 = get_col_by_name(table, params->first_col_on);
+        col_on2 = get_col_by_name(join_table, params->second_col_on);
+        if(!col_on1 || !col_on2) return;
     }
 
     // check where params
@@ -257,7 +262,7 @@ void select(Query* query) {
     }
 
     if (include_join) {
-        //select_join_only(params);
+        //select_join_only(s);
         return;
     }
 
