@@ -14,6 +14,7 @@ Projet final de C à ESGI
 - Available types : int, string, and double
 - Insert: values will be inserted in the order of which columns are created and all columns must be inserted (can't insert only 4 values into a table with 5 columns)
 - Operators AND and OR are not available yet
+- With SELECT using both WHERE and JOIN, the WHERE column is assumed to belong to the first table. If both tables contain a column with the same name, avoid using such columns in the WHERE clause to prevent ambiguity.
 - Tables can't be altered one created, altering must be done through deleting the table, recreate it and manually reinsert all data :)
 - NOT NULL constraint is not available yet
 - Only one primary key is allowed for each table => relation many-many not available
@@ -42,7 +43,7 @@ Projet final de C à ESGI
 6. Contributors
 
 Current quick start :
-gcc main.c ui/parser.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/select.c ui/show.c ui/describe.c ui/helper_ui.c clean/cmd.c clean/db.c init/query.c init/db.c init/hash_table.c db/create.c db/helper_db.c db/drop.c db/show.c db/insert.c db/describe.c db/where.c global_var.c hash/hash.c -o sb.exe
+gcc main.c ui/parser.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/select.c ui/show.c ui/describe.c ui/helper_ui.c clean/cmd.c clean/db.c init/query.c init/db.c init/hash_table.c db/create.c db/helper_db.c db/select.c db/drop.c db/show.c db/insert.c db/describe.c db/where.c global_var.c hash/hash.c -o sb.exe
 
 Commands to test:
 

@@ -104,9 +104,7 @@ int main(int argc, char **argv){
             break;
 
         case SELECT:
-            // Call select() of db
-            
-            printf("SELECT is called\n");
+            select(parser_output);
             break;
         case DELETE:
             // without WHERE clause

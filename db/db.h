@@ -13,10 +13,10 @@ Group 2 ESGI 2A3
 #include <stdbool.h>
 
 #include "../main.h"
+#include "../ui/parser.h"
 
 typedef struct HashTable HashTable;
 
-// struct
 typedef struct Row{
     int **int_list; // unset int will be NULL, int_list[int_count][1]
     char **str_list;
@@ -78,6 +78,9 @@ void drop_table(Query *query);
 void insert(Query *query);
 void describe_table(Query *query);
 void show(Query *query);
+
+void select(Query* query);
+void select_simple(SelectParams* params, Table* table);
 
 FilteredRow* where_for_select(Table* table, Col* condition_col, char* str_condition, double double_condition, int int_condition, ColType col_type);
 #endif

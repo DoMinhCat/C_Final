@@ -152,6 +152,61 @@ HashTable* get_ht_by_col_name(HashTable* first_ht, char* col_name){
     return NULL;
 }
 
+void* get_col_value(Table* table, Row* row, char* col_name, ColType col_type) {
+    // for SELECT : get the right pointer to data field of row based on requested col
+    if (table == NULL || row == NULL || col_name == NULL) return NULL;
+
+    int list_index = get_data_list_index(table, col_name);
+
+    switch (col_type) {
+        case INT:
+            if (row->int_list[list_index]) {
+                return &(row->int_list[list_index][0]);
+            }
+            break;
+        case STRING:
+            if (row->str_list[list_index]) {
+                return row->str_list[list_index];
+            }
+            break;
+        case DOUBLE:
+            if (row->double_list[list_index]) {
+                return &(row->double_list[list_index][0]);
+            }
+            break;
+        default:
+            return NULL;
+            break;
+    }
+
+    return NULL;
+}
+
+void format_value(ColType type, void* value) {
+    // prints out selected value, get value from get_col_value
+
+    if (value == NULL) {
+        printf(" %-22s", "NULL");
+        return;
+    }
+
+    switch (type) {
+        case INT:
+            printf(" %-22d", *(int*)value);
+            break;
+            break;
+        case DOUBLE:
+            printf(" %-22lf", *(double*)value);
+            break;
+        case STRING:
+            printf(" %-22s", (char*)value);
+            break;
+        default:
+            fprintf(stderr, "Execution error: an unexpected error occured during formatting value.\n");
+            break;
+    }
+}
+
 int get_data_list_index(Table* table, char* col_name){
     // get the index of data list of Row for the corresponding type list
     // use this to access to data field of row (same as SELECT col1) or to insert into the right place of the list of row struct
@@ -323,7 +378,7 @@ char* int_to_str(int val){
     return res;
 }
 
-bool str_to_int(const char *str_val, int *int_output, const char *col_name) {
+bool str_to_int(char *str_val, int *int_output, char *col_name) {
     errno = 0;
     char *endptr;
     long long parsed_val = strtoll(str_val, &endptr, 10);
@@ -345,7 +400,7 @@ bool str_to_int(const char *str_val, int *int_output, const char *col_name) {
     return true;
 }
 
-bool str_to_double(const char *str_val, double *double_output, const char *col_name) {
+bool str_to_double(char *str_val, double *double_output, char *col_name) {
     errno = 0;
     char *endptr;
 
@@ -360,3 +415,4 @@ bool str_to_double(const char *str_val, double *double_output, const char *col_n
     *double_output = parsed_val;
     return true;
 }
+

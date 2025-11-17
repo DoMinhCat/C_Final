@@ -34,8 +34,11 @@ bool col_exists(Table* table, char* col_name);
 bool refer_val_exists(char* str_to_check, int val_to_check, char* ref_table_name, char* ref_col_name);
 bool pk_value_is_unique(char* str_to_check, int val_to_check, HashTable* hash_tab, char* constraint);
 
+// New functions for select
+void* get_col_value(Table* table, Row* row, char* col_name, ColType col_type);
+void format_value(ColType type, void* value);
 // type conversion
 char* int_to_str(int val);
-bool str_to_int(const char *str_val, int *int_output, const char *col_name);
-bool str_to_double(const char *str_val, double *double_output, const char *col_name);
+bool str_to_int(char *str_val, int *int_output, char *col_name);
+bool str_to_double(char *str_val, double *double_output, char *col_name);
 #endif
