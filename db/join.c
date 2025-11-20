@@ -6,20 +6,65 @@ Group 2 ESGI 2A3
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "db.h"
 #include "../init/init.h"
 #include "helper_db.h"
 
+int compare_data_field(int* int_data1, int* int_data2, char* str_data1, char* str_data2, double* double_data1, double* double_data2, ColType col_type){
+    // compare any 2 data fields of same type. Return 0 if equal, -1 if val1 < val2, 1 if val1 > val2
+    // IMPORTANT: NULL < Not NULL
+
+    int result;
+    
+    switch (col_type) { 
+    case INT:
+        if(int_data1 && int_data2){
+            if(int_data1[0] > int_data2[0]) result = 1;
+            else if(int_data1[0] < int_data2[0]) result = -1;
+            else result = 0;
+        }else if(int_data1 && !int_data2) result = 1;
+        else if(!int_data1 && int_data2) result = -1;
+        else result = 0;
+        break;
+    
+    case DOUBLE:
+        if(double_data1 && double_data2){
+            if(compare_double(double_data1[0], double_data2[0]) == 1) result = 1;
+            else if(compare_double(double_data1[0], double_data2[0]) == -1) result = -1;
+            else result = 0;
+        }else if(double_data1 && !double_data2) result = 1;
+        else if(!double_data1 && double_data2) result = -1;
+        else result = 0;
+        break;
+
+    case STRING:
+        if(str_data1 && str_data2){
+            if(strcmp(str_data1[0], str_data2[0]) > 0) result = 1;
+            else if(strcmp(str_data1[0], str_data2[0]) < 0) result = -1;
+            else result = 0;
+        }else if(str_data1 && !str_data2) result = 1;
+        else if(!str_data1 && str_data2) result = -1;
+        else result = 0;
+        break;
+    default:
+        break;
+    }
+
+    return result;
+}
+
 FilteredRow* bubble_sort(FilteredRow* head_list, int row_count, int data_index, ColType col_type){
     // sort a list of rows (ascending) of a table based on joined column value
-    // TODO: bubble sort with double loop on filtered struct passed from join(), need to manage current/prev/next pointer
+    // TODO: bubble sort with 2 loops on filtered struct passed from join(), need to manage current/prev/next pointer
 
     if (!head_list || row_count < 2) return head_list;
 
     bool swap_done;
     bool should_swap;
     int i,j;
+    int cmp;
 
     FilteredRow* current_fr = NULL;
     FilteredRow* next_fr = NULL;
@@ -63,11 +108,8 @@ FilteredRow* bubble_sort(FilteredRow* head_list, int row_count, int data_index, 
                 next_int_list_to_cmp = next_actual_row->int_list;
                 next_int_data_to_cmp = next_int_list_to_cmp[data_index];
 
-                // compare
-                if(int_data_to_cmp && next_int_data_to_cmp){
-                    if(int_data_to_cmp[0] > next_int_data_to_cmp[0]) 
-                    should_swap = true;
-                }else if(int_data_to_cmp && !next_int_data_to_cmp) should_swap = true;
+                cmp = compare_data_field(int_data_to_cmp, next_int_data_to_cmp, NULL, NULL, NULL, NULL, INT);
+                if(cmp == 1) should_swap = true;
                 break;
             
             case DOUBLE:
@@ -76,11 +118,8 @@ FilteredRow* bubble_sort(FilteredRow* head_list, int row_count, int data_index, 
                 next_double_list_to_cmp = next_actual_row->double_list;
                 next_double_data_to_cmp = next_double_list_to_cmp[data_index];
                 
-                // compare double
-                if(double_data_to_cmp && next_double_data_to_cmp){
-                    if(compare_double(double_data_to_cmp[0], next_double_data_to_cmp[0]) == 1) 
-                    should_swap = true;
-                }else if(double_data_to_cmp && !next_double_data_to_cmp) should_swap = true;
+                cmp = compare_data_field(NULL, NULL, double_data_to_cmp, next_double_data_to_cmp, NULL, NULL, DOUBLE);
+                if(cmp == 1) should_swap = true;
                 break;
 
             case STRING:
@@ -89,11 +128,8 @@ FilteredRow* bubble_sort(FilteredRow* head_list, int row_count, int data_index, 
                 next_str_list_to_cmp = next_actual_row->str_list;
                 next_str_data_to_cmp = next_str_list_to_cmp[data_index];
                 
-                // compare string a-z order
-                if(str_data_to_cmp && next_str_data_to_cmp){
-                    if(strcmp(str_data_to_cmp, next_str_data_to_cmp) > 0) 
-                    should_swap = true;
-                }else if(str_data_to_cmp && !next_str_data_to_cmp) should_swap = true;
+                cmp = compare_data_field(NULL, NULL, NULL, NULL, str_data_to_cmp, next_str_data_to_cmp, STRING);
+                if(cmp == 1) should_swap = true;
                 break;
             default:
                 break;
@@ -135,7 +171,14 @@ FilteredRow* merge_sorted_lists(FilteredRow* list1, FilteredRow* list2){
         IMPORTANT: handle NULL value when comparing
     */  
 
+    FilteredRow* result = NULL;
+    FilteredRow* p1 = list1;
+    FilteredRow* p2 = list2;
 
+    while(p1 && p2){
+        //compare
+
+    }
 }
 
 FilteredRow* join(Table* tab1, Table* tab2, Col* col1, Col* col2){
