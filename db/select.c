@@ -256,6 +256,7 @@ void select(Query* query) {
     }
     printf("\n");
 
+    // call to select of each case
     if (include_join && include_where) {
         //select_join_where(params);
         return;
