@@ -131,7 +131,6 @@ void select_simple(SelectParams* params, Table* table){
 
 void select_where_only(SelectParams* params, Table* table){
     // select with WHERE
-    // IMPORTANT: free filtered_row after printing, before exit function
     
     FilteredRow* filtered = NULL;
     Col* condition_col = get_col_by_name(table, params->condition_col);
@@ -211,13 +210,6 @@ void select(Query* query) {
         return;
     }
 
-    //make sure all columns exist
-    if (params->col_count > 0 && !select_all) {
-        for (i = 0; i < params->col_count; i++) {
-            if (!col_exists(table, params->col_list[i])) return;
-        }
-    }
-
     // check join params
     if(params->table_join_name){
         Col* col_on1 = NULL;
@@ -238,6 +230,23 @@ void select(Query* query) {
         if(col_on1->type != col_on2->type){
             fprintf(stderr, "Execution error: '%s' and '%s' columns have different types.\n", col_on1->name, col_on2->name);
             return;
+        }
+    }
+
+    //make sure all selected columns exist
+    if (params->col_count > 0 && !select_all) {
+        for (i = 0; i < params->col_count; i++) {
+            if (!get_col_by_name(table, params->col_list[i])) {
+                if(include_join){
+                    if(!get_col_by_name(join_table, params->col_list[i])){
+                        fprintf(stderr, "Execution error: '%s' column  not found.\n", params->col_list[i]);
+                        return;
+                    }
+                }else{
+                    fprintf(stderr, "Execution error: '%s' column  not found.\n", params->col_list[i]);
+                    return;
+                }
+            }
         }
     }
 
