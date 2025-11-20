@@ -18,9 +18,9 @@ Group 2 ESGI 2A3
 typedef struct HashTable HashTable;
 
 typedef struct Row{
-    int **int_list; // unset int will be NULL, int_list[int_count][1]
+    int **int_list; // unset int will be NULL, int_list[int_count][0]
     char **str_list;
-    double **double_list; // unset double will be NULL, double_list[double_count][1]
+    double **double_list; // unset double will be NULL, double_list[double_count][0]
 
     int int_count;
     int str_count;

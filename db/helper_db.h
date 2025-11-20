@@ -44,5 +44,4 @@ bool str_to_int(char *str_val, int *int_output, char *col_name);
 bool str_to_double(char *str_val, double *double_output, char *col_name);
 
 // functions for where & join
-void add_filtered_row(FilteredRow* first_node, FilteredRow* node_to_add);
 #endif

@@ -278,6 +278,7 @@ void select(Query* query) {
 
     if (include_join) {
         //select_join_only(s);
+        // IMPORTANT: free filteredRow list after printing
         return;
     }
 

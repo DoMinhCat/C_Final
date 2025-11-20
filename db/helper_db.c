@@ -416,18 +416,4 @@ bool str_to_double(char *str_val, double *double_output, char *col_name) {
     return true;
 }
 
-void add_filtered_row(FilteredRow* first_node, FilteredRow* node_to_add){
-    // add a node of filtered row to the linked list
-
-    FilteredRow* last_node = NULL;
-
-    if(first_node == NULL) {
-        first_node = node_to_add;
-        last_node = first_node;
-    } else {
-        // append to the end
-        last_node->next_filtered_row = node_to_add;
-        last_node = node_to_add;
-    }
-}
 

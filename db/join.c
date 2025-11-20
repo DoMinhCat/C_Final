@@ -7,10 +7,18 @@ Group 2 ESGI 2A3
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <assert.h>
 
 #include "db.h"
 #include "../init/init.h"
 #include "helper_db.h"
+#include "../clean/clean.h"
+
+typedef struct {
+    ColType type;    
+    int table_id; // 1 = tab1, 2 = tab2
+    int data_index;   
+} SelectedColInfo;
 
 int compare_data_field(int* int_data1, int* int_data2, char* str_data1, char* str_data2, double* double_data1, double* double_data2, ColType col_type){
     // compare any 2 data fields of same type. Return 0 if equal, -1 if val1 < val2, 1 if val1 > val2
@@ -162,9 +170,8 @@ FilteredRow* bubble_sort(FilteredRow* head_list, int row_count, int data_index, 
     return head_list;
 }
 
-FilteredRow* merge_sorted_lists(FilteredRow* list1, FilteredRow* list2, int data_index1, int data_index2, ColType col_type){
+FilteredRow* merge_sorted_lists(Table* tab1, Table* tab2, SelectParams* params, FilteredRow* list1, FilteredRow* list2, int data_index1, int data_index2, ColType col_on_type){
     /*
-    TODO: 2 pointers on each struct
     compare joined col value of 2 pointers 
         if == : merge data fields and save to result struct 
         if != : the smaller one advance then compare again
@@ -172,50 +179,167 @@ FilteredRow* merge_sorted_lists(FilteredRow* list1, FilteredRow* list2, int data
     */  
 
     FilteredRow* result = NULL;
+    FilteredRow* new_node = NULL;
+    FilteredRow* last_node = NULL;
     FilteredRow* p1 = list1;
     FilteredRow* p2 = list2;
     Row* row1 = NULL;
     Row* row2 = NULL;
+    Col* current_col = NULL;
+    SelectedColInfo col_info[params->col_count];
     int cmp;
+    int i;
+    int int_count = 0;
+    int double_count = 0;
+    int str_count = 0;
+    int int_index = 0;
+    int double_index = 0;
+    int str_index = 0;
+    bool select_all = params->col_count == 1 && strcmp(params->col_list[0], "*") == 0;
+    
+    // collect metadata for data insert into joined lists
+    if(!select_all){
+        for(i=0; i<params->col_count; i++){   
+            // all selected cols have been checked in select that they exist
+            current_col = NULL;
+
+            current_col = get_col_by_name(tab1, params->col_list[i]);
+            if(!current_col) {
+                current_col = get_col_by_name(tab2, params->col_list[i]);
+                col_info[i].table_id = 2;
+                col_info[i].data_index = get_data_list_index(tab2, params->col_list[i]);
+            }else {
+                col_info[i].table_id = 1;
+                col_info[i].data_index = get_data_list_index(tab1, params->col_list[i]);
+            }
+            col_info[i].type = current_col->type;
+
+            // get size to alloc joined lists
+            if(current_col->type == INT) int_count++;
+            else if(current_col->type == DOUBLE) double_count++;
+            else str_count++;
+
+        }
+    }
 
     while(p1 && p2){
         row1 = p1->row;
         row2 = p2->row;
 
         //compare
-        switch (col_type) { 
+        switch (col_on_type) { 
         case INT:
             cmp = compare_data_field(row1->int_list[data_index1], row2->int_list[data_index2], NULL, NULL, NULL, NULL, INT);
-            
             break;
-        
         case DOUBLE:
             cmp = compare_data_field(NULL, NULL, NULL, NULL, row1->double_list[data_index1], row2->double_list[data_index2], DOUBLE);
-            
             break;
-
         case STRING:
             cmp = compare_data_field(NULL, NULL, row1->str_list[data_index1], row2->str_list[data_index2], NULL, NULL, STRING);
-            
             break;
         default:
             break;
         }
     
         if(cmp == 0){
-            // append to result list
-            // advance both
+            new_node = init_filtered_row();
+
+            // set data for required cols and append to result list
+            if(select_all){
+                assert((new_node->int_joined_list = (int**)calloc(row1->int_count + row2->int_count, sizeof(int*))) != NULL);
+                assert((new_node->double_joined_list = (double**)calloc(row1->double_count + row2->double_count, sizeof(double*))) != NULL);
+                assert((new_node->str_joined_list = (char**)calloc(row1->str_count + row2->str_count, sizeof(char*))) != NULL);
+
+                // copy data lists of 2 rows into joined lists with structure: list1, list2
+                memcpy(new_node->int_joined_list, row1->int_list, sizeof(int*) * row1->int_count);
+                memcpy(new_node->int_joined_list + row1->int_count, row2->int_list, sizeof(int*) * row2->int_count);
+                memcpy(new_node->str_joined_list, row1->str_list, sizeof(char*) * row1->str_count);
+                memcpy(new_node->str_joined_list + row1->str_count, row2->str_list, sizeof(char*) * row2->str_count);
+                memcpy(new_node->double_joined_list, row1->double_list, sizeof(double*) * row1->double_count);
+                memcpy(new_node->double_joined_list + row1->double_count, row2->double_list, sizeof(double*) * row2->double_count);
+
+                new_node->int_join_count = row1->int_count + row2->int_count;
+                new_node->double_join_count = row1->double_count + row2->double_count;
+                new_node->str_join_count = row1->str_count + row2->str_count;
+
+                if(result == NULL) {
+                    result = new_node;
+                    last_node = result;
+                } else {
+                    // append to the end
+                    last_node->next_filtered_row = new_node;
+                    last_node = new_node;
+                }
+            }else{
+                int_index = 0;
+                double_index = 0;
+                str_index = 0;
+
+                // calloc joined lists
+                assert((new_node->int_joined_list = (int**)calloc(int_count, sizeof(int*))) != NULL);
+                assert((new_node->double_joined_list = (double**)calloc(double_count, sizeof(double*))) != NULL);
+                assert((new_node->str_joined_list = (char**)calloc(str_count, sizeof(char*))) != NULL);
+
+                // set data for joined lists
+                for(i=0; i<params->col_count; i++){ 
+                    switch (col_info[i].type) {
+                    case INT:
+                        assert((new_node->int_joined_list[int_index] = malloc(sizeof(int))) != NULL);
+                        if(col_info[i].table_id==1) new_node->int_joined_list[int_index][0] = row1->int_list[col_info[i].data_index][0];
+                        else new_node->int_joined_list[int_index][0] = row2->int_list[col_info[i].data_index][0];
+                        int_index++;
+                        break;
+
+                    case DOUBLE:
+                        assert((new_node->double_joined_list[double_index] = malloc(sizeof(double))) != NULL);
+                        if(col_info[i].table_id==1) new_node->double_joined_list[double_index][0] = row1->double_list[col_info[i].data_index][0];
+                        else new_node->double_joined_list[double_index][0] = row2->double_list[col_info[i].data_index][0];
+                        double_index++;
+                        break;
+
+                    case STRING:
+                        if(col_info[i].table_id==1) new_node->str_joined_list[str_index] = strdup(row1->str_list[col_info[i].data_index]);
+                        else new_node->str_joined_list[str_index] = strdup(row2->str_list[col_info[i].data_index]);
+                        assert(new_node->str_joined_list[str_index] != NULL);
+                        str_index++;
+                        break;                    
+                    default:
+                        break;
+                    }  
+                }
+                new_node->int_join_count = int_count;
+                new_node->double_join_count = double_count;
+                new_node->str_join_count = str_count;
+
+                if(result == NULL) {
+                    result = new_node;
+                    last_node = result;
+                } else {
+                    // append to the end
+                    last_node->next_filtered_row = new_node;
+                    last_node = new_node;
+                }
+            }            
+
+            // advance both pointers
+            p1 = p1->next_filtered_row;
+            p2 = p2->next_filtered_row;
         }else if(cmp == 1){
             // advance p2
+            p2 = p2->next_filtered_row;
         }else{
             //advance p1
+            p1 = p1->next_filtered_row;
         }
     }
 
+    // Free 2 lists before exit
+    free_filtered_set(list1);
+    free_filtered_set(list2);
     return result;
 }
 
-FilteredRow* join(Table* tab1, Table* tab2, Col* col1, Col* col2){
+FilteredRow* join(Table* tab1, Table* tab2, Col* col1, Col* col2, SelectParams* params){
     // join the 2 tables, return filtered rows for final result print of select
 
     /*
@@ -231,6 +355,7 @@ FilteredRow* join(Table* tab1, Table* tab2, Col* col1, Col* col2){
     FilteredRow* head_list1 = NULL;
     FilteredRow* head_list2 = NULL;
     FilteredRow* new_node = NULL;
+    FilteredRow* last_node = NULL;
     FilteredRow* result = NULL;
     Row* current_row = NULL;
 
@@ -243,14 +368,30 @@ FilteredRow* join(Table* tab1, Table* tab2, Col* col1, Col* col2){
     for(current_row = tab1->first_row; current_row; current_row=current_row->next_row){
         new_node = init_filtered_row();
         new_node->row = current_row;
-        add_filtered_row(head_list1, new_node);
+
+        if(head_list1 == NULL) {
+            head_list1 = new_node;
+            last_node = head_list1;
+        } else {
+            // append to the end
+            last_node->next_filtered_row = new_node;
+            last_node = new_node;
+        }
     }
     
     //copy linked list Row of tab2
     for(current_row = tab2->first_row; current_row; current_row=current_row->next_row){
         new_node = init_filtered_row();
         new_node->row = current_row;
-        add_filtered_row(head_list2, new_node);
+        
+        if(head_list1 == NULL) {
+            head_list1 = new_node;
+            last_node = head_list1;
+        } else {
+            // append to the end
+            last_node->next_filtered_row = new_node;
+            last_node = new_node;
+        }
     }
 
     // bubble sort
@@ -258,7 +399,7 @@ FilteredRow* join(Table* tab1, Table* tab2, Col* col1, Col* col2){
     head_list2 = bubble_sort(head_list2, row_count2, data_index2, col1->type);
 
     // merge
-    result = merge_sorted_lists(head_list1, head_list2, data_index1, data_index2, col1->type);
+    result = merge_sorted_lists(tab1, tab2, params, head_list1, head_list2, data_index1, data_index2, col1->type);
 
     return result;
 }

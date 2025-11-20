@@ -68,7 +68,14 @@ FilteredRow* traverse_and_compare(Table* table, Col* condition_col, char* str_co
             new_filtered_row = init_filtered_row();
             new_filtered_row->row = current_row;
 
-            add_filtered_row(first_filtered_row, new_filtered_row);
+            if(first_filtered_row == NULL) {
+                first_filtered_row = new_filtered_row;
+                last_filtered_row = first_filtered_row;
+            } else {
+                // append to the end
+                last_filtered_row->next_filtered_row = new_filtered_row;
+                last_filtered_row = new_filtered_row;
+            }
         }
     }
     return first_filtered_row;
