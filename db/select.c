@@ -234,6 +234,11 @@ void select(Query* query) {
         col_on1 = get_col_by_name(table, params->first_col_on);
         col_on2 = get_col_by_name(join_table, params->second_col_on);
         if(!col_on1 || !col_on2) return;
+        // join columns same type?
+        if(col_on1->type != col_on2->type){
+            fprintf(stderr, "Execution error: '%s' and '%s' columns have different types.\n", col_on1->name, col_on2->name);
+            return;
+        }
     }
 
     // check where params
