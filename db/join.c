@@ -181,6 +181,12 @@ FilteredRow* merge_sorted_lists(Table* tab1, Table* tab2, SelectParams* params, 
     FilteredRow* result = NULL;
     FilteredRow* new_node = NULL;
     FilteredRow* last_node = NULL;
+    FilteredRow* start_dup1 = NULL;
+    FilteredRow* start_dup2 = NULL;
+    FilteredRow* end_dup1 = NULL;
+    FilteredRow* end_dup2 = NULL;
+    FilteredRow* ref1 = NULL;
+    FilteredRow* ref2 = NULL;
     FilteredRow* p1 = list1;
     FilteredRow* p2 = list2;
     Row* row1 = NULL;
@@ -225,8 +231,10 @@ FilteredRow* merge_sorted_lists(Table* tab1, Table* tab2, SelectParams* params, 
     while(p1 && p2){
         row1 = p1->row;
         row2 = p2->row;
+        start_dup1 = p1;
+        start_dup2 = p2;
 
-        //compare
+        //compare 
         switch (col_on_type) { 
         case INT:
             cmp = compare_data_field(row1->int_list[data_index1], row2->int_list[data_index2], NULL, NULL, NULL, NULL, INT);
@@ -240,90 +248,135 @@ FilteredRow* merge_sorted_lists(Table* tab1, Table* tab2, SelectParams* params, 
         default:
             break;
         }
-    
+
         if(cmp == 0){
-            new_node = init_filtered_row();
-
-            // set data for required cols and append to result list
-            if(select_all){
-                assert((new_node->int_joined_list = (int**)calloc(row1->int_count + row2->int_count, sizeof(int*))) != NULL);
-                assert((new_node->double_joined_list = (double**)calloc(row1->double_count + row2->double_count, sizeof(double*))) != NULL);
-                assert((new_node->str_joined_list = (char**)calloc(row1->str_count + row2->str_count, sizeof(char*))) != NULL);
-
-                // copy data lists of 2 rows into joined lists with structure: list1, list2
-                memcpy(new_node->int_joined_list, row1->int_list, sizeof(int*) * row1->int_count);
-                memcpy(new_node->int_joined_list + row1->int_count, row2->int_list, sizeof(int*) * row2->int_count);
-                memcpy(new_node->str_joined_list, row1->str_list, sizeof(char*) * row1->str_count);
-                memcpy(new_node->str_joined_list + row1->str_count, row2->str_list, sizeof(char*) * row2->str_count);
-                memcpy(new_node->double_joined_list, row1->double_list, sizeof(double*) * row1->double_count);
-                memcpy(new_node->double_joined_list + row1->double_count, row2->double_list, sizeof(double*) * row2->double_count);
-
-                new_node->int_join_count = row1->int_count + row2->int_count;
-                new_node->double_join_count = row1->double_count + row2->double_count;
-                new_node->str_join_count = row1->str_count + row2->str_count;
-
-                if(result == NULL) {
-                    result = new_node;
-                    last_node = result;
-                } else {
-                    // append to the end
-                    last_node->next_filtered_row = new_node;
-                    last_node = new_node;
+            // collect duplicates of list1
+            ref1 = p1;
+            int cmp1;
+            while(p1 && cmp1 == 0){
+                switch (col_on_type) { 
+                case INT:
+                    cmp1 = compare_data_field(row1->int_list[data_index1], ref1->row->int_list[data_index1], NULL, NULL, NULL, NULL, INT);
+                    break;
+                case DOUBLE:
+                    cmp1 = compare_data_field(NULL, NULL, NULL, NULL, row1->double_list[data_index1], ref1->row->double_list[data_index1], DOUBLE);
+                    break;
+                case STRING:
+                    cmp1 = compare_data_field(NULL, NULL, row1->str_list[data_index1], ref1->row->str_list[data_index1], NULL, NULL, STRING);
+                    break;
+                default:
+                    break;
                 }
-            }else{
-                int_index = 0;
-                double_index = 0;
-                str_index = 0;
+                p1 = p1->next_filtered_row;
+                if(p1) row1 = p1->row;
+            }
 
-                // calloc joined lists
-                assert((new_node->int_joined_list = (int**)calloc(int_count, sizeof(int*))) != NULL);
-                assert((new_node->double_joined_list = (double**)calloc(double_count, sizeof(double*))) != NULL);
-                assert((new_node->str_joined_list = (char**)calloc(str_count, sizeof(char*))) != NULL);
-
-                // set data for joined lists
-                for(i=0; i<params->col_count; i++){ 
-                    switch (col_info[i].type) {
-                    case INT:
-                        assert((new_node->int_joined_list[int_index] = malloc(sizeof(int))) != NULL);
-                        if(col_info[i].table_id==1) new_node->int_joined_list[int_index][0] = row1->int_list[col_info[i].data_index][0];
-                        else new_node->int_joined_list[int_index][0] = row2->int_list[col_info[i].data_index][0];
-                        int_index++;
-                        break;
-
-                    case DOUBLE:
-                        assert((new_node->double_joined_list[double_index] = malloc(sizeof(double))) != NULL);
-                        if(col_info[i].table_id==1) new_node->double_joined_list[double_index][0] = row1->double_list[col_info[i].data_index][0];
-                        else new_node->double_joined_list[double_index][0] = row2->double_list[col_info[i].data_index][0];
-                        double_index++;
-                        break;
-
-                    case STRING:
-                        if(col_info[i].table_id==1) new_node->str_joined_list[str_index] = strdup(row1->str_list[col_info[i].data_index]);
-                        else new_node->str_joined_list[str_index] = strdup(row2->str_list[col_info[i].data_index]);
-                        assert(new_node->str_joined_list[str_index] != NULL);
-                        str_index++;
-                        break;                    
-                    default:
-                        break;
-                    }  
+            // collect duplicates of list2
+            ref2 = p2;
+            int cmp2;
+            while(p2 && cmp2 == 0){
+                switch (col_on_type) { 
+                case INT:
+                    cmp2 = compare_data_field(row2->int_list[data_index2], ref2->row->int_list[data_index2], NULL, NULL, NULL, NULL, INT);
+                    break;
+                case DOUBLE:
+                    cmp2 = compare_data_field(NULL, NULL, NULL, NULL, row2->double_list[data_index2], ref2->row->double_list[data_index2], DOUBLE);
+                    break;
+                case STRING:
+                    cmp2 = compare_data_field(NULL, NULL, row2->str_list[data_index2], ref2->row->str_list[data_index2], NULL, NULL, STRING);
+                    break;
+                default:
+                    break;
                 }
-                new_node->int_join_count = int_count;
-                new_node->double_join_count = double_count;
-                new_node->str_join_count = str_count;
+                p2 = p2->next_filtered_row;
+                if(p2) row2 = p2->row;
+            }
 
-                if(result == NULL) {
-                    result = new_node;
-                    last_node = result;
-                } else {
-                    // append to the end
-                    last_node->next_filtered_row = new_node;
-                    last_node = new_node;
+            // combine all duplicates
+            for(FilteredRow* r1 = start_dup1; r1 != p1; r1 = r1->next_filtered_row) {
+                for(FilteredRow* r2 = start_dup2; r2 != p2; r2 = r2->next_filtered_row) {
+                    row1 = r1->row;
+                    row2 = r2->row;
+                    new_node = init_filtered_row();
+
+                    // set data for required cols and append to result list
+                    if(select_all){
+                        assert((new_node->int_joined_list = (int**)calloc(row1->int_count + row2->int_count, sizeof(int*))) != NULL);
+                        assert((new_node->double_joined_list = (double**)calloc(row1->double_count + row2->double_count, sizeof(double*))) != NULL);
+                        assert((new_node->str_joined_list = (char**)calloc(row1->str_count + row2->str_count, sizeof(char*))) != NULL);
+
+                        // copy data lists of 2 rows into joined lists with structure: list1, list2
+                        memcpy(new_node->int_joined_list, row1->int_list, sizeof(int*) * row1->int_count);
+                        memcpy(new_node->int_joined_list + row1->int_count, row2->int_list, sizeof(int*) * row2->int_count);
+                        memcpy(new_node->str_joined_list, row1->str_list, sizeof(char*) * row1->str_count);
+                        memcpy(new_node->str_joined_list + row1->str_count, row2->str_list, sizeof(char*) * row2->str_count);
+                        memcpy(new_node->double_joined_list, row1->double_list, sizeof(double*) * row1->double_count);
+                        memcpy(new_node->double_joined_list + row1->double_count, row2->double_list, sizeof(double*) * row2->double_count);
+
+                        new_node->int_join_count = row1->int_count + row2->int_count;
+                        new_node->double_join_count = row1->double_count + row2->double_count;
+                        new_node->str_join_count = row1->str_count + row2->str_count;
+
+                        if(result == NULL) {
+                            result = new_node;
+                            last_node = result;
+                        } else {
+                            // append to the end
+                            last_node->next_filtered_row = new_node;
+                            last_node = new_node;
+                        }
+                    }else{
+                        int_index = 0;
+                        double_index = 0;
+                        str_index = 0;
+
+                        // calloc joined lists
+                        assert((new_node->int_joined_list = (int**)calloc(int_count, sizeof(int*))) != NULL);
+                        assert((new_node->double_joined_list = (double**)calloc(double_count, sizeof(double*))) != NULL);
+                        assert((new_node->str_joined_list = (char**)calloc(str_count, sizeof(char*))) != NULL);
+
+                        // set data for joined lists
+                        for(i=0; i<params->col_count; i++){ 
+                            switch (col_info[i].type) {
+                            case INT:
+                                assert((new_node->int_joined_list[int_index] = malloc(sizeof(int))) != NULL);
+                                if(col_info[i].table_id==1) new_node->int_joined_list[int_index][0] = row1->int_list[col_info[i].data_index][0];
+                                else new_node->int_joined_list[int_index][0] = row2->int_list[col_info[i].data_index][0];
+                                int_index++;
+                                break;
+
+                            case DOUBLE:
+                                assert((new_node->double_joined_list[double_index] = malloc(sizeof(double))) != NULL);
+                                if(col_info[i].table_id==1) new_node->double_joined_list[double_index][0] = row1->double_list[col_info[i].data_index][0];
+                                else new_node->double_joined_list[double_index][0] = row2->double_list[col_info[i].data_index][0];
+                                double_index++;
+                                break;
+
+                            case STRING:
+                                if(col_info[i].table_id==1) new_node->str_joined_list[str_index] = strdup(row1->str_list[col_info[i].data_index]);
+                                else new_node->str_joined_list[str_index] = strdup(row2->str_list[col_info[i].data_index]);
+                                assert(new_node->str_joined_list[str_index] != NULL);
+                                str_index++;
+                                break;                    
+                            default:
+                                break;
+                            }  
+                        }
+                        new_node->int_join_count = int_count;
+                        new_node->double_join_count = double_count;
+                        new_node->str_join_count = str_count;
+
+                        if(result == NULL) {
+                            result = new_node;
+                            last_node = result;
+                        } else {
+                            // append to the end
+                            last_node->next_filtered_row = new_node;
+                            last_node = new_node;
+                        }
+                    }            
                 }
-            }            
-
-            // advance both pointers
-            p1 = p1->next_filtered_row;
-            p2 = p2->next_filtered_row;
+            }
         }else if(cmp == 1){
             // advance p2
             p2 = p2->next_filtered_row;
