@@ -41,8 +41,8 @@ int compare_data_field(int* int_data1, int* int_data2, char* str_data1, char* st
 
     case STRING:
         if(str_data1 && str_data2){
-            if(strcmp(str_data1[0], str_data2[0]) > 0) result = 1;
-            else if(strcmp(str_data1[0], str_data2[0]) < 0) result = -1;
+            if(strcmp(str_data1, str_data2) > 0) result = 1;
+            else if(strcmp(str_data1, str_data2) < 0) result = -1;
             else result = 0;
         }else if(str_data1 && !str_data2) result = 1;
         else if(!str_data1 && str_data2) result = -1;
@@ -118,7 +118,7 @@ FilteredRow* bubble_sort(FilteredRow* head_list, int row_count, int data_index, 
                 next_double_list_to_cmp = next_actual_row->double_list;
                 next_double_data_to_cmp = next_double_list_to_cmp[data_index];
                 
-                cmp = compare_data_field(NULL, NULL, double_data_to_cmp, next_double_data_to_cmp, NULL, NULL, DOUBLE);
+                cmp = compare_data_field(NULL, NULL, NULL, NULL, double_data_to_cmp, next_double_data_to_cmp, DOUBLE);
                 if(cmp == 1) should_swap = true;
                 break;
 
@@ -128,7 +128,7 @@ FilteredRow* bubble_sort(FilteredRow* head_list, int row_count, int data_index, 
                 next_str_list_to_cmp = next_actual_row->str_list;
                 next_str_data_to_cmp = next_str_list_to_cmp[data_index];
                 
-                cmp = compare_data_field(NULL, NULL, NULL, NULL, str_data_to_cmp, next_str_data_to_cmp, STRING);
+                cmp = compare_data_field(NULL, NULL, str_data_to_cmp, next_str_data_to_cmp, NULL, NULL, STRING);
                 if(cmp == 1) should_swap = true;
                 break;
             default:
@@ -162,7 +162,7 @@ FilteredRow* bubble_sort(FilteredRow* head_list, int row_count, int data_index, 
     return head_list;
 }
 
-FilteredRow* merge_sorted_lists(FilteredRow* list1, FilteredRow* list2){
+FilteredRow* merge_sorted_lists(FilteredRow* list1, FilteredRow* list2, int data_index1, int data_index2, ColType col_type){
     /*
     TODO: 2 pointers on each struct
     compare joined col value of 2 pointers 
@@ -174,11 +174,45 @@ FilteredRow* merge_sorted_lists(FilteredRow* list1, FilteredRow* list2){
     FilteredRow* result = NULL;
     FilteredRow* p1 = list1;
     FilteredRow* p2 = list2;
+    Row* row1 = NULL;
+    Row* row2 = NULL;
+    int cmp;
 
     while(p1 && p2){
-        //compare
+        row1 = p1->row;
+        row2 = p2->row;
 
+        //compare
+        switch (col_type) { 
+        case INT:
+            cmp = compare_data_field(row1->int_list[data_index1], row2->int_list[data_index2], NULL, NULL, NULL, NULL, INT);
+            
+            break;
+        
+        case DOUBLE:
+            cmp = compare_data_field(NULL, NULL, NULL, NULL, row1->double_list[data_index1], row2->double_list[data_index2], DOUBLE);
+            
+            break;
+
+        case STRING:
+            cmp = compare_data_field(NULL, NULL, row1->str_list[data_index1], row2->str_list[data_index2], NULL, NULL, STRING);
+            
+            break;
+        default:
+            break;
+        }
+    
+        if(cmp == 0){
+            // append to result list
+            // advance both
+        }else if(cmp == 1){
+            // advance p2
+        }else{
+            //advance p1
+        }
     }
+
+    return result;
 }
 
 FilteredRow* join(Table* tab1, Table* tab2, Col* col1, Col* col2){
@@ -220,11 +254,11 @@ FilteredRow* join(Table* tab1, Table* tab2, Col* col1, Col* col2){
     }
 
     // bubble sort
-    head_list1 = bubble_sort(head_list1, row_count1, data_index1, col2->type);
-    head_list2 = bubble_sort(head_list2, row_count2, data_index2, col2->type);
+    head_list1 = bubble_sort(head_list1, row_count1, data_index1, col1->type);
+    head_list2 = bubble_sort(head_list2, row_count2, data_index2, col1->type);
 
     // merge
-    result = merge_sorted_lists(head_list1, head_list2);
+    result = merge_sorted_lists(head_list1, head_list2, data_index1, data_index2, col1->type);
 
     return result;
 }
