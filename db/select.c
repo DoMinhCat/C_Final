@@ -18,7 +18,7 @@ Group 2 ESGI 2A3
 #include "../global_var.h"
 #include "../clean/clean.h"
 
-void print_header_row(bool select_all, Table* table, SelectParams* params){
+void print_header_row(bool select_all, Table* table1, Table* table2, SelectParams* params){
     // print the first row (col names passed to select)
 
     Col* current_col = NULL;
@@ -26,20 +26,22 @@ void print_header_row(bool select_all, Table* table, SelectParams* params){
     if (select_all) {
         //  SELECT *
         printf("|");
-        current_col = table->first_col;
-        while (current_col != NULL) {
-            printf(" %-21s |", current_col->name);
-            current_col = current_col->next_col;
+        for(current_col = table1->first_col; current_col != NULL; current_col = current_col->next_col)
+            printf(" %-21s |", current_col->name); 
+        if(table2){
+            for(current_col = table2->first_col; current_col != NULL; current_col = current_col->next_col) 
+                printf(" %-21s |", current_col->name);
         }
         printf("\n");
 
         printf("|");
-        current_col = table->first_col;
-        while (current_col != NULL) {
+        for(current_col = table1->first_col; current_col != NULL; current_col = current_col->next_col) 
             printf("-----------------------|");
-            current_col = current_col->next_col;
-        }
         printf("\n");
+        if(table2){
+            for(current_col = table2->first_col; current_col != NULL; current_col = current_col->next_col) 
+            printf("-----------------------|");
+        }
     } else {
         // SELECT col1, col2, ... :/
         printf("|");
@@ -57,12 +59,12 @@ void print_header_row(bool select_all, Table* table, SelectParams* params){
     }
 }
 
-void print_empty_table(bool select_all, Table* table, SelectParams* params){
+void print_empty_table(bool select_all, Table* table1, Table* table2, SelectParams* params){
     int i;
 
     printf("|");
     if(select_all){
-        for(i=0; i<table->col_count; i++) printf("%23s|", " ");
+        for(i=0; i<table2!=NULL?table1->col_count+table2->col_count:table1->col_count; i++) printf("%23s|", " ");
     }else{
         for(int i = 0; i < params->col_count; i++) printf("%23s|", " ");
     }
@@ -98,6 +100,10 @@ void print_data(bool select_all, Table* table, Row* current_row, SelectParams* p
     printf("\n");
 }
 
+void print_data_for_join(bool select_all, FilteredRow* filtered){
+
+}
+
 void select_simple(SelectParams* params, Table* table){
     // select without JOIN and WHERE: SELECT */col1, col2,... from tab1
 
@@ -105,7 +111,7 @@ void select_simple(SelectParams* params, Table* table){
     Col* current_col = NULL;
     ColType col_type;
 
-    print_header_row(select_all, table, params);
+    print_header_row(select_all, table, NULL, params);
 
     // starts printing data
     Row* current_row = table->first_row;
@@ -113,7 +119,7 @@ void select_simple(SelectParams* params, Table* table){
 
     // if table is empty
     if(!table->first_row){
-        print_empty_table(select_all, table, params);
+        print_empty_table(select_all, table, NULL, params);
         return;
     }
 
@@ -168,9 +174,9 @@ void select_where_only(SelectParams* params, Table* table){
     }
 
     // print results
-    print_header_row(select_all, table, params);
+    print_header_row(select_all, table, NULL, params);
     if(!filtered){
-        print_empty_table(select_all, table, params);
+        print_empty_table(select_all, table, NULL, params);
         return;
     }
 
@@ -183,6 +189,37 @@ void select_where_only(SelectParams* params, Table* table){
     }
 
     // free before exit
+    free_filtered_set(filtered);
+    printf("\nFound %d %s.\n", row_count, row_count>1?"rows":"row");
+}
+
+void select_join_only(Table* tab1, Table* tab2, SelectParams* params){
+    // select with JOIN
+
+    FilteredRow* filtered = NULL;
+    Row* current_row = NULL;
+    Col* col1 = params->first_col_on;
+    Col* col2 = params->second_col_on;
+    bool select_all = params->col_count == 1 && strcmp(params->col_list[0], "*") == 0;
+    int row_count = 0;
+
+    filtered = join(tab1, tab2, col1, col2, params);
+
+    print_header_row(select_all, tab1, tab2, params);
+    if(!filtered){
+        print_empty_table(select_all, tab1, tab2, params);
+        return;
+    }
+
+    // TODO: func for print data join
+    while(filtered){
+        current_row = filtered->row;
+        print_data_for_join(select_all, filtered);
+
+        row_count++;
+        filtered = filtered->next_filtered_row;
+    }
+
     free_filtered_set(filtered);
     printf("\nFound %d %s.\n", row_count, row_count>1?"rows":"row");
 }
@@ -275,18 +312,14 @@ void select(Query* query) {
         //select_join_where(params);
         return;
     }
-
     if (include_join) {
-        //select_join_only(s);
+        select_join_only(table, join_table, params);
         // IMPORTANT: free filteredRow list after printing
         return;
     }
-
     if (include_where) {
         select_where_only(params, table);
         return;
     }
-
     select_simple(params, table);
-    
 }

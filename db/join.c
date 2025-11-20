@@ -107,7 +107,6 @@ FilteredRow* bubble_sort(FilteredRow* head_list, int row_count, int data_index, 
             should_swap = false;
 
             // get right data field to compare and compare them
-            // IMPORTANT: handle NULL case, NULL will be placed before NOT NULL values so: NULL, NULL, 1, 3, 4,...
             switch (col_type) { 
             case INT:
                 // get right data 
@@ -175,7 +174,6 @@ FilteredRow* merge_sorted_lists(Table* tab1, Table* tab2, SelectParams* params, 
     compare joined col value of 2 pointers 
         if == : merge data fields and save to result struct 
         if != : the smaller one advance then compare again
-        IMPORTANT: handle NULL value when comparing
     */  
 
     FilteredRow* result = NULL;
@@ -396,13 +394,13 @@ FilteredRow* join(Table* tab1, Table* tab2, Col* col1, Col* col2, SelectParams* 
     // join the 2 tables, return filtered rows for final result print of select
 
     /*
-    TODO: copy row linked list of 2 tables to 2 filtered struct: ok
+    copy row linked list of 2 tables to 2 filtered struct: ok
     bubble_sort 2 sorted filtered struct
     merge_sorted_lists into 1 final filtered struct
     return that struct
-
     */ 
-    // edge cases JOIN empty-empty or empty-normal shall return NULL
+
+    // edge cases JOIN empty-empty or empty-not empty tables shall return NULL
     if(!tab1->first_row || !tab2->first_row) return NULL;
 
     FilteredRow* head_list1 = NULL;

@@ -83,4 +83,6 @@ void select(Query* query);
 void select_simple(SelectParams* params, Table* table);
 
 FilteredRow* where_for_select(Table* table, Col* condition_col, char* str_condition, double double_condition, int int_condition, ColType col_type);
+FilteredRow* join(Table* tab1, Table* tab2, Col* col1, Col* col2, SelectParams* params);
+
 #endif
