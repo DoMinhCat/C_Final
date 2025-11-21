@@ -72,4 +72,4 @@ SELECT with WHERE (no indexing) : print on the go with a compare to check condit
 SELECT with WHERE (indexing) : look up hash table, return list of Row*, loop through result rows and print on the go
 
 **Current bugs:**
-insert with unique constraint violated on unique column causes crash
+insert with unique constraint violated on unique/pk column causes crash (crash right away with unique, crash on second invalid insert with pk)
