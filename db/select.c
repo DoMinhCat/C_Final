@@ -104,15 +104,14 @@ void print_data_for_join(FilteredRow* filtered_set, SelectedColInfo* col_info){
 
     FilteredRow* current_fr = NULL;
     Col* current_col = NULL;
-    ColType col_type;
-    int i;
+    int i = 0;
 
     printf("|");
     for(current_fr = filtered_set; current_fr != NULL; current_fr = current_fr->next_filtered_row) {
-        col_type = current_col->type;
-        void* value = get_col_value(table, current_row, current_col->name, col_type);
-        format_value(col_type, value);
+        void* value = get_col_value_for_join(filtered_set, col_info[i]);
+        format_value(col_info[i].type, value);
         printf("|");   
+        i++;
     }
     printf("\n");
 }
@@ -209,14 +208,10 @@ void select_where_only(SelectParams* params, Table* table){
 void select_join_only(Table* tab1, Table* tab2, SelectParams* params, SelectedColInfo* col_info){
     // select with JOIN
 
-    FilteredRow* filtered = NULL;
     Row* current_row = NULL;
-    Col* col1 = params->first_col_on;
-    Col* col2 = params->second_col_on;
+    FilteredRow* filtered = join(tab1, tab2, params->first_col_on, params->second_col_on, params);
     bool select_all = params->col_count == 1 && strcmp(params->col_list[0], "*") == 0;
     int row_count = 0;
-
-    filtered = join(tab1, tab2, col1, col2, params);
 
     print_header_row(select_all, tab1, tab2, params);
     if(!filtered){
@@ -224,7 +219,7 @@ void select_join_only(Table* tab1, Table* tab2, SelectParams* params, SelectedCo
         return;
     }
 
-    // TODO: func for print data join
+    // print results
     while(filtered){
         current_row = filtered->row;
         print_data_for_join(filtered, col_info);
@@ -329,7 +324,6 @@ void select(Query* query) {
         output_col_info = build_col_info_list(table, join_table, params, col_info_list_size);
 
         select_join_only(table, join_table, params, output_col_info);
-
         // free dynamic col_output_info list
         free(output_col_info);
         // already freed filtered set in select_join_only

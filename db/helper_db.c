@@ -183,6 +183,34 @@ void* get_col_value(Table* table, Row* row, char* col_name, ColType col_type) {
     return NULL;
 }
 
+void* get_col_value_for_join(FilteredRow* filtered_set, SelectedColInfo col_info) {
+    if(!filtered_set) return NULL;
+
+    int i;
+    int data_index = col_info.data_index;
+
+    switch (col_info.type) {
+    case INT:
+        if (filtered_set->int_joined_list[data_index]) {
+            return &(filtered_set->int_joined_list[data_index][0]);
+        }
+        break;
+    case STRING:
+        if (filtered_set->str_joined_list[data_index]) {
+            return filtered_set->str_joined_list[data_index];
+        }
+        break;
+    case DOUBLE:
+        if (filtered_set->double_joined_list[data_index]) {
+            return &(filtered_set->double_joined_list[data_index][0]);
+        }
+        break;
+    default:
+        return NULL;
+        break;
+    }
+}
+
 void format_value(ColType type, void* value) {
     // prints out selected value, get value from get_col_value
 
@@ -478,4 +506,5 @@ SelectedColInfo* build_col_info_list(Table* tab1, Table* tab2, SelectParams* par
     }
     return output_col_info;
 }
+
 
