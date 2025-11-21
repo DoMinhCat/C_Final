@@ -225,7 +225,7 @@ void format_value(ColType type, void* value) {
             break;
             break;
         case DOUBLE:
-            printf(" %-22lf", *(double*)value);
+            printf(" %-22g", *(double*)value);
             break;
         case STRING:
             printf(" %-22s", (char*)value);
@@ -446,8 +446,6 @@ bool str_to_double(char *str_val, double *double_output, char *col_name) {
 }
 
 SelectedColInfo* build_col_info_list(Table* tab1, Table* tab2, SelectParams* params, int list_size){
-    // build output col info to help print data in correct order
-
     bool select_all = params->col_count == 1 && strcmp(params->col_list[0], "*") == 0;
     int int_index = 0;
     int double_index = 0;
@@ -455,55 +453,57 @@ SelectedColInfo* build_col_info_list(Table* tab1, Table* tab2, SelectParams* par
     SelectedColInfo* output_col_info = NULL;
     Col* current_col = NULL;
     int i;
+    int out_i = 0;
 
-    assert((list_size = malloc(sizeof(SelectedColInfo) * list_size))!=NULL);
-    
-    for(i=0; i<list_size; i++){  
-        if(select_all){ 
-            // for data of first tab
-            for(current_col = tab1->first_col; current_col!=NULL; current_col=current_col->next_col){
+    assert((output_col_info = malloc(sizeof(SelectedColInfo) * list_size))!=NULL);
+
+    if (select_all) {
+        // fill with columns from tab1
+        current_col = tab1->first_col;
+        while (current_col != NULL && out_i < list_size) {
+            output_col_info[out_i].table_id = 1;
+            output_col_info[out_i].type = current_col->type;
+            if (current_col->type == INT) {
+                output_col_info[out_i].data_index = int_index++;
+            } else if (current_col->type == DOUBLE) {
+                output_col_info[out_i].data_index = double_index++;
+            } else {
+                output_col_info[out_i].data_index = str_index++;
+            }
+            out_i++;
+            current_col = current_col->next_col;
+        }
+        // fill with columns from tab2
+        current_col = tab2->first_col;
+        while (current_col != NULL && out_i < list_size) {
+            output_col_info[out_i].table_id = 2;
+            output_col_info[out_i].type = current_col->type;
+            if (current_col->type == INT) {
+                output_col_info[out_i].data_index = int_index++;
+            } else if (current_col->type == DOUBLE) {
+                output_col_info[out_i].data_index = double_index++;
+            } else {
+                output_col_info[out_i].data_index = str_index++;
+            }
+            out_i++;
+            current_col = current_col->next_col;
+        }
+    } else {
+        for (i = 0; i < list_size; i++) {
+            current_col = get_col_by_name(tab1, params->col_list[i]);
+            if (current_col) {
                 output_col_info[i].table_id = 1;
                 output_col_info[i].type = current_col->type;
-                if(current_col->type == INT) {
-                    output_col_info[i].data_index = int_index;
-                    int_index++;
-                }else if(current_col->type == DOUBLE) {
-                    output_col_info[i].data_index = double_index;
-                    double_index++;
-                }else {
-                    output_col_info[i].data_index = str_index;
-                    str_index++;
-                }
-            }
-            // for data of second tab
-            for(current_col = tab2->first_col; current_col!=NULL; current_col=current_col->next_col){
-                output_col_info[i].table_id = 2;
-                output_col_info[i].type = current_col->type;
-                if(current_col->type == INT) {
-                    output_col_info[i].data_index = int_index;
-                    int_index++;
-                }else if(current_col->type == DOUBLE) {
-                    output_col_info[i].data_index = double_index;
-                    double_index++;
-                }else {
-                    output_col_info[i].data_index = str_index;
-                    str_index++;
-                }
-            }
-        } else{
-            current_col = NULL;
-            current_col = get_col_by_name(tab1, params->col_list[i]);
-            if(!current_col) {
+                output_col_info[i].data_index = get_data_list_index(tab1, params->col_list[i]);
+            } else {
                 current_col = get_col_by_name(tab2, params->col_list[i]);
                 output_col_info[i].table_id = 2;
+                output_col_info[i].type = current_col->type;
                 output_col_info[i].data_index = get_data_list_index(tab2, params->col_list[i]);
-            }else {
-                output_col_info[i].table_id = 1;
-                output_col_info[i].data_index = get_data_list_index(tab1, params->col_list[i]);
             }
-            output_col_info[i].type = current_col->type;
         }
     }
+
     return output_col_info;
 }
 

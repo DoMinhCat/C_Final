@@ -6,15 +6,10 @@ Group 2 ESGI 2A3
 #include <stdbool.h>
 
 #include "../main.h"
+#include "db.h"
 
 #ifndef HELPER_DB_H
 #define HELPER_DB_H
-
-typedef struct Col Col; 
-typedef struct Row Row; 
-typedef struct Table Table; 
-typedef struct Query Query; 
-typedef struct HashTable HashTable; 
 
 // get node of linked list functions
 int* get_fk_col_list_index(Query* query);

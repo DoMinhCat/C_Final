@@ -17,6 +17,7 @@ Group 2 ESGI 2A3
 
 typedef struct HashTable HashTable;
 typedef struct Query Query;
+typedef struct SelectParams SelectParams;
 
 typedef struct Row{
     int **int_list; // unset int will be NULL, int_list[int_count][0]
@@ -72,7 +73,7 @@ typedef struct FilteredRow{
 } FilteredRow;
 
 // for join
-typedef struct {
+typedef struct SelectedColInfo{
     ColType type;    
     int table_id; // 1 = tab1, 2 = tab2 (joined table)
     int data_index;   

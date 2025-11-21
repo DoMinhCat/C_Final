@@ -65,7 +65,7 @@ void print_empty_table(bool select_all, Table* table1, Table* table2, SelectPara
 
     printf("|");
     if(select_all){
-        for(i=0; i<table2!=NULL?table1->col_count+table2->col_count:table1->col_count; i++) printf("%23s|", " ");
+        for(i=0; i<(table2!=NULL?table1->col_count+table2->col_count:table1->col_count); i++) printf("%23s|", " ");
     }else{
         for(int i = 0; i < params->col_count; i++) printf("%23s|", " ");
     }
@@ -205,11 +205,11 @@ void select_where_only(SelectParams* params, Table* table){
     printf("\nFound %d %s.\n", row_count, row_count>1?"rows":"row");
 }
 
-void select_join_only(Table* tab1, Table* tab2, SelectParams* params, SelectedColInfo* col_info){
+void select_join_only(Table* tab1, Table* tab2, SelectParams* params, SelectedColInfo* col_info, Col* col1, Col* col2){
     // select with JOIN
 
     Row* current_row = NULL;
-    FilteredRow* filtered = join(tab1, tab2, params->first_col_on, params->second_col_on, params);
+    FilteredRow* filtered = join(tab1, tab2, col1, col2, params);
     bool select_all = params->col_count == 1 && strcmp(params->col_list[0], "*") == 0;
     int row_count = 0;
 
@@ -242,6 +242,8 @@ void select(Query* query) {
     Table* table = NULL;
     Table* join_table = NULL;
     Table* where_table = NULL;
+    Col* col_on1 = NULL;
+    Col* col_on2 = NULL;
     int i;
     SelectedColInfo* output_col_info = NULL;
     int col_info_list_size;
@@ -255,8 +257,6 @@ void select(Query* query) {
 
     // check join params
     if(params->table_join_name){
-        Col* col_on1 = NULL;
-        Col* col_on2 = NULL;
         include_join = true;
         
         // join table exists ?
@@ -323,7 +323,7 @@ void select(Query* query) {
         else col_info_list_size = params->col_count;
         output_col_info = build_col_info_list(table, join_table, params, col_info_list_size);
 
-        select_join_only(table, join_table, params, output_col_info);
+        select_join_only(table, join_table, params, output_col_info, col_on1, col_on2);
         // free dynamic col_output_info list
         free(output_col_info);
         // already freed filtered set in select_join_only
