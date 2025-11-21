@@ -14,12 +14,6 @@ Group 2 ESGI 2A3
 #include "helper_db.h"
 #include "../clean/clean.h"
 
-typedef struct {
-    ColType type;    
-    int table_id; // 1 = tab1, 2 = tab2
-    int data_index;   
-} SelectedColInfo;
-
 int compare_data_field(int* int_data1, int* int_data2, char* str_data1, char* str_data2, double* double_data1, double* double_data2, ColType col_type){
     // compare any 2 data fields of same type. Return 0 if equal, -1 if val1 < val2, 1 if val1 > val2
     // IMPORTANT: NULL < Not NULL
@@ -394,7 +388,7 @@ FilteredRow* join(Table* tab1, Table* tab2, Col* col1, Col* col2, SelectParams* 
     // join the 2 tables, return filtered rows for final result print of select
 
     /*
-    copy row linked list of 2 tables to 2 filtered struct: ok
+    copy row linked list of 2 tables to 2 filtered struct
     bubble_sort 2 sorted filtered struct
     merge_sorted_lists into 1 final filtered struct
     return that struct

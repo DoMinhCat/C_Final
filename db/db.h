@@ -16,6 +16,7 @@ Group 2 ESGI 2A3
 #include "../ui/parser.h"
 
 typedef struct HashTable HashTable;
+typedef struct Query Query;
 
 typedef struct Row{
     int **int_list; // unset int will be NULL, int_list[int_count][0]
@@ -70,7 +71,12 @@ typedef struct FilteredRow{
     struct FilteredRow* next_filtered_row;
 } FilteredRow;
 
-typedef struct Query Query;
+// for join
+typedef struct {
+    ColType type;    
+    int table_id; // 1 = tab1, 2 = tab2 (joined table)
+    int data_index;   
+} SelectedColInfo;
 
 // prototypes
 void create_table(Query *query);

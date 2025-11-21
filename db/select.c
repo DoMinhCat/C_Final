@@ -8,6 +8,7 @@ Group 2 ESGI 2A3
 #include <string.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #include "db.h"
 #include "helper_db.h"
@@ -80,13 +81,11 @@ void print_data(bool select_all, Table* table, Row* current_row, SelectParams* p
     printf("|");
     if (select_all) {
         // print all columns in the right order
-        current_col = table->first_col;
-        while (current_col != NULL) {
+        for(current_col = table->first_col; current_col != NULL; current_col = current_col->next_col) {
             col_type = current_col->type;
             void* value = get_col_value(table, current_row, current_col->name, col_type);
             format_value(col_type, value);
             printf("|");
-            current_col = current_col->next_col;
         }
     } else {
         // SELECT col1, col2: print the right columns
@@ -100,8 +99,22 @@ void print_data(bool select_all, Table* table, Row* current_row, SelectParams* p
     printf("\n");
 }
 
-void print_data_for_join(bool select_all, FilteredRow* filtered){
+void print_data_for_join(FilteredRow* filtered_set, SelectedColInfo* col_info){
+    // print the filtered list after JOIN operation
 
+    FilteredRow* current_fr = NULL;
+    Col* current_col = NULL;
+    ColType col_type;
+    int i;
+
+    printf("|");
+    for(current_fr = filtered_set; current_fr != NULL; current_fr = current_fr->next_filtered_row) {
+        col_type = current_col->type;
+        void* value = get_col_value(table, current_row, current_col->name, col_type);
+        format_value(col_type, value);
+        printf("|");   
+    }
+    printf("\n");
 }
 
 void select_simple(SelectParams* params, Table* table){
@@ -193,7 +206,7 @@ void select_where_only(SelectParams* params, Table* table){
     printf("\nFound %d %s.\n", row_count, row_count>1?"rows":"row");
 }
 
-void select_join_only(Table* tab1, Table* tab2, SelectParams* params){
+void select_join_only(Table* tab1, Table* tab2, SelectParams* params, SelectedColInfo* col_info){
     // select with JOIN
 
     FilteredRow* filtered = NULL;
@@ -214,7 +227,7 @@ void select_join_only(Table* tab1, Table* tab2, SelectParams* params){
     // TODO: func for print data join
     while(filtered){
         current_row = filtered->row;
-        print_data_for_join(select_all, filtered);
+        print_data_for_join(filtered, col_info);
 
         row_count++;
         filtered = filtered->next_filtered_row;
@@ -229,16 +242,14 @@ void select(Query* query) {
 
     SelectParams* params = &query->params.select_params;
     bool select_all = params->col_count == 1 && strcmp(params->col_list[0], "*") == 0;
-
-
     bool include_join = false;
     bool include_where = false;
-    ColType col_type;
     Table* table = NULL;
     Table* join_table = NULL;
     Table* where_table = NULL;
-
     int i;
+    SelectedColInfo* output_col_info = NULL;
+    int col_info_list_size;
 
     // Make sure table exists
     table = get_table_by_name(params->table_name);
@@ -313,12 +324,20 @@ void select(Query* query) {
         return;
     }
     if (include_join) {
-        select_join_only(table, join_table, params);
-        // IMPORTANT: free filteredRow list after printing
+        if(select_all) col_info_list_size = table->col_count + join_table->col_count;
+        else col_info_list_size = params->col_count;
+        output_col_info = build_col_info_list(table, join_table, params, col_info_list_size);
+
+        select_join_only(table, join_table, params, output_col_info);
+
+        // free dynamic col_output_info list
+        free(output_col_info);
+        // already freed filtered set in select_join_only
         return;
     }
     if (include_where) {
         select_where_only(params, table);
+        // already freed filtered set in select_where_only
         return;
     }
     select_simple(params, table);
