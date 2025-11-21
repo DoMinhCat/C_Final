@@ -210,6 +210,20 @@ void select_join_only(Table* tab1, Table* tab2, SelectParams* params, SelectedCo
 
     Row* current_row = NULL;
     FilteredRow* filtered = join(tab1, tab2, col1, col2, params);
+    // DEBUG
+    FilteredRow* current_fr = NULL;
+    if(!filtered) printf("No filtered set for print_data_for_join, join() failed\n");
+    else{
+        for(current_fr = filtered; current_fr != NULL; current_fr = current_fr->next_filtered_row) {
+            if(!current_fr->row) printf("No row set: ok\n"); else printf("Why is there row in join\n");
+            if(!current_fr->int_joined_list) printf("No int list\n");
+            if(!current_fr->double_joined_list) printf("No double list\n");
+            if(!current_fr->str_joined_list) printf("No str list\n");
+        }
+    }
+
+    
+    
     bool select_all = params->col_count == 1 && strcmp(params->col_list[0], "*") == 0;
     int row_count = 0;
 

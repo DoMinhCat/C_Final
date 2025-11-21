@@ -8,6 +8,9 @@ Group 2 ESGI 2A3
 #include <stdbool.h>
 #include <string.h>
 #include <assert.h>
+// DEBUG
+#include <stdio.h>
+
 
 #include "db.h"
 #include "../init/init.h"
@@ -186,6 +189,8 @@ FilteredRow* merge_sorted_lists(Table* tab1, Table* tab2, SelectParams* params, 
     Col* current_col = NULL;
     SelectedColInfo col_info[params->col_count];
     int cmp;
+    int cmp1;
+    int cmp2;
     int i;
     int int_count = 0;
     int double_count = 0;
@@ -244,7 +249,7 @@ FilteredRow* merge_sorted_lists(Table* tab1, Table* tab2, SelectParams* params, 
         if(cmp == 0){
             // collect duplicates of list1
             ref1 = p1;
-            int cmp1;
+            cmp1 = 0;
             while(p1 && cmp1 == 0){
                 switch (col_on_type) { 
                 case INT:
@@ -265,7 +270,7 @@ FilteredRow* merge_sorted_lists(Table* tab1, Table* tab2, SelectParams* params, 
 
             // collect duplicates of list2
             ref2 = p2;
-            int cmp2;
+            cmp2 = 0;
             while(p2 && cmp2 == 0){
                 switch (col_on_type) { 
                 case INT:
@@ -386,7 +391,6 @@ FilteredRow* merge_sorted_lists(Table* tab1, Table* tab2, SelectParams* params, 
 
 FilteredRow* join(Table* tab1, Table* tab2, Col* col1, Col* col2, SelectParams* params){
     // join the 2 tables, return filtered rows for final result print of select
-
     /*
     copy row linked list of 2 tables to 2 filtered struct
     bubble_sort 2 sorted filtered struct
@@ -425,13 +429,14 @@ FilteredRow* join(Table* tab1, Table* tab2, Col* col1, Col* col2, SelectParams* 
     }
     
     //copy linked list Row of tab2
+    last_node = NULL;
     for(current_row = tab2->first_row; current_row; current_row=current_row->next_row){
         new_node = init_filtered_row();
         new_node->row = current_row;
         
-        if(head_list1 == NULL) {
-            head_list1 = new_node;
-            last_node = head_list1;
+        if(head_list2 == NULL) {
+            head_list2 = new_node;
+            last_node = head_list2;
         } else {
             // append to the end
             last_node->next_filtered_row = new_node;
@@ -439,12 +444,24 @@ FilteredRow* join(Table* tab1, Table* tab2, Col* col1, Col* col2, SelectParams* 
         }
     }
 
+    // DEBUG
+    if(head_list1) printf("Copied head list1\n"); else printf("FAILED copied head list1\n");
+    if(head_list2) printf("Copied head list2\n"); else printf("FAILED copied head list2\n");
+
+
     // bubble sort
     head_list1 = bubble_sort(head_list1, row_count1, data_index1, col1->type);
     head_list2 = bubble_sort(head_list2, row_count2, data_index2, col1->type);
 
+    // DEBUG
+    if(head_list1) printf("Sorted head list1\n"); else printf("FAILED sorted head list1\n");
+    if(head_list2) printf("Sorted head list2\n"); else printf("FAILED sorted head list2\n");
+
     // merge
     result = merge_sorted_lists(tab1, tab2, params, head_list1, head_list2, data_index1, data_index2, col1->type);
+
+    // DEBUG
+    if(result) printf("Merge done\n"); else printf("Merge return Null\n");
 
     return result;
 }
