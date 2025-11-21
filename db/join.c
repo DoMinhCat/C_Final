@@ -8,8 +8,6 @@ Group 2 ESGI 2A3
 #include <stdbool.h>
 #include <string.h>
 #include <assert.h>
-// DEBUG
-#include <stdio.h>
 
 
 #include "db.h"
@@ -444,24 +442,12 @@ FilteredRow* join(Table* tab1, Table* tab2, Col* col1, Col* col2, SelectParams* 
         }
     }
 
-    // DEBUG
-    if(head_list1) printf("Copied head list1\n"); else printf("FAILED copied head list1\n");
-    if(head_list2) printf("Copied head list2\n"); else printf("FAILED copied head list2\n");
-
-
     // bubble sort
     head_list1 = bubble_sort(head_list1, row_count1, data_index1, col1->type);
     head_list2 = bubble_sort(head_list2, row_count2, data_index2, col1->type);
 
-    // DEBUG
-    if(head_list1) printf("Sorted head list1\n"); else printf("FAILED sorted head list1\n");
-    if(head_list2) printf("Sorted head list2\n"); else printf("FAILED sorted head list2\n");
-
     // merge
     result = merge_sorted_lists(tab1, tab2, params, head_list1, head_list2, data_index1, data_index2, col1->type);
-
-    // DEBUG
-    if(result) printf("Merge done\n"); else printf("Merge return Null\n");
 
     return result;
 }
