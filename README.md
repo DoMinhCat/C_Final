@@ -48,21 +48,30 @@ gcc main.c ui/parser.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/select.c
 
 Commands to test:
 
-CREATE TABLE team ( id int pk, name string unique, score double )
-CREATE TABLE player ( id int pk, name string, age int, weight double, team_id int fk references team id )
+create table customers ( id int pk, name string )
+create table orders ( order_id int pk, customer_id int fk references customers id, amount double )
 
-DROP TABLE player // error: 'player' references 'team'
+insert into customers ( id, name ) values ( 1, Alice )
+insert into customers ( id, name ) values ( 2, Bob )
+insert into customers ( id, name ) values ( 3, Carol )
 
-INSERT INTO team ( id, name, score ) values ( 1, abc, 45.5 )
-INSERT INTO player ( id , name , age , weight , team_id ) values ( 1 , ronaldo , 38 , 78.0 , 1 )
-INSERT INTO player ( team_id ) values ( 5 ) //ref id doesnt exist
-INSERT INTO team ( id , name , score ) values ( 1 , duplicateteam , 100.0 ) // PK violated
-INSERT INTO player ( id , name , age , weight , team_id ) values ( 15 , stringfk , 22 , 70.0 , abc ) // invalid FK
+insert into orders ( order_id, customer_id, amount ) values ( 10, 1, 99.5 )
+insert into orders ( order_id, customer_id, amount ) values ( 11, 1, 20.0 )
+insert into orders ( order_id, customer_id, amount ) values ( 12, 3, 250.75 )
 
-SELECT * from team
-select * from team WHERE id = 1
-select ( id, name ) from team WHERE id = 1
-select ( score, weight ) from team join player on id = id
+select ( id, name ) from customers
+select ( id, name ) from customers where id = 2
+select ( id, name ) from customers where name = Alice
+select ( order_id, amount ) from orders where amount = 20.0
+select ( id, amount ) from customers join orders on id = customer_id
+select ( name, amount ) from customers join orders on id = customer_id
+select ( id, name, amount ) from customers join orders on id = customer_id where id = 1
+select ( id, name, amount ) from customers join orders on id = customer_id where amount = 250.75
+select ( name, amount ) from customers join orders on id = customer_id where name = Alice
+
+Edge cases:
+select ( id ) from customers join orders on id = customer_id    // select id will return id of customers even when orders also has id column
+select ( id, id ) from customers join orders on id = customer_id    // will only return id of customers
 
 **Ideas:**
 default constraint
