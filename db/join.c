@@ -175,10 +175,8 @@ FilteredRow* merge_sorted_lists(Table* tab1, Table* tab2, SelectParams* params, 
     FilteredRow* last_node = NULL;
     FilteredRow* start_dup1 = NULL;
     FilteredRow* start_dup2 = NULL;
-    FilteredRow* end_dup1 = NULL;
-    FilteredRow* end_dup2 = NULL;
-    FilteredRow* ref1 = NULL;
-    FilteredRow* ref2 = NULL;
+    FilteredRow* end1 = NULL;
+    FilteredRow* end2 = NULL;
     FilteredRow* p1 = list1;
     FilteredRow* p2 = list2;
     Row* row1 = NULL;
@@ -245,50 +243,48 @@ FilteredRow* merge_sorted_lists(Table* tab1, Table* tab2, SelectParams* params, 
 
         if(cmp == 0){
             // collect duplicates of list1
-            ref1 = p1;
-            cmp1 = 0;
-            while(p1 && cmp1 == 0){
+            end1 = p1;
+            while(end1){
                 switch (col_on_type) { 
                 case INT:
-                    cmp1 = compare_data_field(row1->int_list[data_index1], ref1->row->int_list[data_index1], NULL, NULL, NULL, NULL, INT);
+                    cmp1 = compare_data_field(start_dup1->row->int_list[data_index1], end1->row->int_list[data_index1], NULL, NULL, NULL, NULL, INT);
                     break;
                 case DOUBLE:
-                    cmp1 = compare_data_field(NULL, NULL, NULL, NULL, row1->double_list[data_index1], ref1->row->double_list[data_index1], DOUBLE);
+                    cmp1 = compare_data_field(NULL, NULL, NULL, NULL, start_dup1->row->double_list[data_index1], end1->row->double_list[data_index1], DOUBLE);
                     break;
                 case STRING:
-                    cmp1 = compare_data_field(NULL, NULL, row1->str_list[data_index1], ref1->row->str_list[data_index1], NULL, NULL, STRING);
+                    cmp1 = compare_data_field(NULL, NULL, start_dup1->row->str_list[data_index1], end1->row->str_list[data_index1], NULL, NULL, STRING);
                     break;
                 default:
                     break;
                 }
-                p1 = p1->next_filtered_row;
-                if(p1) row1 = p1->row;
+                if(cmp1!=0) break;
+                end1 = end1->next_filtered_row;
             }
 
             // collect duplicates of list2
-            ref2 = p2;
-            cmp2 = 0;
-            while(p2 && cmp2 == 0){
+            end2 = p2;
+            while(end2){
                 switch (col_on_type) { 
                 case INT:
-                    cmp2 = compare_data_field(row2->int_list[data_index2], ref2->row->int_list[data_index2], NULL, NULL, NULL, NULL, INT);
+                    cmp2 = compare_data_field(start_dup2->row->int_list[data_index2], end2->row->int_list[data_index2], NULL, NULL, NULL, NULL, INT);
                     break;
                 case DOUBLE:
-                    cmp2 = compare_data_field(NULL, NULL, NULL, NULL, row2->double_list[data_index2], ref2->row->double_list[data_index2], DOUBLE);
+                    cmp2 = compare_data_field(NULL, NULL, NULL, NULL, start_dup2->row->double_list[data_index2], end2->row->double_list[data_index2], DOUBLE);
                     break;
                 case STRING:
-                    cmp2 = compare_data_field(NULL, NULL, row2->str_list[data_index2], ref2->row->str_list[data_index2], NULL, NULL, STRING);
+                    cmp2 = compare_data_field(NULL, NULL, start_dup2->row->str_list[data_index2], end2->row->str_list[data_index2], NULL, NULL, STRING);
                     break;
                 default:
                     break;
                 }
-                p2 = p2->next_filtered_row;
-                if(p2) row2 = p2->row;
+                if(cmp2 != 0) break;
+                end2 = end2->next_filtered_row;
             }
 
             // combine all duplicates
-            for(FilteredRow* r1 = start_dup1; r1 != p1; r1 = r1->next_filtered_row) {
-                for(FilteredRow* r2 = start_dup2; r2 != p2; r2 = r2->next_filtered_row) {
+            for(FilteredRow* r1 = start_dup1; r1 != end1; r1 = r1->next_filtered_row) {
+                for(FilteredRow* r2 = start_dup2; r2 != end2; r2 = r2->next_filtered_row) {
                     row1 = r1->row;
                     row2 = r2->row;
                     new_node = init_filtered_row();
@@ -300,12 +296,30 @@ FilteredRow* merge_sorted_lists(Table* tab1, Table* tab2, SelectParams* params, 
                         assert((new_node->str_joined_list = (char**)calloc(row1->str_count + row2->str_count, sizeof(char*))) != NULL);
 
                         // copy data lists of 2 rows into joined lists with structure: list1, list2
-                        memcpy(new_node->int_joined_list, row1->int_list, sizeof(int*) * row1->int_count);
-                        memcpy(new_node->int_joined_list + row1->int_count, row2->int_list, sizeof(int*) * row2->int_count);
-                        memcpy(new_node->str_joined_list, row1->str_list, sizeof(char*) * row1->str_count);
-                        memcpy(new_node->str_joined_list + row1->str_count, row2->str_list, sizeof(char*) * row2->str_count);
-                        memcpy(new_node->double_joined_list, row1->double_list, sizeof(double*) * row1->double_count);
-                        memcpy(new_node->double_joined_list + row1->double_count, row2->double_list, sizeof(double*) * row2->double_count);
+                        // int list
+                        new_node->int_joined_list = calloc(new_node->int_join_count, sizeof(int*));
+                        for (i = 0; i < row1->int_count; ++i) {
+                            new_node->int_joined_list[i] = malloc(sizeof(int));
+                            *new_node->int_joined_list[i] = *row1->int_list[i];
+                        }
+                        for (i = 0; i < row2->int_count; ++i) {
+                            new_node->int_joined_list[row1->int_count + i] = malloc(sizeof(int));
+                            *new_node->int_joined_list[row1->int_count + i] = *row2->int_list[i];
+                        }
+                        // double list
+                        new_node->double_joined_list = calloc(new_node->double_join_count, sizeof(double*));
+                        for (i = 0; i < row1->double_count; ++i) {
+                            new_node->double_joined_list[i] = malloc(sizeof(double));
+                            *new_node->double_joined_list[i] = *row1->double_list[i];
+                        }
+                        for (i = 0; i < row2->double_count; ++i) {
+                            new_node->double_joined_list[row1->double_count + i] = malloc(sizeof(double));
+                            *new_node->double_joined_list[row1->double_count + i] = *row2->double_list[i];
+                        }
+                        // str list
+                        new_node->str_joined_list = calloc(new_node->str_join_count, sizeof(char*));
+                        for (i = 0; i < row1->str_count; ++i) assert((new_node->str_joined_list[i] = strdup(row1->str_list[i])) != NULL);
+                        for (i = 0; i < row2->str_count; ++i) assert((new_node->str_joined_list[row1->str_count + i] = strdup(row2->str_list[i])) != NULL);
 
                         new_node->int_join_count = row1->int_count + row2->int_count;
                         new_node->double_join_count = row1->double_count + row2->double_count;
@@ -371,6 +385,9 @@ FilteredRow* merge_sorted_lists(Table* tab1, Table* tab2, SelectParams* params, 
                     }            
                 }
             }
+            // advannce both pointer after matching duplicates
+            p1 = end1;
+            p2 = end2;
         }else if(cmp == 1){
             // advance p2
             p2 = p2->next_filtered_row;
