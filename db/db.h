@@ -91,5 +91,6 @@ void select_simple(SelectParams* params, Table* table);
 
 FilteredRow* where_for_select(Table* table, Col* condition_col, char* str_condition, double double_condition, int int_condition, ColType col_type);
 FilteredRow* join(Table* tab1, Table* tab2, Col* col1, Col* col2, SelectParams* params);
+FilteredRow* join_with_where(FilteredRow* head_list_where, Table* tab, Table* tab_where, Col* col_tab, Col* col_tab_where, SelectParams* params);
 
 #endif

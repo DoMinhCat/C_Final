@@ -507,4 +507,48 @@ SelectedColInfo* build_col_info_list(Table* tab1, Table* tab2, SelectParams* par
     return output_col_info;
 }
 
+bool str_to_col_type(Col* condition_col, char* condition_val, int* int_val, double* double_val, char** str_val){
+    // convert condition value (char*) to the correct type of column to compare
+
+    switch (condition_col->type) {
+    case INT:
+        if(!str_to_int(condition_val, int_val, condition_col->name)) return false;
+        break;
+    case DOUBLE:
+        if(!str_to_double(condition_val, double_val, condition_col->name)) return false;
+        break;
+    case STRING:
+        *str_val = condition_val;
+        break;
+    default:
+        break;
+    }
+    return true;
+}
+
+FilteredRow* copy_rows_to_filtered(Table* tab){
+    // copy linked list Row of a table to linked list of FilteredRow for JOIN operation
+
+    if(!tab || !tab->first_row) return NULL;
+
+    Row* current_row = NULL;
+    FilteredRow* head_list = NULL;
+    FilteredRow* new_node = NULL;
+    FilteredRow* last_node = NULL;
+
+    for(current_row = tab->first_row; current_row; current_row=current_row->next_row){
+        new_node = init_filtered_row();
+        new_node->row = current_row;
+
+        if(head_list == NULL) {
+            head_list = new_node;
+            last_node = head_list;
+        } else {
+            // append to the end
+            last_node->next_filtered_row = new_node;
+            last_node = new_node;
+        }
+    }
+    return head_list;
+}
 

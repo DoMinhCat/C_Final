@@ -39,7 +39,9 @@ bool str_to_int(char *str_val, int *int_output, char *col_name);
 bool str_to_double(char *str_val, double *double_output, char *col_name);
 
 // functions for where & join
+FilteredRow* copy_rows_to_filtered(Table* tab);
 SelectedColInfo* build_col_info_list(Table* tab1, Table* tab2, SelectParams* params, int list_size);
 void* get_col_value_for_join(FilteredRow* filtered_set, SelectedColInfo col_info);
+bool str_to_col_type(Col* condition_col, char* condition_val, int* int_val, double* double_val, char** str_val);
 
 #endif

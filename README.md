@@ -9,7 +9,7 @@ Projet final de C à ESGI
 3. Installation
 4. Features
 
-    - Strings are applied directly, no need to wrap them in quotes or double quotes
+    - Strings does not need to be wrapped inside quotes or double quotes
     - Table and column names are case sensitive
     - Available types : int, string, and double
     - Insert: values will be inserted in the order of which columns are created and all columns must be inserted (can't insert only 4 values into a table with 5 columns)
@@ -21,7 +21,7 @@ Projet final de C à ESGI
     - Primary key and foreign key must be of type int or string, can't be 0 or negative if is int
     - Primary key type INT auto-incrementation supported
     - All foreign keys are ON DELETE RESTRICT
-    - The order of tables passed for DROP matters (foreign key constraint)
+    - The order of tables passed for DROP matters (foreign key constraint violation)
     - "exit" or "quit" to exit the program
 
     - Max col per table = 50
@@ -67,9 +67,5 @@ select ( score, weight ) from team join player on id = id
 default constraint
 end with ; to be able to execute multiple cmds in one run
 
-SELECT without where: print on the go
-SELECT with WHERE (no indexing) : print on the go with a compare to check condition (like above + check)
-SELECT with WHERE (indexing) : look up hash table, return list of Row*, loop through result rows and print on the go
-
 **Current bugs:**
-insert with unique constraint violated on unique/pk column causes crash (crash right away with unique, crash on second invalid insert with pk)
+None

@@ -237,7 +237,6 @@ void insert(Query* query){
                 unique_int_col_index++;
 
                 // check uniqueness of values to be inserted
-                // TODO: fix crash when violate
                 hash_tab_of_col = get_ht_by_col_name(first_hash_tab, current_col->name);
                 if(!pk_value_is_unique(NULL, safe_val, hash_tab_of_col, current_col->constraint == UNIQUE?"UNIQUE":"PRIMARY KEY")){
                     free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
@@ -288,7 +287,6 @@ void insert(Query* query){
             }
             
             // check UNIQUE constraint and pk uniqueness
-            // TODO: fix crash when violate
             if(current_col->constraint == PK || current_col->constraint == UNIQUE){ 
                 if(current_col->constraint == PK) str_pk_provided = true;
                 hash_tab_of_col = get_ht_by_col_name(first_hash_tab, current_col->name);

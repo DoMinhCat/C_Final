@@ -102,8 +102,8 @@ void print_data(Table* table, Row* current_row, SelectParams* params){
     printf("\n");
 }
 
-void print_data_for_join(FilteredRow* filtered_set, SelectedColInfo* col_info, SelectParams* params){
-    // print the filtered list after JOIN operation
+void print_data_for_join(FilteredRow* filtered_row, SelectedColInfo* col_info, SelectParams* params){
+    // print from the filtered list (after JOIN operation)
 
     FilteredRow* current_fr = NULL;
     Col* current_col = NULL;
@@ -114,7 +114,7 @@ void print_data_for_join(FilteredRow* filtered_set, SelectedColInfo* col_info, S
     col_count = select_all ? get_table_by_name(params->table_name)->col_count + get_table_by_name(params->table_join_name)->col_count : params->col_count;
     printf("|");
     for(int i = 0; i < params->col_count; i++) {
-        void* value = get_col_value_for_join(filtered_set, col_info[i]);
+        void* value = get_col_value_for_join(filtered_row, col_info[i]);
         format_value(col_info[i].type, value);
         printf("|");  
     }
@@ -169,24 +169,11 @@ void select_where_only(SelectParams* params, Table* table){
     
     // NOTE: could make a function for "type conversion" if repititive across select cases
     // special case compare with NULL
-    if(strcasecmp(params->condition_val, "NULL") == 0){
+    if(strcasecmp(condition_val, "NULL") == 0){
         filtered = where_for_select(table, condition_col, "NULL", 0, 0, col_type);
     } else{
         // convert condition value to the correct type to compare
-        switch (col_type) {
-        case INT:
-            if(!str_to_int(condition_val, &int_val, condition_col->name)) return;
-            break;
-        case DOUBLE:
-            if(!str_to_double(condition_val, &double_val, condition_col->name)) return;
-            break;
-        case STRING:
-            str_val = condition_val;
-            break;
-        default:
-            break;
-        }
-
+        if(!str_to_col_type(condition_col, condition_val, &int_val, &double_val, &str_val)) return;
         filtered = where_for_select(table, condition_col, str_val, double_val, int_val, col_type);
     }
 
@@ -210,11 +197,75 @@ void select_where_only(SelectParams* params, Table* table){
     printf("\nFound %d %s.\n", row_count, row_count>1?"rows":"row");
 }
 
+void select_join_where(SelectParams* params, Table* tab, Table* condition_tab, Col* col_tab, Col* col_tab_where, SelectedColInfo* col_info){
+    // SELECT with WHERE and JOIN
+
+    bool select_all = params->col_count == 1 && strcmp(params->col_list[0], "*") == 0;
+    FilteredRow* filtered_where = NULL;
+    FilteredRow* result = NULL;
+    FilteredRow* current_fr = NULL;
+    Col* condition_col = NULL;
+    Col* col1 = NULL;
+    Col* col2 = NULL;
+    char* condition_val = params->condition_val;
+    int int_val;
+    double double_val;
+    char* str_val = NULL;
+    int row_count = 0;
+    bool where_tab_is_first = strcmp(params->table_name, condition_tab->name) == 0; 
+    Table* tab1 = NULL;
+    Table* tab2 = NULL;
+
+    // determine tab and col order to print in correct order
+    if(where_tab_is_first){
+        tab1 = condition_tab;
+        col1 = col_tab_where;
+        tab2 = tab;
+        col2 = col_tab;
+    }else{
+        tab2 = condition_tab;
+        col2 = col_tab_where;
+        tab1 = tab;
+        col1 = col_tab;
+    }
+    
+    // get condition column
+    condition_col = get_col_by_name(condition_tab, params->condition_col);
+
+    // filter rows by WHERE
+    if(strcasecmp(condition_val, "NULL") == 0){
+        filtered_where = where_for_select(condition_tab, condition_col, "NULL", 0, 0, condition_col->type);
+    } else{
+        // convert condition value to the correct type to compare
+        if(!str_to_col_type(condition_col, condition_val, &int_val, &double_val, &str_val)) return;
+        filtered_where = where_for_select(condition_tab, condition_col, str_val, double_val, int_val, condition_col->type);
+    }
+
+    // filter by JOIN, filtered_where freed by merge func in join_with_where
+    result = join_with_where(filtered_where, tab, condition_tab, col_tab, col_tab_where, params);
+
+    print_header_row(tab1, tab2, params);
+    if(!result){
+        print_empty_table(tab1, tab2, params);
+        return;
+    }
+
+    // print results
+    for(current_fr=result; current_fr!=NULL; current_fr=current_fr->next_filtered_row){
+        print_data_for_join(current_fr, col_info, params);
+        row_count++;
+    }
+
+    // IMPORTANT free filtered set after print, before return
+    free_filtered_set(result);
+    printf("\nFound %d %s.\n", row_count, row_count>1?"rows":"row");
+}
+
 void select_join_only(Table* tab1, Table* tab2, SelectParams* params, SelectedColInfo* col_info, Col* col1, Col* col2){
     // select with JOIN
 
-    Row* current_row = NULL;
     FilteredRow* filtered = join(tab1, tab2, col1, col2, params);
+    FilteredRow* current_fr = NULL;
     
     bool select_all = params->col_count == 1 && strcmp(params->col_list[0], "*") == 0;
     int row_count = 0;
@@ -226,12 +277,9 @@ void select_join_only(Table* tab1, Table* tab2, SelectParams* params, SelectedCo
     }
 
     // print results
-    while(filtered){
-        current_row = filtered->row;
-        print_data_for_join(filtered, col_info, params);
-
+    for(current_fr=filtered; current_fr!=NULL; current_fr=current_fr->next_filtered_row){
+        print_data_for_join(current_fr, col_info, params);
         row_count++;
-        filtered = filtered->next_filtered_row;
     }
 
     free_filtered_set(filtered);
@@ -303,7 +351,7 @@ void select(Query* query) {
     if (params->condition_col) {
         include_where = true;
         where_table = table;
-
+        // default where column belongs to the first table, if not then search at the second table
         if (!get_col_by_name(table, params->condition_col)) {
             if (include_join) {
                 if (!get_col_by_name(join_table, params->condition_col)) {
