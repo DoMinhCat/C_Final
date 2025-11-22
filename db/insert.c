@@ -23,24 +23,30 @@ void free_insert_before_exit(
     char*** int_unique_col_name_list, char*** str_unique_col_name_list, int unique_str_col_count, int unique_int_col_count){
     if(*int_list_to_insert){
         for(int i=0; i<int_col_count; i++){
-            free((*int_list_to_insert)[i]);
-            (*int_list_to_insert)[i] = NULL;
+            if((*int_list_to_insert)[i]){
+                free((*int_list_to_insert)[i]);
+                (*int_list_to_insert)[i] = NULL;
+            }
         }
         free(*int_list_to_insert);
         *int_list_to_insert = NULL;
     }
     if(*str_list_to_insert){
         for(int i=0; i<str_col_count; i++){
-            free((*str_list_to_insert)[i]);
-            (*str_list_to_insert)[i] = NULL;
+            if((*str_list_to_insert)[i]){
+                free((*str_list_to_insert)[i]);
+                (*str_list_to_insert)[i] = NULL;
+            }
         }
         free(*str_list_to_insert);
         *str_list_to_insert = NULL;
     }
     if(*double_list_to_insert){
         for(int i=0; i<double_col_count; i++){
-            free((*double_list_to_insert)[i]);
-            (*double_list_to_insert)[i] = NULL;
+            if((*double_list_to_insert)[i]){
+                free((*double_list_to_insert)[i]);
+                (*double_list_to_insert)[i] = NULL;
+            }
         }
         free(*double_list_to_insert);
         *double_list_to_insert = NULL;
@@ -51,24 +57,30 @@ void free_insert_before_exit(
     }
     if(*str_unique_val_list){
         for(int i=0; i<unique_str_col_count; i++){
-            free((*str_unique_val_list)[i]);
-            (*str_unique_val_list)[i] = NULL;
+            if((*str_unique_val_list)[i]){
+                free((*str_unique_val_list)[i]);
+                (*str_unique_val_list)[i] = NULL;
+            }
         }
         free(*str_unique_val_list);
         *str_unique_val_list = NULL;
     }
     if(*int_unique_col_name_list){
         for(int i=0; i<unique_int_col_count; i++){
-            free((*int_unique_col_name_list)[i]);
-            (*int_unique_col_name_list)[i] = NULL;
+            if((*int_unique_col_name_list)[i]){
+                free((*int_unique_col_name_list)[i]);
+                (*int_unique_col_name_list)[i] = NULL;
+            }
         }
         free(*int_unique_col_name_list);
         *int_unique_col_name_list = NULL;
     }
     if(*str_unique_col_name_list){
         for(int i=0; i<unique_str_col_count; i++){
-            free((*str_unique_col_name_list)[i]);
-            (*str_unique_col_name_list)[i] = NULL;
+            if((*str_unique_col_name_list)[i]){
+                free((*str_unique_col_name_list)[i]);
+                (*str_unique_col_name_list)[i] = NULL;
+            }
         }
         free(*str_unique_col_name_list);
         *str_unique_col_name_list = NULL;
@@ -172,10 +184,10 @@ void insert(Query* query){
     assert(str_list_to_insert!=NULL);
 
     //malloc for unique lists
-    assert((int_unique_val_list = (int*)malloc(sizeof(int) * unique_int_col_count)) != NULL);
-    assert((str_unique_val_list = (char**)malloc(sizeof(char*) * unique_str_col_count)) != NULL);
-    assert((int_unique_col_name_list = (char**)malloc(sizeof(char*) * unique_int_col_count)) != NULL);
-    assert((str_unique_col_name_list = (char**)malloc(sizeof(char*) * unique_str_col_count)) != NULL);
+    assert((int_unique_val_list = (int*)calloc(unique_int_col_count, sizeof(int))) != NULL);
+    assert((str_unique_val_list = (char**)calloc(unique_str_col_count, sizeof(char*))) != NULL);
+    assert((int_unique_col_name_list = (char**)calloc(unique_int_col_count, sizeof(char*))) != NULL);
+    assert((str_unique_col_name_list = (char**)calloc(unique_str_col_count, sizeof(char*))) != NULL);
 
     // checks for cols to insert and init list for later insert
     for(i=0; i<col_count; i++){
