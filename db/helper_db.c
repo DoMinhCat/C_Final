@@ -8,6 +8,7 @@ Group 2 ESGI 2A3
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <assert.h>
 #include <float.h>
 #include <math.h>
 
@@ -16,6 +17,7 @@ Group 2 ESGI 2A3
 #include "db.h"
 #include "../global_var.h"
 #include "../hash/hash.h"
+#include "../init/init.h"
 
 bool table_exists(char* table_name){
     // check for table existence, print error if not.
@@ -182,6 +184,34 @@ void* get_col_value(Table* table, Row* row, char* col_name, ColType col_type) {
     return NULL;
 }
 
+void* get_col_value_for_join(FilteredRow* filtered_set, SelectedColInfo col_info) {
+    if(!filtered_set) return NULL;
+
+    int i;
+    int data_index = col_info.data_index;
+
+    switch (col_info.type) {
+    case INT:
+        if (filtered_set->int_joined_list[data_index]) {
+            return &(filtered_set->int_joined_list[data_index][0]);
+        }
+        break;
+    case STRING:
+        if (filtered_set->str_joined_list[data_index]) {
+            return filtered_set->str_joined_list[data_index];
+        }
+        break;
+    case DOUBLE:
+        if (filtered_set->double_joined_list[data_index]) {
+            return &(filtered_set->double_joined_list[data_index][0]);
+        }
+        break;
+    default:
+        return NULL;
+        break;
+    }
+}
+
 void format_value(ColType type, void* value) {
     // prints out selected value, get value from get_col_value
 
@@ -196,7 +226,7 @@ void format_value(ColType type, void* value) {
             break;
             break;
         case DOUBLE:
-            printf(" %-22lf", *(double*)value);
+            printf(" %-22g", *(double*)value);
             break;
         case STRING:
             printf(" %-22s", (char*)value);
@@ -414,5 +444,112 @@ bool str_to_double(char *str_val, double *double_output, char *col_name) {
 
     *double_output = parsed_val;
     return true;
+}
+
+SelectedColInfo* build_col_info_list(Table* tab1, Table* tab2, SelectParams* params, int list_size){
+    bool select_all = params->col_count == 1 && strcmp(params->col_list[0], "*") == 0;
+    int int_index = 0;
+    int double_index = 0;
+    int str_index = 0;
+    SelectedColInfo* output_col_info = NULL;
+    Col* current_col = NULL;
+    int i;
+    int out_i = 0;
+
+    assert((output_col_info = malloc(sizeof(SelectedColInfo) * list_size))!=NULL);
+
+    if (select_all) {
+        // fill with columns from tab1
+        current_col = tab1->first_col;
+        while (current_col != NULL && out_i < list_size) {
+            output_col_info[out_i].table_id = 1;
+            output_col_info[out_i].type = current_col->type;
+            if (current_col->type == INT) {
+                output_col_info[out_i].data_index = int_index++;
+            } else if (current_col->type == DOUBLE) {
+                output_col_info[out_i].data_index = double_index++;
+            } else {
+                output_col_info[out_i].data_index = str_index++;
+            }
+            out_i++;
+            current_col = current_col->next_col;
+        }
+        // fill with columns from tab2
+        current_col = tab2->first_col;
+        while (current_col != NULL && out_i < list_size) {
+            output_col_info[out_i].table_id = 2;
+            output_col_info[out_i].type = current_col->type;
+            if (current_col->type == INT) {
+                output_col_info[out_i].data_index = int_index++;
+            } else if (current_col->type == DOUBLE) {
+                output_col_info[out_i].data_index = double_index++;
+            } else {
+                output_col_info[out_i].data_index = str_index++;
+            }
+            out_i++;
+            current_col = current_col->next_col;
+        }
+    } else {
+        for (i = 0; i < list_size; i++) {
+            current_col = get_col_by_name(tab1, params->col_list[i]);
+            if (current_col) {
+                output_col_info[i].table_id = 1;
+                output_col_info[i].type = current_col->type;
+                output_col_info[i].data_index = get_data_list_index(tab1, params->col_list[i]);
+            } else {
+                current_col = get_col_by_name(tab2, params->col_list[i]);
+                output_col_info[i].table_id = 2;
+                output_col_info[i].type = current_col->type;
+                output_col_info[i].data_index = get_data_list_index(tab2, params->col_list[i]);
+            }
+        }
+    }
+
+    return output_col_info;
+}
+
+bool str_to_col_type(Col* condition_col, char* condition_val, int* int_val, double* double_val, char** str_val){
+    // convert condition value (char*) to the correct type of column to compare
+
+    switch (condition_col->type) {
+    case INT:
+        if(!str_to_int(condition_val, int_val, condition_col->name)) return false;
+        break;
+    case DOUBLE:
+        if(!str_to_double(condition_val, double_val, condition_col->name)) return false;
+        break;
+    case STRING:
+        *str_val = condition_val;
+        break;
+    default:
+        break;
+    }
+    return true;
+}
+
+FilteredRow* copy_rows_to_filtered(Table* tab){
+    // copy linked list Row of a table to linked list of FilteredRow for JOIN operation
+
+    if(!tab || !tab->first_row) return NULL;
+
+    Row* current_row = NULL;
+    FilteredRow* head_list = NULL;
+    FilteredRow* new_node = NULL;
+    FilteredRow* last_node = NULL;
+
+    for(current_row = tab->first_row; current_row; current_row=current_row->next_row){
+        new_node = init_filtered_row();
+        new_node->row = current_row;
+
+        if(head_list == NULL) {
+            head_list = new_node;
+            last_node = head_list;
+        } else {
+            // append to the end
+            last_node->next_filtered_row = new_node;
+            last_node = new_node;
+        }
+    }
+    return head_list;
 }
 

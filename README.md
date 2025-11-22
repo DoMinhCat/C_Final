@@ -9,26 +9,27 @@ Projet final de C à ESGI
 3. Installation
 4. Features
 
-- Strings are applied directly, no need to wrap them in quotes or double quotes
-- Table and column names are case sensitive
-- Available types : int, string, and double
-- Insert: values will be inserted in the order of which columns are created and all columns must be inserted (can't insert only 4 values into a table with 5 columns)
-- Operators AND and OR are not available yet
-- With SELECT using both WHERE and JOIN, the WHERE column is assumed to belong to the first table. If both tables contain a column with the same name, avoid using such columns in the WHERE clause to prevent ambiguity.
-- Tables can't be altered one created, altering must be done through deleting the table, recreate it and manually reinsert all data :)
-- NOT NULL constraint is not available yet
-- Only one primary key is allowed for each table => relation many-many not available
-- Primary key and foreign key must be of type int or string, can't be 0 or negative if is int
-- Primary key type INT auto-incrementation supported
-- All foreign keys are ON DELETE RESTRICT
-- The order of tables passed for DROP matters (foreign key constraint)
-- "exit" or "quit" to exit the program
+    - Strings does not need to be wrapped inside quotes or double quotes
+    - Table and column names are case sensitive
+    - Available types : int, string, and double
+    - Insert: values will be inserted in the order of which columns are created and all columns must be inserted (can't insert only 4 values into a table with 5 columns)
+    - Operators AND and OR are not available yet
+    - With SELECT using JOIN, if both tables have a column with the same name as the selected column, by default that column will refer to the first table
+    - With SELECT using both WHERE and JOIN, the WHERE column is assumed to belong to the first table. If both tables contain a column with the same name, avoid using such columns in the WHERE clause to prevent ambiguity.
+    - Tables can't be altered one created, altering must be done through deleting the table, recreate it and manually reinsert all data :)
+    - NOT NULL constraint is not available yet
+    - Only one primary key is allowed for each table => relation many-many not available
+    - Primary key and foreign key must be of type int or string, can't be 0 or negative if is int
+    - Primary key type INT auto-incrementation supported
+    - All foreign keys are ON DELETE RESTRICT
+    - The order of tables passed for DROP matters (foreign key constraint violation)
+    - "exit" or "quit" to exit the program
 
-- Max col per table = 50
-- Max length for str values 256 (\0 excluded)
-- Max table = 100
-- Max chars for table/col name = 100
-- Row per table warning threshold = 10 000
+    - Max col per table = 50
+    - Max length for str values 256 (\0 excluded)
+    - Max table = 100
+    - Max chars for table/col name = 100
+    - Row per table warning threshold = 10 000
 
 5. Usage
 
@@ -43,24 +44,38 @@ Projet final de C à ESGI
 6. Contributors
 
 Current quick start :
-gcc main.c ui/parser.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/select.c ui/show.c ui/describe.c ui/helper_ui.c clean/cmd.c clean/db.c init/query.c init/db.c init/hash_table.c db/create.c db/helper_db.c db/select.c db/drop.c db/show.c db/insert.c db/describe.c db/where.c global_var.c hash/hash.c -o sb.exe
+gcc main.c ui/parser.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/select.c ui/show.c ui/describe.c ui/helper_ui.c clean/cmd.c clean/db.c init/query.c init/db.c init/hash_table.c db/create.c db/helper_db.c db/select.c db/drop.c db/show.c db/insert.c db/describe.c db/where.c db/join.c global_var.c hash/hash.c -o sb.exe
 
 Commands to test:
 
-CREATE TABLE team ( id int pk, name string unique, score double )
-CREATE TABLE player ( id int pk, name string, age int, weight double, team_id int fk references team id )
-DROP TABLE player // error: 'player' references 'team'
-INSERT INTO team ( id, name, score ) values ( 1, abc, 45.5 )
-INSERT INTO player ( team_id ) values ( 5 ) //ref id doesnt exist
-INSERT INTO team ( id , name , score ) values ( 1 , duplicateteam , 100.0 ) // PK violated
-INSERT INTO player ( id , name , age , weight , team_id ) values ( 99 , ronaldo , 38 , 78.0 , 1 )
-INSERT INTO player ( id , name , age , weight , team_id ) values ( 15 , stringfk , 22 , 70.0 , abc ) // invalid FK
+create table customers ( id int pk, name string )
+create table orders ( order_id int pk, customer_id int fk references customers id, amount double )
 
-Ideas:
+insert into customers ( id, name ) values ( 1, Alice )
+insert into customers ( id, name ) values ( 2, Bob )
+insert into customers ( id, name ) values ( 3, Carol )
+
+insert into orders ( order_id, customer_id, amount ) values ( 10, 1, 99.5 )
+insert into orders ( order_id, customer_id, amount ) values ( 11, 1, 20.0 )
+insert into orders ( order_id, customer_id, amount ) values ( 12, 3, 250.75 )
+
+select ( id, name ) from customers
+select ( id, name ) from customers where id = 2
+select ( id, name ) from customers where name = Alice
+select ( order_id, amount ) from orders where amount = 20.0
+select ( id, amount ) from customers join orders on id = customer_id
+select ( name, amount ) from customers join orders on id = customer_id
+select ( id, name, amount ) from customers join orders on id = customer_id where id = 1
+select ( id, name, amount ) from customers join orders on id = customer_id where amount = 250.75
+select ( name, amount ) from customers join orders on id = customer_id where name = Alice
+
+Edge cases:
+select ( id ) from customers join orders on id = customer_id    // select id will return id of customers even when orders also has id column
+select ( id, id ) from customers join orders on id = customer_id    // will only return id of customers
+
+**Ideas:**
 default constraint
 end with ; to be able to execute multiple cmds in one run
 
-SELECT without where: print on the go
-SELECT with WHERE (no indexing) : print on the go with a compare to check condition (like above + check)
-SELECT with WHERE (indexing) : look up hash table, return list of Row*, loop through result rows and print on the go
-
+**Current bugs:**
+None

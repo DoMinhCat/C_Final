@@ -29,8 +29,10 @@ FilteredRow* hash_lookup(HashTable* hash_table, int condition_int, char* conditi
 }
 
 FilteredRow* traverse_and_compare(Table* table, Col* condition_col, char* str_condition, double double_condition, int int_condition, ColType col_type){
-    // traverse rows and compare for WHERE clause
+    // traverse rows and compare for WHERE clause, return the first node of the linked list FilteredRow
 
+    if(!table->first_row) return NULL;
+    
     FilteredRow* first_filtered_row = NULL;
     FilteredRow* new_filtered_row = NULL;
     FilteredRow* last_filtered_row = NULL;

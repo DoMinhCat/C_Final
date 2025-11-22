@@ -58,7 +58,7 @@ typedef struct {
     char* condition_value; 
 } DeleteParams;
 
-typedef struct {
+typedef struct SelectParams{
     char* table_name; 
     char* table_join_name; 
 

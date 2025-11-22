@@ -16,11 +16,13 @@ Group 2 ESGI 2A3
 #include "../ui/parser.h"
 
 typedef struct HashTable HashTable;
+typedef struct Query Query;
+typedef struct SelectParams SelectParams;
 
 typedef struct Row{
-    int **int_list; // unset int will be NULL, int_list[int_count][1]
+    int **int_list; // unset int will be NULL, int_list[int_count][0]
     char **str_list;
-    double **double_list; // unset double will be NULL, double_list[double_count][1]
+    double **double_list; // unset double will be NULL, double_list[double_count][0]
 
     int int_count;
     int str_count;
@@ -70,7 +72,12 @@ typedef struct FilteredRow{
     struct FilteredRow* next_filtered_row;
 } FilteredRow;
 
-typedef struct Query Query;
+// for join
+typedef struct SelectedColInfo{
+    ColType type;    
+    int table_id; // 1 = tab1, 2 = tab2 (joined table)
+    int data_index;   
+} SelectedColInfo;
 
 // prototypes
 void create_table(Query *query);
@@ -83,4 +90,7 @@ void select(Query* query);
 void select_simple(SelectParams* params, Table* table);
 
 FilteredRow* where_for_select(Table* table, Col* condition_col, char* str_condition, double double_condition, int int_condition, ColType col_type);
+FilteredRow* join(Table* tab1, Table* tab2, Col* col1, Col* col2, SelectParams* params);
+FilteredRow* join_with_where(FilteredRow* head_list_where, Table* tab, Table* tab_where, Col* col_tab, Col* col_tab_where, SelectParams* params);
+
 #endif
