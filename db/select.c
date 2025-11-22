@@ -296,8 +296,11 @@ void select(Query* query) {
     Table* table = NULL;
     Table* join_table = NULL;
     Table* where_table = NULL;
+    Table* non_where_table = NULL;
     Col* col_on1 = NULL;
     Col* col_on2 = NULL;
+    Col* col_on_where = NULL;
+    Col* col_on_no_where = NULL;
     int i;
     SelectedColInfo* output_col_info = NULL;
     int col_info_list_size;
@@ -350,7 +353,11 @@ void select(Query* query) {
     // check where params
     if (params->condition_col) {
         include_where = true;
+
         where_table = table;
+        non_where_table = join_table;
+        col_on_where = col_on1;
+        col_on_no_where = col_on2;
         // default where column belongs to the first table, if not then search at the second table
         if (!get_col_by_name(table, params->condition_col)) {
             if (include_join) {
@@ -359,6 +366,9 @@ void select(Query* query) {
                     return;
                 }
                 where_table = join_table;
+                non_where_table = table;
+                col_on_where = col_on2;
+                col_on_no_where = col_on1;
             } else{
                 fprintf(stderr, "Execution error: '%s' column  not found.\n", params->condition_col);
                 return;
@@ -369,7 +379,11 @@ void select(Query* query) {
 
     // call to select of each case
     if (include_join && include_where) {
-        //select_join_where(params);
+        if(select_all) col_info_list_size = table->col_count + join_table->col_count;
+        else col_info_list_size = params->col_count;
+        output_col_info = build_col_info_list(table, join_table, params, col_info_list_size);
+        select_join_where(params,non_where_table, where_table, col_on_no_where, col_on_where, output_col_info);
+        free(output_col_info);
         return;
     }
     if (include_join) {

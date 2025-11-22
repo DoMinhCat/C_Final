@@ -17,6 +17,7 @@ Group 2 ESGI 2A3
 #include "db.h"
 #include "../global_var.h"
 #include "../hash/hash.h"
+#include "../init/init.h"
 
 bool table_exists(char* table_name){
     // check for table existence, print error if not.
