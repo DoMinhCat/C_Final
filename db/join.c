@@ -60,7 +60,6 @@ int compare_data_field(int* int_data1, int* int_data2, char* str_data1, char* st
 
 FilteredRow* bubble_sort(FilteredRow* head_list, int row_count, int data_index, ColType col_type){
     // sort a list of rows (ascending) of a table based on joined column value
-    // TODO: bubble sort with 2 loops on filtered struct passed from join(), need to manage current/prev/next pointer
 
     if (!head_list || row_count < 2) return head_list;
 
@@ -401,10 +400,7 @@ FilteredRow* join(Table* tab1, Table* tab2, Col* col1, Col* col2, SelectParams* 
 
     FilteredRow* head_list1 = NULL;
     FilteredRow* head_list2 = NULL;
-    FilteredRow* new_node = NULL;
-    FilteredRow* last_node = NULL;
     FilteredRow* result = NULL;
-    Row* current_row = NULL;
 
     int row_count1 = tab1->row_count;
     int row_count2 = tab2->row_count;
@@ -412,42 +408,45 @@ FilteredRow* join(Table* tab1, Table* tab2, Col* col1, Col* col2, SelectParams* 
     int data_index2 = get_data_list_index(tab2, col2->name);
 
     // copy linked list Row of tab1
-    for(current_row = tab1->first_row; current_row; current_row=current_row->next_row){
-        new_node = init_filtered_row();
-        new_node->row = current_row;
-
-        if(head_list1 == NULL) {
-            head_list1 = new_node;
-            last_node = head_list1;
-        } else {
-            // append to the end
-            last_node->next_filtered_row = new_node;
-            last_node = new_node;
-        }
-    }
+    head_list1 = copy_rows_to_filtered(tab1);
     
     //copy linked list Row of tab2
-    last_node = NULL;
-    for(current_row = tab2->first_row; current_row; current_row=current_row->next_row){
-        new_node = init_filtered_row();
-        new_node->row = current_row;
-        
-        if(head_list2 == NULL) {
-            head_list2 = new_node;
-            last_node = head_list2;
-        } else {
-            // append to the end
-            last_node->next_filtered_row = new_node;
-            last_node = new_node;
-        }
-    }
+    head_list2 = copy_rows_to_filtered(tab2);
 
     // bubble sort
     head_list1 = bubble_sort(head_list1, row_count1, data_index1, col1->type);
     head_list2 = bubble_sort(head_list2, row_count2, data_index2, col1->type);
 
-    // merge
+    //merge, 2 input lists freed in merge_sorted_lists before exit
     result = merge_sorted_lists(tab1, tab2, params, head_list1, head_list2, data_index1, data_index2, col1->type);
+
+    return result;
+}
+
+FilteredRow* join_with_where(FilteredRow* head_list_where, Table* tab, Table* tab_where, Col* col_tab, Col* col_tab_where, SelectParams* params){
+    // same as join() but with filtered list done by WHERE instead of 2 tables
+
+    // edge cases JOIN empty-empty or empty-not empty returns NULL
+    if(!head_list_where || !tab->first_row) return NULL;
+
+    FilteredRow* head_list_tab = NULL;
+    FilteredRow* result = NULL;
+    FilteredRow* current_fr = NULL;
+    int data_index_tab = get_data_list_index(tab, col_tab->name);
+    int data_index_tab_where = get_data_list_index(tab_where, col_tab_where->name);
+    int row_count_where = 0;
+
+    head_list_tab = copy_rows_to_filtered(tab);
+
+    // get number of rows filtered from where
+    for(current_fr = head_list_where; current_fr!=NULL; current_fr=current_fr->next_filtered_row) row_count_where++;
+
+    // bubble sort
+    head_list_tab = bubble_sort(head_list_tab, tab->row_count, data_index_tab, col_tab->type);
+    head_list_where = bubble_sort(head_list_where, row_count_where, row_count_where, col_tab->type);
+
+    //merge, 2 input lists freed in merge_sorted_lists before exit
+    result = merge_sorted_lists(tab, tab_where, params, head_list_tab, head_list_where, data_index_tab, data_index_tab_where, col_tab->type);
 
     return result;
 }
