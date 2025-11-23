@@ -19,104 +19,196 @@ Group 2 ESGI 2A3
 #include "../global_var.h"
 #include "../clean/clean.h"
 
-void print_header_row(Table* table1, Table* table2, SelectParams* params){
-    // print the first row (col names passed to select)
-
+void print_header_row(Table* table1, Table* table2, SelectParams* params) {
     bool select_all = params->col_count == 1 && strcmp(params->col_list[0], "*") == 0;
     Col* current_col = NULL;
+    int col_count = 0;
+    int col_width;
+    int current_width = 1; // Start with 1 for initial "|"
+    bool truncated_cols = false;
 
+    // Calculate total column count
     if (select_all) {
-        //  SELECT *
-        printf("|");
-        for(current_col = table1->first_col; current_col != NULL; current_col = current_col->next_col)
-            printf(" %-21s |", current_col->name); 
-        if(table2){
-            for(current_col = table2->first_col; current_col != NULL; current_col = current_col->next_col) 
-                printf(" %-21s |", current_col->name);
-        }
-        printf("\n");
-
-        printf("|");
-        for(current_col = table1->first_col; current_col != NULL; current_col = current_col->next_col) 
-            printf("-----------------------|");
-        printf("\n");
-        if(table2){
-            for(current_col = table2->first_col; current_col != NULL; current_col = current_col->next_col) 
-            printf("-----------------------|");
+        col_count = table1->col_count;
+        if (table2) {
+            col_count += table2->col_count;
         }
     } else {
-        // SELECT col1, col2, ... :/
-        printf("|");
-        for (int i = 0; i < params->col_count; i++) {
-            printf(" %-21s |", params->col_list[i]);
-        }
-        printf("\n");
-
-
-        printf("|");
-        for (int i = 0; i < params->col_count; i++) {
-            printf("-----------------------|");
-        }
-        printf("\n");
+        col_count = params->col_count;
     }
+
+    // Calculate column width
+    col_width = calculate_col_width(col_count);
+
+    // Print column headers
+    printf("|");
+    if (select_all) {
+        // SELECT *
+        for (current_col = table1->first_col; current_col != NULL; current_col = current_col->next_col) {
+            // Check if adding this column exceeds max width
+            if (current_width + col_width + 1 > MAX_TABLE_WIDTH) {
+                printf(" ... |");
+                truncated_cols = true;
+                break;
+            }
+            print_cell(current_col->name, col_width);
+            printf("|");
+            current_width += col_width + 1;
+        }
+        if (table2 && !truncated_cols) {
+            for (current_col = table2->first_col; current_col != NULL; current_col = current_col->next_col) {
+                if (current_width + col_width + 1 > MAX_TABLE_WIDTH) {
+                    printf(" ... |");
+                    truncated_cols = true;
+                    break;
+                }
+                print_cell(current_col->name, col_width);
+                printf("|");
+                current_width += col_width + 1;
+            }
+        }
+    } else {
+        // SELECT col1, col2, ...
+        for (int i = 0; i < params->col_count; i++) {
+            if (current_width + col_width + 1 > MAX_TABLE_WIDTH) {
+                printf(" ... |");
+                truncated_cols = true;
+                break;
+            }
+            print_cell(params->col_list[i], col_width);
+            printf("|");
+            current_width += col_width + 1;
+        }
+    }
+    printf("\n");
+
+    // Print separator line (matching the actual printed columns)
+    printf("|");
+    current_width = 1;
+    int printed_cols = 0;
+    for (int i = 0; i < col_count; i++) {
+        if (current_width + col_width + 1 > MAX_TABLE_WIDTH) {
+            for (int j = 0; j < 5; j++) printf("-");
+            printf("|");
+            break;
+        }
+        for (int j = 0; j < col_width; j++) {
+            printf("-");
+        }
+        printf("|");
+        current_width += col_width + 1;
+        printed_cols++;
+    }
+    printf("\n");
 }
 
-void print_empty_table(Table* table1, Table* table2, SelectParams* params){
+void print_empty_table(Table* table1, Table* table2, SelectParams* params) {
     bool select_all = params->col_count == 1 && strcmp(params->col_list[0], "*") == 0;
-    int i;
+    int col_count;
+    int col_width;
 
+    // Calculate column count
+    if (select_all) {
+        col_count = table1->col_count;
+        if (table2) {
+            col_count += table2->col_count;
+        }
+    } else {
+        col_count = params->col_count;
+    }
+
+    // Calculate column width
+    col_width = calculate_col_width(col_count);
+
+    // Print empty row
     printf("|");
-    if(select_all){
-        for(i=0; i<(table2!=NULL?table1->col_count+table2->col_count:table1->col_count); i++) printf("%23s|", " ");
-    }else{
-        for(int i = 0; i < params->col_count; i++) printf("%23s|", " ");
+    for (int i = 0; i < col_count; i++) {
+        printf("%*s|", col_width, "");
     }
     printf("\n\n");
     printf("Found 0 row.\n");
 }
 
-void print_data(Table* table, Row* current_row, SelectParams* params){
-    // print out the selected data, handles both select * and select col1, col2,...
+void print_data(Table* table, Row* current_row, SelectParams* params) {
     Col* current_col = NULL;
     ColType col_type;
     bool select_all = params->col_count == 1 && strcmp(params->col_list[0], "*") == 0;
+    int col_count = select_all ? table->col_count : params->col_count;
+    int col_width = calculate_col_width(col_count);
+    int current_width = 1; // Start with 1 for initial "|"
+    
+    char value_str[MAX_TABLE_WIDTH];
 
     printf("|");
     if (select_all) {
-        // print all columns in the right order
-        for(current_col = table->first_col; current_col != NULL; current_col = current_col->next_col) {
+        // Print all columns in the right order
+        for (current_col = table->first_col; current_col != NULL; current_col = current_col->next_col) {
+            // Check if adding this column exceeds max width
+            if (current_width + col_width + 1 > MAX_TABLE_WIDTH) {
+                printf(" ... |");
+                break;
+            }
+            
             col_type = current_col->type;
             void* value = get_col_value(table, current_row, current_col->name, col_type);
-            format_value(col_type, value);
+            
+            // Format value to string
+            format_value_to_string(col_type, value, value_str, sizeof(value_str));
+            print_cell(value_str, col_width);
             printf("|");
+            current_width += col_width + 1;
         }
     } else {
         // SELECT col1, col2: print the right columns
         for (int i = 0; i < params->col_count; i++) {
+            if (current_width + col_width + 1 > MAX_TABLE_WIDTH) {
+                printf(" ... |");
+                break;
+            }
+            
             col_type = get_col_by_name(table, params->col_list[i])->type;
             void* value = get_col_value(table, current_row, params->col_list[i], col_type);
-            format_value(col_type, value);
+            
+            format_value_to_string(col_type, value, value_str, sizeof(value_str));
+            print_cell(value_str, col_width);
             printf("|");
+            current_width += col_width + 1;
         }
     }
     printf("\n");
 }
 
-void print_data_for_join(FilteredRow* filtered_row, SelectedColInfo* col_info, SelectParams* params){
-    // print from the filtered list (after JOIN operation)
-
-    FilteredRow* current_fr = NULL;
-    Col* current_col = NULL;
+void print_data_for_join(FilteredRow* filtered_row, SelectedColInfo* col_info, SelectParams* params) {
     bool select_all = params->col_count == 1 && strcmp(params->col_list[0], "*") == 0;
     int col_count;
-    int i;
+    int col_width;
+    int current_width = 1; // Start with 1 for initial "|"
+    char value_str[MAX_TABLE_WIDTH];
 
-    col_count = select_all ? get_table_by_name(params->table_name)->col_count + get_table_by_name(params->table_join_name)->col_count : params->col_count;
+    // Calculate column count
+    if (select_all) {
+        col_count = get_table_by_name(params->table_name)->col_count + 
+                    get_table_by_name(params->table_join_name)->col_count;
+    } else {
+        col_count = params->col_count;
+    }
+
+    col_width = calculate_col_width(col_count);
+
     printf("|");
-    for(int i = 0; i < params->col_count; i++) {
+    for (int i = 0; i < params->col_count; i++) {
+        // Check if adding this column exceeds max width
+        if (current_width + col_width + 1 > MAX_TABLE_WIDTH) {
+            printf(" ... |");
+            break;
+        }
+        
         void* value = get_col_value_for_join(filtered_row, col_info[i]);
-        format_value(col_info[i].type, value);
-        printf("|");  
+        
+        format_value_to_string(col_info[i].type, value, value_str, sizeof(value_str));
+        print_cell(value_str, col_width);
+        printf("|");
+        current_width += col_width + 1;
     }
     printf("\n");
 }

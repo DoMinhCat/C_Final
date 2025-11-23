@@ -31,7 +31,7 @@ int compare_double(double val1, double val2);
 
 // functions for select
 void* get_col_value(Table* table, Row* row, char* col_name, ColType col_type);
-void format_value(ColType type, void* value);
+void format_value_to_string(ColType col_type, void* value, char* buffer, size_t buffer_size);
 
 // type conversion
 char* int_to_str(int val);
@@ -43,5 +43,10 @@ FilteredRow* copy_rows_to_filtered(Table* tab);
 SelectedColInfo* build_col_info_list(Table* tab1, Table* tab2, SelectParams* params, int list_size);
 void* get_col_value_for_join(FilteredRow* filtered_set, SelectedColInfo col_info);
 bool str_to_col_type(Col* condition_col, char* condition_val, int* int_val, double* double_val, char** str_val);
+
+// format printing
+int calculate_col_width(int col_count);
+void print_separator_line(int col_count, int col_width);
+void print_cell(char* content, int width);
 
 #endif
