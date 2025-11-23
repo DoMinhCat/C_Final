@@ -12,6 +12,7 @@ Group 2 ESGI 2A3
 #include "db.h"
 #include "../ui/parser.h"
 #include "helper_db.h"
+#include "../global_var.h"
 
 void describe_table(Query* query){
     Table* table = NULL;
@@ -21,20 +22,59 @@ void describe_table(Query* query){
     char* constraint = NULL;
     char* table_refer = NULL;
     char* col_refer = NULL;
-    int i;
+    int current_width = 0;
+    int col_width = 20;  
+    int num_cols = 5;
+    int max_width = MAX_TABLE_WIDTH;
 
     // check if table exists
     table = get_table_by_name(query->params.describe_params.table_name);
 
     if(!table){
-        fprintf(stderr, "Execution error: '%s' table not found.\n");
+        fprintf(stderr, "Execution error: '%s' table not found.\n", query->params.describe_params.table_name);
         return;
     } 
 
-    printf("%-20s | %-20s | %-20s | %-25s | %-20s\n", "Column", "Type", "Constraint", "Table of Reference", "Column of Reference");
-    for(i=0; i<120; i++) printf("-");
-    printf("\n");
+    // Print header
+    current_width = 0;
+    char* headers[] = {"Column", "Type", "Constraint", "Table of Reference", "Column of Reference"};
+    int printed_headers = 0;
+    
+    for(int i = 0; i < num_cols; i++) {
+        if(current_width + col_width + 3 > max_width && i > 0) {  // +3 for " | "
+            printf("| ...");
+            break;
+        }
+        if(i == 0) {
+            printf("| %-*s", col_width, headers[i]);
+            current_width += col_width;
+        } else {
+            printf(" | %-*s", col_width, headers[i]);
+            current_width += col_width + 3;
+        }
+        printed_headers++;
+    }
+    printf(" |\n");
 
+    // Print separator line
+    current_width = 0;
+    for(int i = 0; i < printed_headers; i++) {
+        if(i == 0) {
+            printf("|-");
+            for(int j = 0; j < col_width; j++) printf("-");
+            current_width += col_width;
+        } else {
+            printf("-|-");
+            for(int j = 0; j < col_width; j++) printf("-");
+            current_width += col_width + 3;
+        }
+    }
+    if(printed_headers < num_cols) {
+        printf("-|-----");
+    }
+    printf("-|\n");
+
+    // Print data rows
     for(current_col=table->first_col; current_col!=NULL; current_col = current_col->next_col){
         name = strdup(current_col->name);
         assert(name!=NULL);
@@ -60,8 +100,35 @@ void describe_table(Query* query){
             assert(col_refer!=NULL);
         } else col_refer = NULL;
 
-        printf("%-20s | %-20s | %-20s | %-25s | %-20s\n", name, type, constraint, table_refer?table_refer:"None", col_refer?col_refer:"None");
+        // Print row with truncation check
+        current_width = 0;
+        char* values[] = {name, type, constraint, table_refer?table_refer:"None", col_refer?col_refer:"None"};
+        char truncated[col_width + 1];
         
+        for(int i = 0; i < num_cols; i++) {
+            if(current_width + col_width + 3 > max_width && i > 0) {
+                printf("| ...");
+                break;
+            }
+            
+            // Truncate value if needed
+            if(strlen(values[i]) > col_width) {
+                strncpy(truncated, values[i], col_width - 3);
+                truncated[col_width - 3] = '\0';
+                strcat(truncated, "...");
+            } else {
+                strcpy(truncated, values[i]);
+            }
+            
+            if(i == 0) {
+                printf("| %-*s", col_width, truncated);
+                current_width += col_width;
+            } else {
+                printf(" | %-*s", col_width, truncated);
+                current_width += col_width + 3;
+            }
+        }
+        printf(" |\n");
         
         free(name);
         name = NULL;
@@ -70,6 +137,5 @@ void describe_table(Query* query){
         free(table_refer);
         table_refer = NULL;
     }
-    for(i=0; i<120; i++) printf("-");
-    printf("\n%d %s, %d %s in total.\n", table->col_count, table->col_count>1?"columns":"column", table->row_count,  table->row_count>1?"rows":"row");
+    printf("\n%d %s, %d %s in total.\n\n", table->col_count, table->col_count>1?"columns":"column", table->row_count,  table->row_count>1?"rows":"row");
 }
