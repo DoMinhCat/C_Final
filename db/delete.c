@@ -146,6 +146,43 @@ void delete_all(Table* table){
     printf("Executed: %d %s deleted from '%s' table.\n", total_row, total_row>1?"rows":"row", table->name);
 }
 
+FilteredRow* get_null_rows(Table* table, Col* condition_col, int condition_data_index, int* row_count){
+    bool is_null;
+    Row* current_row = NULL;
+    FilteredRow* to_del_list = NULL;
+    FilteredRow* new_fr = NULL;
+    FilteredRow* last_fr = NULL;
+
+    for(current_row = table->first_row; current_row != NULL; current_row = current_row->next_row){
+        is_null = false;
+        
+        if(condition_col->type == INT) is_null = (current_row->int_list[condition_data_index] == NULL);
+        else if(condition_col->type == STRING) is_null = (current_row->str_list[condition_data_index] == NULL); 
+        else if(condition_col->type == DOUBLE) is_null = (current_row->double_list[condition_data_index] == NULL); 
+        else {
+            fprintf(stderr, "Execution error: an unexpected error occured.\n");
+            return NULL;
+        }
+        
+        if(is_null){
+            new_fr = copy_data_lists_to_filtered(current_row, NULL);
+            new_fr->row = current_row;
+            
+            // add to list
+            if(to_del_list == NULL) {
+                to_del_list = new_fr;
+                last_fr = to_del_list;
+            } else {
+                last_fr->next_filtered_row = new_fr;
+                last_fr = new_fr;
+            }
+            (*row_count)++;
+        }
+    }
+    if(*row_count == 0) return NULL;
+    return to_del_list;
+}
+
 void delete_where(Table* table, Col* condition_col, char* condition_val){
     HashTable* ht = NULL;
     Row* current_row = NULL;
@@ -154,11 +191,16 @@ void delete_where(Table* table, Col* condition_col, char* condition_val){
     FilteredRow* to_del_list = NULL;    
     FilteredRow* new_fr = NULL;    
     FilteredRow* last_fr = NULL;    
-    FilteredRow* current_fr = NULL;    
+    FilteredRow* current_fr = NULL;  
+    bool is_null;
+    bool should_add;
     
     int row_count = 0;
-    int condition_data_index;
+    int condition_data_index = get_data_list_index(table, condition_col->name);
     int unique_col_data_index;
+    char* str_val = NULL;
+    int int_val = 0;
+    double double_val = 0;
     
     // Where clause on UNIQUE/PK cols: use hash table
     if(condition_col->constraint == PK || condition_col->constraint == UNIQUE){
@@ -173,37 +215,8 @@ void delete_where(Table* table, Col* condition_col, char* condition_val){
                 return;
             }
             
-            // For UNIQUE columns, traverse to find NULL values
-            condition_data_index = get_data_list_index(table, condition_col->name);
-            
-            // traverse table to get all null rows for ref integrity check
-            for(current_row = table->first_row; current_row != NULL; current_row = current_row->next_row){
-                bool is_null = false;
-                
-                if(condition_col->type == INT) is_null = (current_row->int_list[condition_data_index] == NULL);
-                else if(condition_col->type == STRING) is_null = (current_row->str_list[condition_data_index] == NULL); 
-                else {
-                    fprintf(stderr, "Execution error: an unexpected error occured.\n");
-                    return;
-                }
-                
-                if(is_null){
-                    new_fr = copy_data_lists_to_filtered(current_row, NULL);
-                    new_fr->row = current_row;
-                    
-                    // add to list
-                    if(to_del_list == NULL) {
-                        to_del_list = new_fr;
-                        last_fr = to_del_list;
-                    } else {
-                        last_fr->next_filtered_row = new_fr;
-                        last_fr = new_fr;
-                    }
-                    row_count++;
-                }
-            }
-            
-            printf("Found %d rows with NULL values\n", row_count);
+            // For UNIQUE columns, traverse to find NULL values and put into list for ref integrity check
+            to_del_list = get_null_rows(table, condition_col, condition_data_index, &row_count);
             
             // If no rows found, exit early
             if(row_count == 0){
@@ -214,10 +227,7 @@ void delete_where(Table* table, Col* condition_col, char* condition_val){
         } else {
             // comparing with a value != NULL
             
-            // convert condition val
-            char* str_val = NULL;
-            int int_val = 0;
-            
+            // convert condition val            
             if(condition_col->type == INT){
                 if(!str_to_int(condition_val, &int_val, condition_col->name)) return;
             } else if(condition_col->type == STRING){
@@ -241,48 +251,110 @@ void delete_where(Table* table, Col* condition_col, char* condition_val){
             to_del_list->row = hash_node_found->row;
             row_count = 1;
         }
-
-        // check referential integrity
-        if(!ref_integrity_check_delete(table, to_del_list, false)){
-            free_filtered_set(to_del_list);
-            return;
-        } 
-
-        // remove nodes from hash tables of unique/pk cols for rows to be deleted 
-        for(current_col = table->first_col; current_col != NULL; current_col = current_col->next_col){
-            if(current_col->constraint == UNIQUE || current_col->constraint == PK){
-                ht = get_ht_by_col_name(table->first_hash_table, current_col->name);
-                unique_col_data_index = get_data_list_index(table, current_col->name);
-
-                for(current_fr = to_del_list; current_fr != NULL; current_fr = current_fr->next_filtered_row){
-                    remove_from_ht(ht, current_fr->row, unique_col_data_index, current_col->type);
-                }
-            }
-        }
-
-        // delete all result rows
-        for(current_fr = to_del_list; current_fr != NULL; current_fr = current_fr->next_filtered_row){
-            prev_row = get_prev_row(table, current_fr->row);
-            if(!prev_row){
-                // row to del is first row
-                table->first_row = current_fr->row->next_row;
-            } else {
-                prev_row->next_row = current_fr->row->next_row;
-            }
-            free_row(current_fr->row);
-        }
-
     } else {
         // Non-UNIQUE/PK columns: traverse all rows
-        // TODO: Implement this case
-        fprintf(stderr, "Execution error: WHERE clause on non-UNIQUE/PK columns not yet implemented.\n");
+        if(strcasecmp(condition_val,"NULL") == 0){
+            to_del_list = get_null_rows(table, condition_col, condition_data_index, &row_count);
+            // no row found, return early
+            if(row_count==0){    
+                printf("Executed: 0 row deleted from table '%s'.\n", table->name);
+                return;
+            }
+        }else{
+            // convert condition val to compare          
+            if(condition_col->type == INT){
+                if(!str_to_int(condition_val, &int_val, condition_col->name)) return;
+            } else if(condition_col->type == STRING){
+                str_val = condition_val;
+            }else if(condition_col->type == DOUBLE){
+                if(!str_to_double(condition_val, &double_val, condition_col->name)) return;
+            }             
+            else {
+                fprintf(stderr, "Execution error: unexpected column type.\n");
+                return;
+            }
+
+            // traverse all rows to find matching values 
+            for(current_row=table->first_row; current_row!=NULL; current_row=current_row->next_row){
+                should_add = false;
+                switch(condition_col->type){
+                    case INT:
+                        if(!current_row->int_list[condition_data_index]) continue;
+                        if(current_row->int_list[condition_data_index][0] == int_val) should_add = true;
+                        break;
+                    case DOUBLE:
+                        if(!current_row->double_list[condition_data_index]) continue;
+                        if(compare_double(current_row->double_list[condition_data_index][0], double_val) == 0) should_add = true;
+                        break;
+                    case STRING:
+                        if(!current_row->str_list[condition_data_index]) continue;
+                        if(strcmp(current_row->str_list[condition_data_index], str_val) == 0) should_add = true;
+                        break;
+                    default:
+                        fprintf(stderr, "Execution error: an unexpected error occured.\n");
+                        return;
+                        break;
+                }
+
+                if(should_add){
+                    // add row to to_del_list
+                    new_fr = copy_data_lists_to_filtered(current_row, NULL);
+                    new_fr->row = current_row;
+                    
+                    // add to list
+                    if(to_del_list == NULL) {
+                        to_del_list = new_fr;
+                        last_fr = to_del_list;
+                    } else {
+                        last_fr->next_filtered_row = new_fr;
+                        last_fr = new_fr;
+                    }
+                    row_count++;
+                }
+            }
+            // exit early if no row found
+            if(row_count==0){    
+                printf("Executed: 0 row deleted from table '%s'.\n", table->name);
+                return;
+            }
+        }
+    }
+
+    // check referential integrity of rows to del
+    if(!ref_integrity_check_delete(table, to_del_list, false)){
+        free_filtered_set(to_del_list);
         return;
+    } 
+
+    // remove nodes from hash tables of unique/pk cols for rows to be deleted 
+    for(current_col = table->first_col; current_col != NULL; current_col = current_col->next_col){
+        if(current_col->constraint == UNIQUE || current_col->constraint == PK){
+            ht = get_ht_by_col_name(table->first_hash_table, current_col->name);
+            unique_col_data_index = get_data_list_index(table, current_col->name);
+
+            for(current_fr = to_del_list; current_fr != NULL; current_fr = current_fr->next_filtered_row){
+                remove_from_ht(ht, current_fr->row, unique_col_data_index, current_col->type);
+            }
+        }
+    }
+
+    // delete all result rows
+    for(current_fr = to_del_list; current_fr != NULL; current_fr = current_fr->next_filtered_row){
+        prev_row = get_prev_row(table, current_fr->row);
+        if(!prev_row){
+            // row to del is first row
+            table->first_row = current_fr->row->next_row;
+        } else {
+            prev_row->next_row = current_fr->row->next_row;
+        }
+        free_row(current_fr->row);
     }
 
     table->row_count -= row_count;
-    printf("Executed: %d %s deleted from '%s' table.\n", row_count, row_count > 1 ? "rows" : "row", table->name);
     free_filtered_set(to_del_list);
+    printf("Executed: %d %s deleted from '%s' table.\n", row_count, row_count > 1 ? "rows" : "row", table->name);
 }
+
 void delete_from_table(Query* query) {
     char* table_name = query->params.delete_params.table_name;
     char* condition_col_name = query->params.delete_params.condition_column;
@@ -310,7 +382,6 @@ void delete_from_table(Query* query) {
             fprintf(stderr, "Execution error: '%s' column  not found.\n", condition_col_name);
             return;
         }
-        // TODO: might need to collect other info
     }
 
     // no where case
@@ -322,11 +393,5 @@ void delete_from_table(Query* query) {
     if(include_where){
         delete_where(table, condition_col, condition_val);
         return;
-
     }
-
-
-
-
-
 }

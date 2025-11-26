@@ -48,15 +48,18 @@ gcc main.c ui/parser.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/select.c
 
 Commands to test:
 
-create table customers ( id int pk, name string unique )
+create table customers ( id int pk, name string unique, age int )
 create table orders ( order_id int pk, customer_id int fk references customers id, amount double )
 
-insert into customers ( id, name ) values ( 1, Alice )
-insert into customers ( id, name ) values ( 2, Bob )
-insert into customers ( id, name ) values ( 3, Carol )
+insert into customers ( id, name, age ) values ( 1, Alice, 30 )
+insert into customers ( id, name, age ) values ( 2, Bob, 25 )
+insert into customers ( id, name, age ) values ( 3, Carol, 40 )
+insert into customers ( id, name, age ) values ( 4, Dave, 50 )
+insert into customers ( id ) values ( 45 )
+insert into customers ( id ) values ( 46 )
 
 insert into orders ( order_id, customer_id, amount ) values ( 10, 1, 99.5 )
-insert into orders ( order_id, customer_id, amount ) values ( 11, 1, 20.0 )
+insert into orders ( order_id, customer_id, amount ) values ( 11, 1, 20 )
 insert into orders ( order_id, customer_id, amount ) values ( 12, 3, 250.75 )
 
 select ( id, name ) from customers
@@ -73,15 +76,18 @@ Edge cases:
 select ( id ) from customers join orders on id = customer_id    // select id will return id of customers even when orders also has id column
 select ( id, id ) from customers join orders on id = customer_id    // will only return id of customers
 
+delete from customers where name = null
+delete from customers where id = 4
+delete from customers where id = 2
+
+delete from customers
 delete from customers where id = 1
-insert into customers ( id, name ) values ( 1, Alice )
-delete from customers 
+delete from customers where id = 3
 
-drop table ( customers, orders )
 
-insert into customers ( id ) values ( 1 )
-select * from customers where id = NUll
-delete from customers where name = NUll
+
+drop table customers, orders
+
 
 **Ideas:**
 default constraint
