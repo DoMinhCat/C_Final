@@ -73,6 +73,10 @@ Edge cases:
 select ( id ) from customers join orders on id = customer_id    // select id will return id of customers even when orders also has id column
 select ( id, id ) from customers join orders on id = customer_id    // will only return id of customers
 
+delete from customers
+
+drop table ( customers, orders )
+
 **Ideas:**
 default constraint
 end with ; to be able to execute multiple cmds in one run

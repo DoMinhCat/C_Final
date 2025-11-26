@@ -129,6 +129,9 @@ void delete_all(Table* table){
         free_row(tmp_row); 
         tmp_row = NULL;  
     }
+
+    // update table metadata
+    table->row_count = 0;
     printf("Executed: %d %s deleted from '%s' table.\n", total_row, total_row>1?"rows":"row", table->name);
 }
 
@@ -250,14 +253,15 @@ void delete_where(Table* table, Col* condition_col, char* condition_val){
             free_row(current_fr->row);
         }
 
-        printf("Executed: 1 row deleted from '%s'.\n", table->name);
-        free_filtered_set(to_del_list);
-        return;
     }
     // traverse rows to find rows to del
     else{
-
+        
     }
+    
+    printf("Executed: %d %s deleted from '%s'.\n", row_count, row_count>1?"rows":"row", table->name);
+    free_filtered_set(to_del_list);
+    return;
 }
 
 void delete_from_table(Query* query) {
