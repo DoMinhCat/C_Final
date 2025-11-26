@@ -48,7 +48,7 @@ gcc main.c ui/parser.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/select.c
 
 Commands to test:
 
-n
+create table customers ( id int pk, name string unique )
 create table orders ( order_id int pk, customer_id int fk references customers id, amount double )
 
 insert into customers ( id, name ) values ( 1, Alice )
@@ -73,13 +73,19 @@ Edge cases:
 select ( id ) from customers join orders on id = customer_id    // select id will return id of customers even when orders also has id column
 select ( id, id ) from customers join orders on id = customer_id    // will only return id of customers
 
-delete from customers
+delete from customers where id = 1
+insert into customers ( id, name ) values ( 1, Alice )
+delete from customers 
 
 drop table ( customers, orders )
+
+insert into customers ( id ) values ( 1 )
+select * from customers where id = NUll
+delete from customers where name = NUll
 
 **Ideas:**
 default constraint
 end with ; to be able to execute multiple cmds in one run
 
 **Current bugs:**
-None
+delete with where failed ref integrity check
