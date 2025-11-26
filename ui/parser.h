@@ -8,6 +8,7 @@ Group 2 ESGI 2A3
 #ifndef PARSER_H
 #define PARSER_H
 
+#define MAX_BATCH_SIZE 10000
 #define MAX_CMD_SIZE 2048
 #define TABLE_NAME_MAX 101
 #define MAX_FILE_NAME 255
@@ -90,8 +91,12 @@ typedef struct Query{
 } Query;
 
 
-char* read_cmd(char* cmd_buffer);
+// char* read_cmd(char* cmd_buffer);
 char* read_file_name(char* file_buffer);
+
+char** split_commands(char* batch, int* cmd_count);
+char* read_batch_cmd(char* batch_buffer);
+Query* parse_cmd(char* cmd);
 
 void parse_delete(Query** query);
 void parse_drop(Query** query);
@@ -100,7 +105,6 @@ void parse_insert(Query** query);
 void parse_create(Query** query);
 void parse_show(Query** query);
 void parse_describe(Query** query);
-Query* parse_cmd(char* cmd);
 
 #endif
 
