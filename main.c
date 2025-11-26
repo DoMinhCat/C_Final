@@ -31,18 +31,22 @@ void flush_extra(){
 
 int main(int argc, char **argv){
     char import_export_choice;
-    char cmd_buffer[MAX_CMD_SIZE];
-    char* cmd_input = NULL;
+    char* export_name = NULL;
+
+    char batch_buffer[MAX_BATCH_SIZE];
+    char* batch_input = NULL;
+    char** commands = NULL;
+    int cmd_count;
+    bool exit_cmd = false;
+
     char confirm;
     char file_buffer[MAX_FILE_NAME];
-    char* export_name = NULL;
-    char c;
 
     Query* parser_output = NULL;
 
     printf("Welcome to MiniDB !\n");
     printf("The Final Project developed in C by Minh Cat, Paco, Bamba. 2A3 ESGI 2025-2026.\n");
-    printf("Please refer to README.md for all usage and all other information.\n");
+    printf("Please refer to README.md for usage and additional information.\n");
     print_divider();
 
     // Prompt for file import
@@ -50,8 +54,8 @@ int main(int argc, char **argv){
         printf("Do you want to import an existing database, do it now or never (y/n) : ");
         scanf(" %c", &import_export_choice);
         flush_extra();
-    } while (import_export_choice != 'y' && import_export_choice != 'Y' && import_export_choice != 'n' && import_export_choice != 'N');
-    
+    } while (import_export_choice != 'y' && import_export_choice != 'Y' && 
+             import_export_choice != 'n' && import_export_choice != 'N');
     
     if(import_export_choice == 'y' || import_export_choice == 'Y'){
         print_divider();
@@ -59,6 +63,7 @@ int main(int argc, char **argv){
         print_divider();
         
         // Call import function from file folder
+        // import_db();
     }else {
         print_divider();
         printf("Database importation aborted.\n");
@@ -66,91 +71,130 @@ int main(int argc, char **argv){
     }
 
     // Infinite loop to get user's command
-    while(1){
-        // put the command in cmd_input
+    while(1) {
         printf(">>> ");
-        cmd_input = read_cmd(cmd_buffer);
-        // if nothing or command too long (read_cmd returns NULL)
-        if (cmd_input == NULL || strcmp("long", cmd_input) == 0) continue;
-
-        // Call parser from ui folder analyze command
-        parser_output = parse_cmd(cmd_input);
-
-        // Check exit/quit
-        if(parser_output->cmd_type == EXIT){ 
-            free_current_cmd(&cmd_input, &parser_output);
-            break;
-        }
-
-        // Check invalid syntax
-        if(parser_output->cmd_type == INVALID){
-            free_current_cmd(&cmd_input, &parser_output);
+        
+        // Read all cmds
+        batch_input = read_batch_cmd(batch_buffer);
+        if (batch_input == NULL) continue;
+        
+        // Split into individual commands
+        commands = split_commands(batch_input, &cmd_count);
+        if (cmd_count == 0) {
+            free(batch_input);
             continue;
         }
-
-        // Execute commands
-        switch (parser_output->cmd_type){
-        case SHOW:
-            show(parser_output);
-            break;
-        case DESCRIBE:
-            describe_table(parser_output);
-            break;
-        case CREATE:
-            create_table(parser_output);
-            break;
-        case INSERT:
-            insert(parser_output);
-            break;
-
-        case SELECT:
-            select(parser_output);
-            break;
-        case DELETE:
-            // without WHERE clause
-            if(!parser_output->params.delete_params.condition_column){
-                printf("Confirm deletion of all rows from '%s' table, press 'y' to proceed (cancel on default): ", parser_output->params.delete_params.table_name);
-                confirm = getchar();
-                flush_extra();
-                
-                if(confirm == 'y'){
+        
+        printf("\n");
+        // Execute each command
+        for (int i = 0; i < cmd_count; i++) {
+            parser_output = parse_cmd(commands[i]);
+            
+            // Check exit/quit
+            if (parser_output->cmd_type == EXIT) {
+                // Free current command first
+                free(commands[i]);
+                // Free all remaining commands
+                for (int j = i + 1; j < cmd_count; j++) {
+                    free(commands[j]);
+                }
+                free(commands);
+                free(batch_input);
+                free_query(&parser_output);
+                exit_cmd = true;
+                break; 
+            }
+            
+            // Check invalid syntax
+            if (parser_output->cmd_type == INVALID) {
+                free_query(&parser_output);
+                free(commands[i]);
+                continue; 
+            }
+            
+            // Execute commands
+            switch (parser_output->cmd_type) {
+            case SHOW:
+                show(parser_output);
+                break;
+            case DESCRIBE:
+                describe_table(parser_output);
+                break;
+            case CREATE:
+                create_table(parser_output);
+                break;
+            case INSERT:
+                insert(parser_output);
+                break;
+            case SELECT:
+                select(parser_output);
+                break;
+            case DELETE:
+                // Without WHERE clause - skip confirmation in batch mode if multiple commands
+                if (!parser_output->params.delete_params.condition_column) {
+                    if (cmd_count == 1) {
+                        printf("Confirm deletion of all rows from '%s' table, press 'y' to proceed (cancel on default): ", 
+                               parser_output->params.delete_params.table_name);
+                        confirm = getchar();
+                        flush_extra();
+                        
+                        if (confirm == 'y') {
+                            delete_from_table(parser_output);
+                        } else {
+                            printf("Execution of DELETE statement aborted.\n\n");
+                        }
+                    } else {
+                        // In batch mode, auto-skip for safety
+                        printf("Warning: DELETE without WHERE in batch mode - skipping for safety.\n");
+                    }
+                } else {
                     delete_from_table(parser_output);
-                }else printf("Execution of DELETE statement aborted.\n\n");
+                }
+                break;
+            case DROP:
+                if (cmd_count == 1) {
+                    printf("Confirm deletion of %d %s, press 'y' to proceed (cancel on default): ", 
+                           parser_output->params.drop_params.table_count, 
+                           parser_output->params.drop_params.table_count > 1 ? "tables" : "table");
+                    confirm = getchar();
+                    flush_extra();
+                    
+                    if (confirm == 'y') {
+                        drop_table(parser_output);
+                    } else {
+                        printf("Execution of DROP statement aborted.\n\n");
+                    }
+                } else {
+                    // In batch mode, auto-skip for safety
+                    printf("Warning: DROP in batch mode - skipping for safety.\n");
+                }
+                break;
+            default:
+                printf("Invalid command, please check the syntax.\n\n");
+                break;
             }
-            // execute normally if there is WHERE
-            else{
-                delete_from_table(parser_output);
-            }
+            
+            free_query(&parser_output);
+            free(commands[i]);
+        }
+        
+        if(!exit_cmd) {
+            free(commands);
+            free(batch_input);
+        }
+        
+        if(exit_cmd) {
             break;
-
-        case DROP:
-        // ask for confirmation
-            printf("Confirm deletion of %d %s, press 'y' to proceed (cancel on default): ", parser_output->params.drop_params.table_count, parser_output->params.drop_params.table_count>1?"tables":"table");
-            confirm = getchar();
-            flush_extra();
-
-            if(confirm == 'y'){
-                drop_table(parser_output);
-            }else printf("Execution of DROP statement aborted.\n\n");
-            break;
-        default:
-            printf("Invalid command, please check the syntax.\n\n");
-            break;
-        }          
-
-        // in both case success and failure, msg will be printed by db function
-
-        // free before getting new command
-        free_current_cmd(&cmd_input, &parser_output);
+        }
     }
 
     // Prompt for db export
-    do
-    {
-        printf("Do you want to import export the current database, do it now or never (y/n) : ");
+    do {
+        printf("Do you want to export the current database, do it now or never (y/n) : ");
         scanf(" %c", &import_export_choice);
         flush_extra();
-    } while (import_export_choice != 'y' && import_export_choice != 'Y' && import_export_choice != 'n' && import_export_choice != 'N');
+    } while (import_export_choice != 'y' && import_export_choice != 'Y' && 
+             import_export_choice != 'n' && import_export_choice != 'N');
 
     if(import_export_choice == 'y' || import_export_choice == 'Y'){
         print_divider();
@@ -172,11 +216,11 @@ int main(int argc, char **argv){
         print_divider();
     }
 
-    // Call to functions in clean.c to free all db struct before exit
+    // free all db struct before exit
     free_db(first_table);
     first_table = NULL;
 
-    printf("Goodbye !");
+    printf("Goodbye !\n");
     exit(EXIT_SUCCESS);
 }
 
