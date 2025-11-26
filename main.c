@@ -115,7 +115,7 @@ int main(int argc, char **argv){
                 
                 if(confirm == 'y'){
                     delete_from_table(parser_output);
-                }else printf("Execution of DELETE statement aborted.\n");
+                }else printf("Execution of DELETE statement aborted.\n\n");
             }
             // execute normally if there is WHERE
             else{
@@ -131,10 +131,10 @@ int main(int argc, char **argv){
 
             if(confirm == 'y'){
                 drop_table(parser_output);
-            }else printf("Execution of DROP statement aborted.\n");
+            }else printf("Execution of DROP statement aborted.\n\n");
             break;
         default:
-            printf("Invalid command, please check the syntax.\n");
+            printf("Invalid command, please check the syntax.\n\n");
             break;
         }          
 

@@ -122,7 +122,7 @@ void parse_create(Query** query){
             (*query)->params.create_params.type_list[(*query)->params.create_params.col_count - 1] = DOUBLE;
         else {
             (*query)->cmd_type = INVALID;
-            fprintf(stderr, "Syntax error: invalid type '%s' for '%s' column .\n", col_type, (*query)->params.create_params.col_list[(*query)->params.create_params.col_count - 1]);
+            fprintf(stderr, "Syntax error: invalid type '%s' for '%s' column .\n\n", col_type, (*query)->params.create_params.col_list[(*query)->params.create_params.col_count - 1]);
             free(tmp_col_def);
             return;
         }

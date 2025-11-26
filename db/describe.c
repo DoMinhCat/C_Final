@@ -31,7 +31,7 @@ void describe_table(Query* query){
     table = get_table_by_name(query->params.describe_params.table_name);
 
     if(!table){
-        fprintf(stderr, "Execution error: '%s' table not found.\n", query->params.describe_params.table_name);
+        fprintf(stderr, "Execution error: '%s' table not found.\n\n", query->params.describe_params.table_name);
         return;
     } 
 

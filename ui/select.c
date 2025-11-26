@@ -30,12 +30,12 @@ void parse_select(Query** query){
     token = strtok(NULL, " \t"); // got ( or *
     if(!token || strlen(token) == 0){
         (*query)->cmd_type = INVALID;
-        fprintf(stderr, "Syntax error: missing '(' or '*' after 'SELECT statement'.\n");
+        fprintf(stderr, "Syntax error: missing '(' or '*' after 'SELECT statement'.\n\n");
         return;
     } 
     if((strcmp(token, "(") != 0) && strcmp(token, "*") != 0){
         (*query)->cmd_type = INVALID;
-        fprintf(stderr, "Syntax error: invalid command '%s' after 'SELECT statement'.\n", token);
+        fprintf(stderr, "Syntax error: invalid command '%s' after 'SELECT statement'.\n\n", token);
         return;
     } 
 

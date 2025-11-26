@@ -136,7 +136,7 @@ void insert(Query* query){
     // check table exist
     table = get_table_by_name(query->params.insert_params.table_name);
     if(!table) {
-        fprintf(stderr, "Execution error: '%s' table not found.\n", query->params.insert_params.table_name);
+        fprintf(stderr, "Execution error: '%s' table not found.\n\n", query->params.insert_params.table_name);
         return;
     }
     first_hash_tab = table->first_hash_table;
@@ -145,7 +145,7 @@ void insert(Query* query){
     for(i=0; i<col_count-1;i++){
         for(j=i+1; j<col_count;j++){
             if(strcmp(col_list[i], col_list[j])==0){
-                fprintf(stderr, "Execution error: duplicate '%s' column not allowed.\n", col_list[i]);
+                fprintf(stderr, "Execution error: duplicate '%s' column not allowed.\n\n", col_list[i]);
                 free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
                 return;
             }
@@ -195,7 +195,7 @@ void insert(Query* query){
 
         //check for col existence
         if(!current_col){
-            fprintf(stderr, "'%s' column  not found.\n", col_list[i]);
+            fprintf(stderr, "'%s' column  not found.\n\n", col_list[i]);
             free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
             return;
         }
@@ -214,7 +214,7 @@ void insert(Query* query){
             // FK check for referential integrity
             if (current_col->constraint == FK) {
                 if(safe_val <= 0){
-                    fprintf(stderr, "Execution error: values with FOREIGN KEY constraint must be 1 or larger.\n");
+                    fprintf(stderr, "Execution error: values with FOREIGN KEY constraint must be 1 or larger.\n\n");
                     free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
                     return;
                 }
@@ -265,7 +265,7 @@ void insert(Query* query){
             // empty value not allowed
             if(data_list[i]){
                 if(strcmp(data_list[i], "") == 0){
-                    fprintf(stderr, "Execution error: empty string not allowed.\n");
+                    fprintf(stderr, "Execution error: empty string not allowed.\n\n");
                     free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
                     return;
                 }
@@ -273,7 +273,7 @@ void insert(Query* query){
 
             // check max_len 256
             if(strlen(data_list[i]) > MAX_STR_LEN){
-                fprintf(stderr, "Execution error: 256 characters maximum allowed for STRING values.\n");
+                fprintf(stderr, "Execution error: 256 characters maximum allowed for STRING values.\n\n");
                 free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
                 return;
             }
@@ -305,7 +305,7 @@ void insert(Query* query){
             assert(str_list_to_insert[col_index]!=NULL);
             break;
         default:
-            fprintf(stderr, "Execution error: unknown type for '%s' column .\n", col_list[i]);
+            fprintf(stderr, "Execution error: unknown type for '%s' column .\n\n", col_list[i]);
             free_insert_before_exit(&int_list_to_insert, &str_list_to_insert, &double_list_to_insert, &pk_int_col_name, str_col_count, int_col_count, double_col_count, &int_unique_val_list, &str_unique_val_list, &int_unique_col_name_list, &str_unique_col_name_list, unique_str_col_count, unique_int_col_count);
             return;
             break;
@@ -314,7 +314,7 @@ void insert(Query* query){
 
     // throw error if no value to insert for str pk
     if(pk_is_str && !str_pk_provided){
-        fprintf(stderr, "Execution error: value required for PRIMARY KEY column of '%s' table.\n", table->name);
+        fprintf(stderr, "Execution error: value required for PRIMARY KEY column of '%s' table.\n\n", table->name);
         return;
     }
 
@@ -378,5 +378,5 @@ void insert(Query* query){
     }
     table->row_count++;
     // row insertion complete
-    fprintf(stdout, "Executed: a new row was inserted into '%s' table.\n", table->name);
+    fprintf(stdout, "Executed: a new row was inserted into '%s' table.\n\n", table->name);
 }
