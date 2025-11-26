@@ -15,6 +15,7 @@ Group 2 ESGI 2A3
 int* get_fk_col_list_index(Query* query);
 // Col* get_last_col(Col* first_col);
 Row* get_last_row(Row* first_row);
+Row* get_prev_row(Table* table, Row* target);
 Table* get_last_table(Table* first_table);
 // HashTable* get_last_hash_table(HashTable* first_ht);
 int get_data_list_index(Table* table, char* col_name);
@@ -40,6 +41,7 @@ bool str_to_double(char *str_val, double *double_output, char *col_name);
 
 // functions for where & join
 FilteredRow* copy_rows_to_filtered(Table* tab);
+FilteredRow* copy_data_lists_to_filtered(Row* row1, Row* row2);
 SelectedColInfo* build_col_info_list(Table* tab1, Table* tab2, SelectParams* params, int list_size);
 void* get_col_value_for_join(FilteredRow* filtered_set, SelectedColInfo col_info);
 bool str_to_col_type(Col* condition_col, char* condition_val, int* int_val, double* double_val, char** str_val);

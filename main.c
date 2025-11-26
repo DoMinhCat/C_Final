@@ -114,14 +114,12 @@ int main(int argc, char **argv){
                 flush_extra();
                 
                 if(confirm == 'y'){
-                    // call delete
-                    printf("DELETE is called\n");
+                    delete_from_table(parser_output);
                 }else printf("Execution of DELETE statement aborted.\n");
             }
             // execute normally if there is WHERE
             else{
-                // call delete
-                printf("DELETE is called\n");
+                delete_from_table(parser_output);
             }
             break;
 
@@ -176,6 +174,7 @@ int main(int argc, char **argv){
 
     // Call to functions in clean.c to free all db struct before exit
     free_db(first_table);
+    first_table = NULL;
 
     printf("Goodbye !");
     exit(EXIT_SUCCESS);

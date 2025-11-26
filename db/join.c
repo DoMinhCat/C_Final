@@ -287,43 +287,10 @@ FilteredRow* merge_sorted_lists(Table* tab1, Table* tab2, SelectParams* params, 
                 for(FilteredRow* r2 = start_dup2; r2 != end2; r2 = r2->next_filtered_row) {
                     row1 = r1->row;
                     row2 = r2->row;
-                    new_node = init_filtered_row();
 
                     // set data for required cols and append to result list
                     if(select_all){
-                        assert((new_node->int_joined_list = (int**)calloc(row1->int_count + row2->int_count, sizeof(int*))) != NULL);
-                        assert((new_node->double_joined_list = (double**)calloc(row1->double_count + row2->double_count, sizeof(double*))) != NULL);
-                        assert((new_node->str_joined_list = (char**)calloc(row1->str_count + row2->str_count, sizeof(char*))) != NULL);
-
-                        // copy data lists of 2 rows into joined lists with structure: list1, list2
-                        // int list
-                        new_node->int_joined_list = calloc(new_node->int_join_count, sizeof(int*));
-                        for (i = 0; i < row1->int_count; ++i) {
-                            new_node->int_joined_list[i] = malloc(sizeof(int));
-                            *new_node->int_joined_list[i] = *row1->int_list[i];
-                        }
-                        for (i = 0; i < row2->int_count; ++i) {
-                            new_node->int_joined_list[row1->int_count + i] = malloc(sizeof(int));
-                            *new_node->int_joined_list[row1->int_count + i] = *row2->int_list[i];
-                        }
-                        // double list
-                        new_node->double_joined_list = calloc(new_node->double_join_count, sizeof(double*));
-                        for (i = 0; i < row1->double_count; ++i) {
-                            new_node->double_joined_list[i] = malloc(sizeof(double));
-                            *new_node->double_joined_list[i] = *row1->double_list[i];
-                        }
-                        for (i = 0; i < row2->double_count; ++i) {
-                            new_node->double_joined_list[row1->double_count + i] = malloc(sizeof(double));
-                            *new_node->double_joined_list[row1->double_count + i] = *row2->double_list[i];
-                        }
-                        // str list
-                        new_node->str_joined_list = calloc(new_node->str_join_count, sizeof(char*));
-                        for (i = 0; i < row1->str_count; ++i) assert((new_node->str_joined_list[i] = strdup(row1->str_list[i])) != NULL);
-                        for (i = 0; i < row2->str_count; ++i) assert((new_node->str_joined_list[row1->str_count + i] = strdup(row2->str_list[i])) != NULL);
-
-                        new_node->int_join_count = row1->int_count + row2->int_count;
-                        new_node->double_join_count = row1->double_count + row2->double_count;
-                        new_node->str_join_count = row1->str_count + row2->str_count;
+                        copy_data_lists_to_filtered(row1, row2);
 
                         if(result == NULL) {
                             result = new_node;
@@ -337,6 +304,7 @@ FilteredRow* merge_sorted_lists(Table* tab1, Table* tab2, SelectParams* params, 
                         int_index = 0;
                         double_index = 0;
                         str_index = 0;
+                        new_node = init_filtered_row();
 
                         // calloc joined lists
                         assert((new_node->int_joined_list = (int**)calloc(int_count, sizeof(int*))) != NULL);
