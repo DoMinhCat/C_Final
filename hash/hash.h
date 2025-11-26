@@ -8,6 +8,8 @@ Group 2 ESGI 2A3
 #define HASH_H
 #define HASH_TABLE_SIZE 67 // prime number size for better key distribution
 
+#include <stdbool.h>
+
 #include "../main.h"
 typedef struct Row Row;
 
@@ -34,7 +36,7 @@ typedef struct HashTable{
 
 unsigned int hash_int(int);
 unsigned int hash_string(char*);
-void add_to_ht(HashTable* hash_table, int key, char* value, Row* corresponding_row);
+void add_to_ht(HashTable* hash_table, int key, char* value, Row* corresponding_row, bool is_first_row);
 Node* exist_in_ht(HashTable* hash_tab, int condition_int, char* condition_str);
 
 #endif
