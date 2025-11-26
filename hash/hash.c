@@ -6,7 +6,6 @@ Group 2 ESGI 2A3
 
 #include <string.h>
 #include <assert.h>
-#include <stdbool.h>
 #include <stdlib.h>
 
 #include "hash.h"
@@ -38,14 +37,14 @@ unsigned int hash_int(int num_to_hash){
     return val % HASH_TABLE_SIZE;
 }
 
-void add_to_ht(HashTable* hash_table, int key, char* value, Row* prev_row, bool is_first_row){
+void add_to_ht(HashTable* hash_table, int key, char* value, Row* prev_row, Row* new_row){
     // function to add a node to the indicated hash table, original value can be str/int, must be converted to str before passing in this function
     Node* new_node = NULL;
 
     new_node = init_node();
     new_node->original_value = value;
-    new_node->row = is_first_row ? prev_row : prev_row->next_row;
-    new_node->prev_row = is_first_row ? NULL : prev_row;
+    new_node->row = new_row;
+    new_node->prev_row = prev_row;
 
     // set pointer for node in the linked list that handles collisions
     if(!hash_table->bucket[key]){

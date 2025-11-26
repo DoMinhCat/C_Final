@@ -348,13 +348,15 @@ void insert(Query* query){
     // hash int values of unique int cols and add to their hash table
     int hashed_val;
     char* value = NULL;
+    Row* last_row = !(table->first_row)? NULL : get_last_row(table->first_row);
+
     for(i=0; i<unique_int_col_index; i++){
         value = int_to_str(int_unique_val_list[i]);
         hashed_val = hash_int(int_unique_val_list[i]);
         hash_tab_of_col = get_ht_by_col_name(first_hash_tab, int_unique_col_name_list[i]);
 
         // add key-value pair to hash table of the correct int unique column
-        add_to_ht(hash_tab_of_col, hashed_val, value, new_row);
+        add_to_ht(hash_tab_of_col, hashed_val, value, last_row, new_row);
     }
     // hash str values of unique str cols and add to their hash table
     for(i=0; i<unique_str_col_index; i++){
@@ -362,11 +364,11 @@ void insert(Query* query){
         hash_tab_of_col = get_ht_by_col_name(first_hash_tab, str_unique_col_name_list[i]);
 
         // add key-value pair to hash table of the correct int unique column
-        add_to_ht(hash_tab_of_col, hashed_val, str_unique_val_list[i], new_row);
+        add_to_ht(hash_tab_of_col, hashed_val, str_unique_val_list[i], last_row, new_row);
     }
 
     // set pointer for row/next row
-    Row* last_row = NULL;
+    last_row = NULL;
     if (!table->first_row) {
         table->first_row = new_row;
     } else {

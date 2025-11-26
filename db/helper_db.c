@@ -121,6 +121,18 @@ Row* get_last_row(Row* first_row){
     return current_row;
 }
 
+Row* get_prev_row(Table* table, Row* target) {
+    // Target is first row
+    if (table->first_row == target)
+        return NULL;
+
+    Row* curr = table->first_row;
+    while (curr && curr->next_row != target)
+        curr = curr->next_row;
+
+    return curr;  // returns NULL if not found
+}
+
 Table* get_table_by_name(char* table_name) {
     // this func return pointer to the table having input name
     Table* current = first_table;

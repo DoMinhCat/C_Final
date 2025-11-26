@@ -15,6 +15,7 @@ Group 2 ESGI 2A3
 int* get_fk_col_list_index(Query* query);
 // Col* get_last_col(Col* first_col);
 Row* get_last_row(Row* first_row);
+Row* get_prev_row(Table* table, Row* target);
 Table* get_last_table(Table* first_table);
 // HashTable* get_last_hash_table(HashTable* first_ht);
 int get_data_list_index(Table* table, char* col_name);
