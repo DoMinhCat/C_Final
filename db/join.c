@@ -290,7 +290,7 @@ FilteredRow* merge_sorted_lists(Table* tab1, Table* tab2, SelectParams* params, 
 
                     // set data for required cols and append to result list
                     if(select_all){
-                        new_node = _lists_to_filtered(row1, row2);
+                        copy_data_lists_to_filtered(row1, row2);
 
                         if(result == NULL) {
                             result = new_node;
@@ -304,6 +304,7 @@ FilteredRow* merge_sorted_lists(Table* tab1, Table* tab2, SelectParams* params, 
                         int_index = 0;
                         double_index = 0;
                         str_index = 0;
+                        new_node = init_filtered_row();
 
                         // calloc joined lists
                         assert((new_node->int_joined_list = (int**)calloc(int_count, sizeof(int*))) != NULL);
