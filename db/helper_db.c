@@ -285,60 +285,29 @@ int compare_double(double val1, double val2){
     else return 1;
 }
 
-bool refer_val_exists(char* str_to_check, int val_to_check, char* ref_table_name, char* ref_col_name){
-    // this func check if the inserted value for fk exists in the referenced column of the referenced table
-    int sscanf_check = 0;
-    int hashed_int;
-    Node* current_hash_node = NULL;
-    HashTable* hash_tab = get_ht_by_col_name(get_table_by_name(ref_table_name)->first_hash_table, ref_col_name); 
+bool refer_val_exists(char* str_to_check, int val_to_check, char* ref_table_name, char* ref_col_name) {
+    // get hash table of referenced column
+    HashTable* hash_tab = get_ht_by_col_name(get_table_by_name(ref_table_name)->first_hash_table, ref_col_name);
+    Node* found_node = NULL;
 
-    // no need to check if referenced table exists: this is restricted by drop (can't drop table if it is still refernced)
-
-    // str value check
-    if(str_to_check!=NULL){
-        //hash and check existenece with hash table
-        hashed_int = hash_string(str_to_check); // this is the key 0-66
-
-        // bucket null => value non existing, ref integrity violated 
-        if(hash_tab->bucket[hashed_int] == NULL){
-            fprintf(stderr, "Execution error: referential integrity violated. Value '%s' for '%s' column of '%s' table does not exist.\n", str_to_check, ref_col_name, ref_table_name);
+    // use exist_in_ht depending on type
+    if (str_to_check != NULL) {
+        found_node = exist_in_ht(hash_tab, 0, str_to_check);
+        if (!found_node) {
+            fprintf(stderr, "Execution error: referential integrity violated. Value '%s' for '%s' column of '%s' table does not exist.\n",
+                    str_to_check, ref_col_name, ref_table_name);
             return false;
         }
-        
-        for(current_hash_node = hash_tab->bucket[hashed_int]; current_hash_node!=NULL; current_hash_node=current_hash_node->next_node){
-            if(strcmp(current_hash_node->original_value, str_to_check) == 0) return true;
-        }
-        
-        //no result found
-        fprintf(stderr, "Execution error: referential integrity violated. Value '%s' for '%s' column of '%s' table does not exist.\n", str_to_check, ref_col_name, ref_table_name);
-        return false;
-
-    // int value check
-    }else{
-        //hash and check existenece with hash table
-        hashed_int = hash_int(val_to_check); // this is the key 0-66
-        int val_db;
-
-        // bucket null => no duplicate value, no need to check 
-        if(hash_tab->bucket[hashed_int] == NULL){
-            fprintf(stderr, "Execution error: referential integrity violated. Value '%d' for '%s' column of '%s' table does not exist.\n", val_to_check, ref_col_name, ref_table_name);
+    } else {
+        found_node = exist_in_ht(hash_tab, val_to_check, NULL);
+        if (!found_node) {
+            fprintf(stderr, "Execution error: referential integrity violated. Value '%d' for '%s' column of '%s' table does not exist.\n",
+                    val_to_check, ref_col_name, ref_table_name);
             return false;
         }
-
-        for(current_hash_node = hash_tab->bucket[hashed_int]; current_hash_node!=NULL; current_hash_node=current_hash_node->next_node){
-            // convert back to int to compare, no need strol because we are sure it is int converted to string when inserted and passed earlier checks
-            sscanf_check = sscanf(current_hash_node->original_value, "%d", &val_db); 
-            if(sscanf_check != 1){
-                fprintf(stderr, "Execution error: an error occured while hashing.\n");
-                return false;
-            }
-            if(val_db == val_to_check) return true;
-        }
-        
-        //no result found
-        fprintf(stderr, "Execution error: referential integrity violated. Value '%d' for '%s' column of '%s' table does not exist.\n", val_to_check, ref_col_name, ref_table_name);
-        return false;
     }
+    // value exists
+    return true;
 }
 
 bool pk_value_is_unique(char* str_to_check, int val_to_check, HashTable* hash_tab, char* constraint){
