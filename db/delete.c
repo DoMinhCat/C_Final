@@ -90,11 +90,13 @@ void delete_all(Table* table){
     Row* current_row = NULL;
     Row* tmp_row = NULL;
     HashTable* current_ht = NULL;
-    HashTable* tmp_ht = NULL;
+    Node* tmp_node = NULL;
+    Node* current_node = NULL;
     FilteredRow* fr_to_check = NULL;
     FilteredRow* new_fr = NULL;
     FilteredRow* last_fr = NULL;
     int total_row = table->row_count;
+    int i;
 
     // check ref integrity
     for(current_row=table->first_row; current_row!=NULL; current_row=current_row->next_row){
@@ -112,13 +114,21 @@ void delete_all(Table* table){
     }
     if(!ref_integrity_check_delete(table, fr_to_check, true)) return;
 
-    // del all hash tables
+    // del all nodes from hash tables
     current_ht = table->first_hash_table;
-    while(current_ht != NULL){
-        tmp_ht = current_ht;
-        // save pointer to next row, then free current pointer
-        current_ht = current_ht->next_hash_table;
-        free_hash_table(tmp_ht);   
+        while(current_ht != NULL){
+            for(i=0; i<HASH_TABLE_SIZE; i++){
+            current_node = current_ht->bucket[i];
+            while(current_node != NULL){
+                tmp_node = current_node;
+                // save pointer to next col, then free current pointer
+                current_node =current_node->next_node;
+                
+                free_node(tmp_node);   
+            }
+            current_ht->bucket[i] = NULL;
+        } 
+        current_ht=current_ht->next_hash_table; 
     }
 
     // del all rows
@@ -129,9 +139,11 @@ void delete_all(Table* table){
         free_row(tmp_row); 
         tmp_row = NULL;  
     }
+    table->first_row = NULL;
 
     // update table metadata
     table->row_count = 0;
+    table->next_id = 1;
     printf("Executed: %d %s deleted from '%s' table.\n", total_row, total_row>1?"rows":"row", table->name);
 }
 
@@ -258,7 +270,8 @@ void delete_where(Table* table, Col* condition_col, char* condition_val){
     else{
         
     }
-    
+
+    table->row_count -= row_count;
     printf("Executed: %d %s deleted from '%s'.\n", row_count, row_count>1?"rows":"row", table->name);
     free_filtered_set(to_del_list);
     return;
@@ -301,7 +314,8 @@ void delete_from_table(Query* query) {
     }
     // where case
     if(include_where){
-        // TODO func delete where
+        delete_where(table, condition_col, condition_val);
+        return;
 
     }
 

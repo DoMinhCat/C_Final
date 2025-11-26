@@ -44,11 +44,11 @@ Projet final de C à ESGI
 6. Contributors
 
 Current quick start :
-gcc main.c ui/parser.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/select.c ui/show.c ui/describe.c ui/helper_ui.c clean/cmd.c clean/db.c init/query.c init/db.c init/hash_table.c db/create.c db/helper_db.c db/select.c db/drop.c db/show.c db/insert.c db/describe.c db/where.c db/join.c global_var.c hash/hash.c -o sb.exe
+gcc main.c ui/parser.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/select.c ui/show.c ui/describe.c ui/helper_ui.c clean/cmd.c clean/db.c init/query.c init/db.c init/hash_table.c db/create.c db/helper_db.c db/select.c db/drop.c db/show.c db/insert.c db/describe.c db/where.c db/join.c db/delete.c global_var.c hash/hash.c -o sb.exe
 
 Commands to test:
 
-create table customers ( id int pk, name string )
+n
 create table orders ( order_id int pk, customer_id int fk references customers id, amount double )
 
 insert into customers ( id, name ) values ( 1, Alice )
