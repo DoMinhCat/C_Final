@@ -575,3 +575,58 @@ void print_cell(char* content, int width) {
         printf(" %-*s ", available_width, content);
     }
 }
+
+FilteredRow* copy_data_lists_to_filtered(Row* row1, Row* row2){
+    // copy all data lists of 1 OR 2 rows into FilteredRow for later processing in JOIN and DELETE with WHERE
+
+    FilteredRow* new_node = init_filtered_row();
+    int i;
+    int int_size = row2 ? row1->int_count + row2->int_count : row1->int_count;
+    int double_size = row2 ? row1->double_count + row2->double_count : row1->double_count;
+    int str_size = row2 ? row1->str_count + row2->str_count : row1->str_count;
+
+    // calloc
+    assert((new_node->int_joined_list = (int**)calloc(int_size, sizeof(int*))) != NULL);
+    assert((new_node->double_joined_list = (double**)calloc(double_size, sizeof(double*))) != NULL);
+    assert((new_node->str_joined_list = (char**)calloc(str_size, sizeof(char*))) != NULL);
+
+    // int list
+    new_node->int_joined_list = calloc(new_node->int_join_count, sizeof(int*));
+    for (i = 0; i < row1->int_count; ++i) {
+        new_node->int_joined_list[i] = malloc(sizeof(int));
+        *new_node->int_joined_list[i] = *row1->int_list[i];
+    }
+
+    if(row2){
+        for (i = 0; i < row2->int_count; ++i) {
+        new_node->int_joined_list[row1->int_count + i] = malloc(sizeof(int));
+        *new_node->int_joined_list[row1->int_count + i] = *row2->int_list[i];
+        }
+    }
+
+    // double list
+    new_node->double_joined_list = calloc(new_node->double_join_count, sizeof(double*));
+    for (i = 0; i < row1->double_count; ++i) {
+        new_node->double_joined_list[i] = malloc(sizeof(double));
+        *new_node->double_joined_list[i] = *row1->double_list[i];
+    }
+    if(row2){
+        for (i = 0; i < row2->double_count; ++i) {
+            new_node->double_joined_list[row1->double_count + i] = malloc(sizeof(double));
+            *new_node->double_joined_list[row1->double_count + i] = *row2->double_list[i];
+        }
+    }
+
+    // str list
+    new_node->str_joined_list = calloc(new_node->str_join_count, sizeof(char*));
+    for (i = 0; i < row1->str_count; ++i) assert((new_node->str_joined_list[i] = strdup(row1->str_list[i])) != NULL);
+    if(row2){
+        for (i = 0; i < row2->str_count; ++i) assert((new_node->str_joined_list[row1->str_count + i] = strdup(row2->str_list[i])) != NULL);
+    }
+
+    new_node->int_join_count = int_size;
+    new_node->double_join_count = double_size;
+    new_node->str_join_count = str_size;
+
+    return new_node;
+}
