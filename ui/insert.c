@@ -99,7 +99,7 @@ void parse_insert(Query** query){
     // check number of values passed and number of columns passed
     if(val_count != (*query)->params.insert_params.col_count){
         (*query)->cmd_type = INVALID;
-        fprintf(stderr, "Syntax error: %d %s provided for %d %s.\n", val_count, val_count>1?"values":"value", (*query)->params.insert_params.col_count, (*query)->params.insert_params.col_count>1?"columns":"column");
+        fprintf(stderr, "Syntax error: %d %s provided for %d %s.\n\n", val_count, val_count>1?"values":"value", (*query)->params.insert_params.col_count, (*query)->params.insert_params.col_count>1?"columns":"column");
         return;
     }
 }

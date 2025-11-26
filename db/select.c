@@ -400,7 +400,7 @@ void select(Query* query) {
     // Make sure table exists
     table = get_table_by_name(params->table_name);
     if (table == NULL) {
-        fprintf(stderr, "Execution error: '%s' table not found.\n", params->table_name);
+        fprintf(stderr, "Execution error: '%s' table not found.\n\n", params->table_name);
         return;
     }
 
@@ -411,7 +411,7 @@ void select(Query* query) {
         // join table exists ?
         join_table = get_table_by_name(params->table_join_name);
         if(!join_table){
-            fprintf(stderr, "Execution error: '%s' table not found.\n", params->table_join_name);
+            fprintf(stderr, "Execution error: '%s' table not found.\n\n", params->table_join_name);
             return;
         }
         // join columns exist ?
@@ -420,7 +420,7 @@ void select(Query* query) {
         if(!col_on1 || !col_on2) return;
         // join columns same type?
         if(col_on1->type != col_on2->type){
-            fprintf(stderr, "Execution error: '%s' and '%s' columns have different types.\n", col_on1->name, col_on2->name);
+            fprintf(stderr, "Execution error: '%s' and '%s' columns have different types.\n\n", col_on1->name, col_on2->name);
             return;
         }
     }
@@ -431,11 +431,11 @@ void select(Query* query) {
             if (!get_col_by_name(table, params->col_list[i])) {
                 if(include_join){
                     if(!get_col_by_name(join_table, params->col_list[i])){
-                        fprintf(stderr, "Execution error: '%s' column  not found.\n", params->col_list[i]);
+                        fprintf(stderr, "Execution error: '%s' column  not found.\n\n", params->col_list[i]);
                         return;
                     }
                 }else{
-                    fprintf(stderr, "Execution error: '%s' column  not found.\n", params->col_list[i]);
+                    fprintf(stderr, "Execution error: '%s' column  not found.\n\n", params->col_list[i]);
                     return;
                 }
             }
@@ -454,7 +454,7 @@ void select(Query* query) {
         if (!get_col_by_name(table, params->condition_col)) {
             if (include_join) {
                 if (!get_col_by_name(join_table, params->condition_col)) {
-                    fprintf(stderr, "Execution error: '%s' column  not found.\n", params->condition_col);
+                    fprintf(stderr, "Execution error: '%s' column  not found.\n\n", params->condition_col);
                     return;
                 }
                 where_table = join_table;
@@ -462,7 +462,7 @@ void select(Query* query) {
                 col_on_where = col_on2;
                 col_on_no_where = col_on1;
             } else{
-                fprintf(stderr, "Execution error: '%s' column  not found.\n", params->condition_col);
+                fprintf(stderr, "Execution error: '%s' column  not found.\n\n", params->condition_col);
                 return;
             }
         }

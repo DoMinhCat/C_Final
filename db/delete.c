@@ -45,13 +45,13 @@ bool ref_integrity_check_delete(Table* table, FilteredRow* rows_to_del_fr, bool 
                             if(value_exist){
                                 if(delete_all){
                                     // since we delete all rows, the referencing existing in hash table means it also exists in the col of table to del 
-                                    fprintf(stderr, "Execution error: referential integrity violated, '%s' column is referenced by '%s' column of '%s' table.\n", current_col->refer_col, current_col->name, current_table->name);
+                                    fprintf(stderr, "Execution error: referential integrity violated, '%s' column is referenced by '%s' column of '%s' table.\n\n", current_col->refer_col, current_col->name, current_table->name);
                                     return false;
                                 }else{
                                     // traverse rows to del and check if it contain the referencing value
                                     for(current_row_to_del=rows_to_del_fr; current_row_to_del!=NULL; current_row_to_del=current_row_to_del->next_filtered_row){
                                         if(current_row->int_list[data_index_referencing][0] == current_row_to_del->int_joined_list[data_index_referenced][0]){
-                                            fprintf(stderr, "Execution error: referential integrity violated, '%s' column is referenced by '%s' column of '%s' table.\n", current_col->refer_col, current_col->name, current_table->name);
+                                            fprintf(stderr, "Execution error: referential integrity violated, '%s' column is referenced by '%s' column of '%s' table.\n\n", current_col->refer_col, current_col->name, current_table->name);
                                             return false;
                                         }
                                     }
@@ -61,20 +61,20 @@ bool ref_integrity_check_delete(Table* table, FilteredRow* rows_to_del_fr, bool 
                             value_exist = exist_in_ht(ht_check, 0, current_row->str_list[data_index_referencing]);  
                             if(value_exist){
                                 if(delete_all){
-                                    fprintf(stderr, "Execution error: referential integrity violated, '%s' column is referenced by '%s' column of '%s' table.\n", current_col->refer_col, current_col->name, current_table->name);
+                                    fprintf(stderr, "Execution error: referential integrity violated, '%s' column is referenced by '%s' column of '%s' table.\n\n", current_col->refer_col, current_col->name, current_table->name);
                                     return false;
                                 }else{
                                     // traverse rows to del and check if it contain the referencing value
                                     for(current_row_to_del=rows_to_del_fr; current_row_to_del!=NULL; current_row_to_del=current_row_to_del->next_filtered_row){
                                         if(strcmp(current_row->str_list[data_index_referencing], current_row_to_del->str_joined_list[data_index_referenced]) == 0){
-                                            fprintf(stderr, "Execution error: referential integrity violated, '%s' column is referenced by '%s' column of '%s' table.\n", current_col->refer_col, current_col->name, current_table->name);
+                                            fprintf(stderr, "Execution error: referential integrity violated, '%s' column is referenced by '%s' column of '%s' table.\n\n", current_col->refer_col, current_col->name, current_table->name);
                                             return false;
                                         }
                                     }
                                 }
                             }
                         }else{
-                            fprintf(stderr, "Execution error: an unexpected error occured.\n");
+                            fprintf(stderr, "Execution error: an unexpected error occured.\n\n");
                             return false;
                         }
                     }
@@ -143,7 +143,7 @@ void delete_all(Table* table){
     // update table metadata
     table->row_count = 0;
     table->next_id = 1;
-    printf("Executed: %d %s deleted from '%s' table.\n", total_row, total_row>1?"rows":"row", table->name);
+    printf("Executed: %d %s deleted from '%s' table.\n\n", total_row, total_row>1?"rows":"row", table->name);
 }
 
 FilteredRow* get_null_rows(Table* table, Col* condition_col, int condition_data_index, int* row_count){
@@ -160,7 +160,7 @@ FilteredRow* get_null_rows(Table* table, Col* condition_col, int condition_data_
         else if(condition_col->type == STRING) is_null = (current_row->str_list[condition_data_index] == NULL); 
         else if(condition_col->type == DOUBLE) is_null = (current_row->double_list[condition_data_index] == NULL); 
         else {
-            fprintf(stderr, "Execution error: an unexpected error occured.\n");
+            fprintf(stderr, "Execution error: an unexpected error occured.\n\n");
             return NULL;
         }
         
@@ -211,7 +211,7 @@ void delete_where(Table* table, Col* condition_col, char* condition_val){
         if(strcasecmp(condition_val, "NULL") == 0){            
             if(condition_col->constraint == PK){
                 // PK value is never NULL
-                printf("Executed: 0 row deleted from '%s' table.\n", table->name);
+                printf("Executed: 0 row deleted from '%s' table.\n\n", table->name);
                 return;
             }
             
@@ -220,7 +220,7 @@ void delete_where(Table* table, Col* condition_col, char* condition_val){
             
             // If no rows found, exit early
             if(row_count == 0){
-                printf("Executed: 0 row deleted from '%s' table.\n", table->name);
+                printf("Executed: 0 row deleted from '%s' table.\n\n", table->name);
                 return;
             }
             
@@ -233,7 +233,7 @@ void delete_where(Table* table, Col* condition_col, char* condition_val){
             } else if(condition_col->type == STRING){
                 str_val = condition_val;
             } else {
-                fprintf(stderr, "Execution error: unexpected column type.\n");
+                fprintf(stderr, "Execution error: unexpected column type.\n\n");
                 return;
             }
 
@@ -242,7 +242,7 @@ void delete_where(Table* table, Col* condition_col, char* condition_val){
             
             // no row to del
             if(!hash_node_found){
-                printf("Executed: 0 row deleted from '%s' table.\n", table->name);
+                printf("Executed: 0 row deleted from '%s' table.\n\n", table->name);
                 return;
             }
             
@@ -257,7 +257,7 @@ void delete_where(Table* table, Col* condition_col, char* condition_val){
             to_del_list = get_null_rows(table, condition_col, condition_data_index, &row_count);
             // no row found, return early
             if(row_count==0){    
-                printf("Executed: 0 row deleted from table '%s'.\n", table->name);
+                printf("Executed: 0 row deleted from table '%s'.\n\n", table->name);
                 return;
             }
         }else{
@@ -270,7 +270,7 @@ void delete_where(Table* table, Col* condition_col, char* condition_val){
                 if(!str_to_double(condition_val, &double_val, condition_col->name)) return;
             }             
             else {
-                fprintf(stderr, "Execution error: unexpected column type.\n");
+                fprintf(stderr, "Execution error: unexpected column type.\n\n");
                 return;
             }
 
@@ -291,7 +291,7 @@ void delete_where(Table* table, Col* condition_col, char* condition_val){
                         if(strcmp(current_row->str_list[condition_data_index], str_val) == 0) should_add = true;
                         break;
                     default:
-                        fprintf(stderr, "Execution error: an unexpected error occured.\n");
+                        fprintf(stderr, "Execution error: an unexpected error occured.\n\n");
                         return;
                         break;
                 }
@@ -314,7 +314,7 @@ void delete_where(Table* table, Col* condition_col, char* condition_val){
             }
             // exit early if no row found
             if(row_count==0){    
-                printf("Executed: 0 row deleted from table '%s'.\n", table->name);
+                printf("Executed: 0 row deleted from table '%s'.\n\n", table->name);
                 return;
             }
         }
@@ -352,7 +352,7 @@ void delete_where(Table* table, Col* condition_col, char* condition_val){
 
     table->row_count -= row_count;
     free_filtered_set(to_del_list);
-    printf("Executed: %d %s deleted from '%s' table.\n", row_count, row_count > 1 ? "rows" : "row", table->name);
+    printf("Executed: %d %s deleted from '%s' table.\n\n", row_count, row_count > 1 ? "rows" : "row", table->name);
 }
 
 void delete_from_table(Query* query) {
@@ -368,7 +368,7 @@ void delete_from_table(Query* query) {
     // check table exists
     table = get_table_by_name(table_name);
     if (!table) {
-        fprintf(stderr, "Execution error: table '%s' not found.\n", table_name);
+        fprintf(stderr, "Execution error: table '%s' not found.\n\n", table_name);
         return;
     }
 
@@ -379,7 +379,7 @@ void delete_from_table(Query* query) {
         // check where col exists
         condition_col = get_col_by_name(table, condition_col_name);
         if(!condition_col){
-            fprintf(stderr, "Execution error: '%s' column  not found.\n", condition_col_name);
+            fprintf(stderr, "Execution error: '%s' column  not found.\n\n", condition_col_name);
             return;
         }
     }

@@ -24,7 +24,7 @@ bool table_exists(char* table_name){
     // ex: if(!table_exists(tb_name)) return;
     Table* table = get_table_by_name(table_name);
     if(!table) {
-        fprintf(stderr, "Execution error: '%s' table not found.\n", table_name);
+        fprintf(stderr, "Execution error: '%s' table not found.\n\n", table_name);
         return false;
     }
     return true;
@@ -34,7 +34,7 @@ bool col_exists(Table* table, char* col_name){
     // same as table_exists above but for col
     Col* col = get_col_by_name(table, col_name);
     if(!col) {
-        fprintf(stderr, "Execution error: '%s' column  not found.\n", col_name);
+        fprintf(stderr, "Execution error: '%s' column  not found.\n\n", col_name);
         return false;
     }
     return true;
@@ -306,14 +306,14 @@ bool refer_val_exists(char* str_to_check, int val_to_check, char* ref_table_name
     if (str_to_check != NULL) {
         found_node = exist_in_ht(hash_tab, 0, str_to_check);
         if (!found_node) {
-            fprintf(stderr, "Execution error: referential integrity violated. Value '%s' for '%s' column of '%s' table does not exist.\n",
+            fprintf(stderr, "Execution error: referential integrity violated. Value '%s' for '%s' column of '%s' table does not exist.\n\n",
                     str_to_check, ref_col_name, ref_table_name);
             return false;
         }
     } else {
         found_node = exist_in_ht(hash_tab, val_to_check, NULL);
         if (!found_node) {
-            fprintf(stderr, "Execution error: referential integrity violated. Value '%d' for '%s' column of '%s' table does not exist.\n",
+            fprintf(stderr, "Execution error: referential integrity violated. Value '%d' for '%s' column of '%s' table does not exist.\n\n",
                     val_to_check, ref_col_name, ref_table_name);
             return false;
         }
@@ -337,7 +337,7 @@ bool pk_value_is_unique(char* str_to_check, int val_to_check, HashTable* hash_ta
         if(hash_tab->bucket[hashed_int] != NULL){
             for(current_hash_node = hash_tab->bucket[hashed_int]; current_hash_node!=NULL; current_hash_node=current_hash_node->next_node){
                 if(strcmp(current_hash_node->original_value, str_to_check) == 0){
-                    fprintf(stderr, "Execution error: %s constraint violated.\n", constraint);
+                    fprintf(stderr, "Execution error: %s constraint violated.\n\n", constraint);
                     return false;
                 }
             }
@@ -349,7 +349,7 @@ bool pk_value_is_unique(char* str_to_check, int val_to_check, HashTable* hash_ta
     }else{
         // 0 and negative not allowed
         if(strcasecmp("PRIMARY KEY", constraint)==0 && val_to_check<=0){
-            fprintf(stderr, "Execution error: values with PRIMARY KEY constraint must be 1 or larger.\n");
+            fprintf(stderr, "Execution error: values with PRIMARY KEY constraint must be 1 or larger.\n\n");
             return false;
         }
         //hash and check uniqueness with hash table
@@ -362,11 +362,11 @@ bool pk_value_is_unique(char* str_to_check, int val_to_check, HashTable* hash_ta
                 // convert back to int before cmp, no need strol because we are sure it is int converted to string when inserted and passed earlier checks
                 sscanf_check = sscanf(current_hash_node->original_value, "%d", &val_db); 
                 if(sscanf_check != 1){
-                    fprintf(stderr, "Execution error: an error occured while hashing.\n");
+                    fprintf(stderr, "Execution error: an error occured while hashing.\n\n");
                     return false;
                 }
                 if(val_db == val_to_check){
-                    fprintf(stderr, "Execution error: UNIQUE constraint violated.\n");
+                    fprintf(stderr, "Execution error: UNIQUE constraint violated.\n\n");
                     return false;
                 }
             }
@@ -392,13 +392,13 @@ bool str_to_int(char *str_val, int *int_output, char *col_name) {
 
     // check conversion error
     if (endptr == str_val || *endptr != '\0') {
-        fprintf(stderr, "Execution error: invalid value '%s' for '%s' column type INT.\n", str_val, col_name);
+        fprintf(stderr, "Execution error: invalid value '%s' for '%s' column type INT.\n\n", str_val, col_name);
         return false;
     }
 
     // check overflow
     if (errno == ERANGE || parsed_val > INT_MAX || parsed_val < INT_MIN) {
-        fprintf(stderr, "Execution error: incompatible size of '%s' for type INT.\n", str_val);
+        fprintf(stderr, "Execution error: incompatible size of '%s' for type INT.\n\n", str_val);
         return false;
     }
 
@@ -415,7 +415,7 @@ bool str_to_double(char *str_val, double *double_output, char *col_name) {
 
     //Check conversion errors
     if (errno == ERANGE || isinf(parsed_val) || isnan(parsed_val) || endptr == str_val || *endptr != '\0') {
-        fprintf(stderr, "Execution error: invalid value '%s' for '%s' column type DOUBLE.\n", str_val, col_name);
+        fprintf(stderr, "Execution error: invalid value '%s' for '%s' column type DOUBLE.\n\n", str_val, col_name);
         return false;
     }
 
