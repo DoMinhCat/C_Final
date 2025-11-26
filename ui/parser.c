@@ -74,7 +74,7 @@ Query* parse_cmd(char* cmd) {
     // first word is not one of the accepted command (create, select, insert,...)
     else {
         query->cmd_type = INVALID;
-        fprintf(stderr, "Syntax error: command '%s' not found, please check the syntax.\n\n", token);
+        fprintf(stderr, "Syntax error: '%s' command not found, please check the syntax.\n\n", token);
     }
 
     return query;
