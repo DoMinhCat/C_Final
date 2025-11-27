@@ -68,9 +68,9 @@ bool write_succeed(int written, int count, char* file_name){
 
 bool export_col(FILE* output_file, char* output_file_name, Col* col){
     int written;
-    int len_name = strlen(col->name) + 1;
-    int len_ref_tab = strlen(col->refer_table)+1;
-    int len_ref_col = strlen(col->refer_col)+1;
+    int len_name = col->name ? strlen(col->name) + 1 : 0;
+    int len_ref_tab = col->refer_table ? strlen(col->refer_table) + 1 : 0;
+    int len_ref_col = col->refer_col ? strlen(col->refer_col) + 1 : 0;
     
     // len of col name
     written = fwrite(&len_name, sizeof(int), 1, output_file);
@@ -90,15 +90,19 @@ bool export_col(FILE* output_file, char* output_file_name, Col* col){
     written = fwrite(&len_ref_tab, sizeof(int), 1, output_file);
     if(!write_succeed(written, 1, output_file_name)) return false;
     // refer tab
-    written = fwrite(col->refer_table, sizeof(char), len_ref_tab, output_file);
-    if(!write_succeed(written, len_ref_tab, output_file_name)) return false;
+    if(len_ref_tab!=0){
+        written = fwrite(col->refer_table, sizeof(char), len_ref_tab, output_file);
+        if(!write_succeed(written, len_ref_tab, output_file_name)) return false;
+    }
 
     // len of refer col
     written = fwrite(&len_ref_col, sizeof(int), 1, output_file);
     if(!write_succeed(written, 1, output_file_name)) return false;
     // refer col
-    written = fwrite(col->refer_col, sizeof(char), len_ref_col, output_file);
-    if(!write_succeed(written, len_ref_col, output_file_name)) return false;    
+    if(len_ref_col!=0){
+        written = fwrite(col->refer_col, sizeof(char), len_ref_col, output_file);
+        if(!write_succeed(written, len_ref_col, output_file_name)) return false;    
+    }
 
     return true;
 }
@@ -325,6 +329,7 @@ void export_db(char* output_file_name, Table* first_table){
 
     // empty database
     if(table_count==0){
+        printf("Current database exported to '%s' successfully.\n\n", filename_with_ext);
         fclose(output_file);
         free(filename_with_ext);
         filename_with_ext = NULL;
@@ -344,8 +349,8 @@ void export_db(char* output_file_name, Table* first_table){
     }
 
     fclose(output_file);
+    printf("Current database exported to '%s' successfully.\n\n", filename_with_ext);
+    
     free(filename_with_ext);
     filename_with_ext = NULL;
-
-    printf("Current database exported to '%s' successfully.\n\n", filename_with_ext);
 }
