@@ -12,27 +12,38 @@ Group 2 ESGI 2A3
 #include "../global_var.h"
 
 /*
+IMPORTANT: for all strings read later need to alloc strlen + 1 and set \0 at the end
+
 NOTE: export structure for table to fwrite in order:
-    # metadata
+    # metadata:
     strlen(tab_name) + 1
     Table name
+
     Num of Cols
     Num of Rows
     Num of Hash Tables
 
     Next_id of table (int)
     Col one by one:
-        name, type, constraint
-        strlen of refer_table, refer_table (str)   IMPORTANT: for all strings read later need to alloc strlen + 1 and set \0 at the end
-        strlen of refer_col, refer_col (str)
+        name
+        type
+        constraint
+        strlen of refer_table
+        refer_table (str)   
+        strlen of refer_col
+        refer_col (str)
 
     Row one by one:
         int_count
         double_count
         str_count
-        int items
-        double items
-        str items
+
+        IMPORTANT: before each item is a char 1 or 0 to indicate if it is null or not
+        example: 0|1value
+
+        int items: null marker then item
+        double items: null marker then item
+        str items: null marker, string len + 1 then item
 
     Hash table one by one:
         strlen of col_name, col_name
@@ -91,8 +102,65 @@ bool export_col(FILE* output_file, char* output_file_name, Col* col){
 
 bool export_row(FILE* output_file, char* output_file_name, Row* row){
     int written;
+    int i;
+    int len_str;
+    unsigned char null_marker;
 
     // int count
+    written = fwrite(&row->int_count, sizeof(int), 1, output_file);
+    if(!write_succeed(written, 1, output_file)) return false;
+    // double count
+    written = fwrite(&row->double_count, sizeof(int), 1, output_file);
+    if(!write_succeed(written, 1, output_file)) return false;
+    // str count
+    written = fwrite(&row->str_count, sizeof(int), 1, output_file);
+    if(!write_succeed(written, 1, output_file)) return false;
+
+    // int list
+    for(i=0; i<row->int_count; i++){
+        // null marker 
+        null_marker = row->int_list[i] ? 1 : 0;
+        written = fwrite(&null_marker, sizeof(unsigned char), 1, output_file);
+        if(!write_succeed(written, 1, output_file)) return false;
+        // write value if not null
+        if(row->int_list[i]){
+            written = fwrite(row->int_list[i], sizeof(int), 1, output_file);
+            if(!write_succeed(written, 1, output_file)) return false;
+        }
+    }
+
+    // double list
+    for(i=0; i<row->double_count; i++){
+        // null marker 
+        null_marker = row->double_list[i] ? 1 : 0;
+        written = fwrite(&null_marker, sizeof(unsigned char), 1, output_file);
+        if(!write_succeed(written, 1, output_file)) return false;
+        // write value if not null
+        if(row->double_list[i]){
+            written = fwrite(row->double_list[i], sizeof(double), 1, output_file);
+            if(!write_succeed(written, 1, output_file)) return false;
+        }
+    }
+
+    // string list
+    for(i=0; i<row->str_count; i++){
+        // null marker 
+        null_marker = row->str_list[i] ? 1 : 0;
+        written = fwrite(&null_marker, sizeof(unsigned char), 1, output_file);
+        if(!write_succeed(written, 1, output_file)) return false;
+        
+        // write if not null
+        if(row->str_list[i]){
+            len_str = strlen(row->str_list[i]) + 1;
+            // len of str item
+            written = fwrite(&len_str, sizeof(int), 1, output_file);
+            if(!write_succeed(written, 1, output_file)) return false;
+            // string value
+            written = fwrite(row->str_list[i], sizeof(char), 1, output_file);
+            if(!write_succeed(written, 1, output_file)) return false;
+        }
+    }
+    return true;
 }
 
 bool export_hash_node(FILE* output_file, Node* hash_node){
@@ -109,6 +177,7 @@ bool export_table(FILE* output_file, char* output_file_name, Table* table){
     int i;
     Col* current_col = NULL;
     Row* current_row = NULL;
+    HashTable* current_ht = NULL;
 
     // write length of table name + 1 (for \0)
     written = fwrite(&tab_name_len, sizeof(int), 1, output_file);
@@ -143,6 +212,13 @@ bool export_table(FILE* output_file, char* output_file_name, Table* table){
     for(i=0; i<table->row_count; i++){
         if(!export_row(output_file, output_file_name, current_row)) return false;
         current_row=current_row->next_row;
+    }
+
+    // write hash tables
+    current_ht = table->first_hash_table;
+    for(i=0; i<table->hash_table_count; i++){
+        if(!export_hash_table()) return false;
+        current_ht=current_ht->next_hash_table;
     }
     
 

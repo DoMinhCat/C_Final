@@ -6,7 +6,10 @@ Projet final de C à ESGI
 
 1. Project Description
 2. Pre-requisites
+
+    - gcc
 3. Installation
+
 4. Features
 
     - Strings does not need to be wrapped inside quotes or double quotes
@@ -34,15 +37,21 @@ Projet final de C à ESGI
 
 5. Usage
 
-- `show tables`
-- `describe table tab1`
-- `delete from tab1 [where col1 = 6]`
-- `drop table tab1 [, tab2, tab3,...]`
-- `create table tab1 ( col1 int pk, col2 string fk references tab_to_refer col_to_refer, col3 double )`, spaces between parentheses are obligated for the program to parse the command correctly
-- `insert into tab1 ( col1, col2 ) values ( val1, val2 )`
-- `select ( col1, col2, col3 )/* from tab1 [join tab2 on col1 = col2] [where col1 = xyz]`, order of col1 and col2 in JOIN clause matters, col1 and col2 correspond to tab1 and tab2 respectively
+    - `show tables`
+    - `describe table tab1`
+    - `delete from tab1 [where col1 = 6]`
+    - `drop table tab1 [, tab2, tab3,...]`
+    - `create table tab1 ( col1 int pk, col2 string fk references tab_to_refer col_to_refer, col3 double )`, spaces between parentheses are obligated for the program to parse the command correctly
+    - `insert into tab1 ( col1, col2 ) values ( val1, val2 )`
+    - `select ( col1, col2, col3 )/* from tab1 [join tab2 on col1 = col2] [where col1 = xyz]`, order of col1 and col2 in JOIN clause matters, col1 and col2 correspond to tab1 and tab2 respectively
 
 6. Contributors
+
+    - Minh Cat DO
+    - Paco ROBINET-CAMPOY
+    - Cheikh Ahmadou Bamba CISSE
+
+---
 
 Current quick start :
 gcc main.c ui/parser.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/select.c ui/show.c ui/describe.c ui/helper_ui.c clean/cmd.c clean/db.c init/query.c init/db.c init/hash_table.c db/create.c db/helper_db.c db/select.c db/drop.c db/show.c db/insert.c db/describe.c db/where.c db/join.c db/delete.c global_var.c hash/hash.c -o sb.exe
@@ -88,3 +97,7 @@ delete from customers where id = 1
 delete from customers where id = 3;
 
 drop table customers, orders;
+
+**Ideas to improve**
+    - Select col AS abc (if not too complicated)
+    - Default constraint
