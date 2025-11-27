@@ -45,19 +45,20 @@ NOTE: export structure for table to fwrite in order:
         double items: null marker then item
         str items: null marker, string len + 1 then item
 
-    Hash table one by one:
+    Write hash table one by one:
         strlen of col_name, col_name
 
-        loop 67 times for each bucket:
-            Loop and write num of nodes that handle collision
-            for prev_row and row, write the row position (int), not the pointer
-            strlen of original_value and original_value (str)
+        write 67 buckets one by one:
+            Loop to count then write num of nodes that handle collision
+            write each collision node:
+                IMPORTANT: for prev_row and row, write the row position (int) from first row (first row=1), not the pointer value. So if prev_row_index=0 => prev_row=NULL
+                strlen of original_value and original_value (str)
 
 */ 
 
 bool write_succeed(int written, int count, char* file_name){
     if(written != count){
-        fprintf(stderr, "Export error: writing to '%s' failed.\n\n");
+        fprintf(stderr, "Export error: writing to '%s' failed, exportation aborted.\n\n");
         return false;
     }
     return true;
@@ -163,12 +164,69 @@ bool export_row(FILE* output_file, char* output_file_name, Row* row){
     return true;
 }
 
-bool export_hash_node(FILE* output_file, Node* hash_node){
-    // TODO
+bool export_hash_node(FILE* output_file, char* output_file_name, Node* hash_node, Table* table){
+    int prev_row_index = 0;
+    int row_index;
+    Row* current_row = NULL;
+    int len_original_val;
+    int written;
+
+    // find index of row and prev row
+    for(current_row=table->first_row; current_row!=NULL; current_row=current_row->next_row){
+        if(current_row==hash_node->prev_row) break;
+        prev_row_index++;
+    }
+
+    // write prev row index
+    written = fwrite(&prev_row_index, sizeof(int), 1, output_file);
+    if(!write_succeed(written, 1, output_file_name)) return false;
+    row_index = prev_row_index+1;
+    // write row index
+    written = fwrite(&row_index, sizeof(int), 1, output_file);
+    if(!write_succeed(written, 1, output_file_name)) return false;
+
+    // original val len
+    len_original_val = strlen(hash_node->original_value)+1;
+    written = fwrite(&len_original_val, sizeof(int), 1, output_file);
+    if(!write_succeed(written, 1, output_file_name)) return false;
+    // original val
+    written = fwrite(hash_node->original_value, sizeof(char), len_original_val, output_file);
+    if(!write_succeed(written, len_original_val, output_file_name)) return false;
+
+    return true;
 }
 
-bool export_hash_table(FILE* output_file, HashTable* ht_to_export){
-    // TODO
+bool export_hash_table(FILE* output_file, char* output_file_name, HashTable* ht, Table* table){
+    int written;
+    int len_col_name = strlen(ht->col_name)+1;
+    int i;
+    int node_count;
+    Node* current_node = NULL;
+
+    // col name len
+    written = fwrite(&len_col_name, sizeof(int), 1, output_file);
+    if(!write_succeed(written, 1, output_file_name)) return false;
+    // col name
+    written = fwrite(ht->col_name, sizeof(char), len_col_name, output_file);
+    if(!write_succeed(written, len_col_name, output_file_name)) return false;
+
+    // 67 buckets
+    for(i=0; i<HASH_TABLE_SIZE; i++){
+        node_count = 0;
+
+        // number of nodes in the current bucket
+        for(current_node = ht->bucket[i]; current_node!=NULL; current_node=current_node->next_node) node_count++;
+        written = fwrite(&node_count, sizeof(int), 1, output_file);
+        if(!write_succeed(written, 1, output_file_name)) return false;
+
+        // write nodes of current bucket
+        if(node_count != 0){
+            for(current_node = ht->bucket[i]; current_node!=NULL; current_node=current_node->next_node){
+                if(!export_hash_node(output_file, output_file_name, current_node, table)) return false;
+            }
+        }
+    }
+    return true;
 }
 
 bool export_table(FILE* output_file, char* output_file_name, Table* table){
@@ -176,8 +234,8 @@ bool export_table(FILE* output_file, char* output_file_name, Table* table){
     int tab_name_len = strlen(table->name) + 1;
     int i;
     Col* current_col = NULL;
-    Row* current_row = NULL;
     HashTable* current_ht = NULL;
+    Row* current_row = NULL;
 
     // write length of table name + 1 (for \0)
     written = fwrite(&tab_name_len, sizeof(int), 1, output_file);
@@ -208,21 +266,24 @@ bool export_table(FILE* output_file, char* output_file_name, Table* table){
     }
 
     // write rows
-    current_row = table->first_row;
-    for(i=0; i<table->row_count; i++){
-        if(!export_row(output_file, output_file_name, current_row)) return false;
-        current_row=current_row->next_row;
+    if(table->row_count != 0){
+        // write rows
+        current_row = table->first_row;
+        for(i=0; i<table->row_count; i++){
+            if(!export_row(output_file, output_file_name, current_row)) return false;
+            current_row=current_row->next_row;
+        }
     }
 
     // write hash tables
-    current_ht = table->first_hash_table;
-    for(i=0; i<table->hash_table_count; i++){
-        if(!export_hash_table()) return false;
-        current_ht=current_ht->next_hash_table;
+    if(table->hash_table_count != 0){
+        current_ht = table->first_hash_table;
+        for(i=0; i<table->hash_table_count; i++){
+            if(!export_hash_table(output_file, output_file_name, current_ht, table)) return false;
+            current_ht=current_ht->next_hash_table;
+        }
     }
     
-
-
     return true;
 }
 
@@ -249,7 +310,16 @@ void export_db(char* output_file_name, Table* first_table){
 
     // write number of tables in db
     written = fwrite(&table_count, sizeof(int), 1, output_file);
-    if(!write_succeed(written, 1, output_file_name)) return;
+    if(!write_succeed(written, 1, output_file_name)){
+        fclose(output_file);
+        return;
+    } 
+
+    // empty database
+    if(table_count==0){
+        fclose(output_file);
+        return;
+    }
     
     // write table one by one
     current_table = first_table;
