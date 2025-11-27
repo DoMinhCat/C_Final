@@ -204,9 +204,8 @@ int main(int argc, char **argv){
         } while(!export_name);
         
         printf("Exporting database...\n");
-        // export_db(export_name, first_table);
-        
-        printf("Database exported successfully to '%s'.\n", export_name);
+        export_db(export_name, first_table);
+
         free(export_name);
         export_name = NULL;
         print_divider();

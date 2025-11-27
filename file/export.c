@@ -5,7 +5,10 @@ Group 2 ESGI 2A3
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
+#include <assert.h>
 
 #include "../db/db.h"
 #include "../hash/hash.h"
@@ -53,7 +56,6 @@ NOTE: export structure for table to fwrite in order:
             write each collision node:
                 IMPORTANT: for prev_row and row, write the row position (int) from first row (first row=1), not the pointer value. So if prev_row_index=0 => prev_row=NULL
                 strlen of original_value and original_value (str)
-
 */ 
 
 bool write_succeed(int written, int count, char* file_name){
@@ -109,24 +111,24 @@ bool export_row(FILE* output_file, char* output_file_name, Row* row){
 
     // int count
     written = fwrite(&row->int_count, sizeof(int), 1, output_file);
-    if(!write_succeed(written, 1, output_file)) return false;
+    if(!write_succeed(written, 1, output_file_name)) return false;
     // double count
     written = fwrite(&row->double_count, sizeof(int), 1, output_file);
-    if(!write_succeed(written, 1, output_file)) return false;
+    if(!write_succeed(written, 1, output_file_name)) return false;
     // str count
     written = fwrite(&row->str_count, sizeof(int), 1, output_file);
-    if(!write_succeed(written, 1, output_file)) return false;
+    if(!write_succeed(written, 1, output_file_name)) return false;
 
     // int list
     for(i=0; i<row->int_count; i++){
         // null marker 
         null_marker = row->int_list[i] ? 1 : 0;
         written = fwrite(&null_marker, sizeof(unsigned char), 1, output_file);
-        if(!write_succeed(written, 1, output_file)) return false;
+        if(!write_succeed(written, 1, output_file_name)) return false;
         // write value if not null
         if(row->int_list[i]){
             written = fwrite(row->int_list[i], sizeof(int), 1, output_file);
-            if(!write_succeed(written, 1, output_file)) return false;
+            if(!write_succeed(written, 1, output_file_name)) return false;
         }
     }
 
@@ -135,11 +137,11 @@ bool export_row(FILE* output_file, char* output_file_name, Row* row){
         // null marker 
         null_marker = row->double_list[i] ? 1 : 0;
         written = fwrite(&null_marker, sizeof(unsigned char), 1, output_file);
-        if(!write_succeed(written, 1, output_file)) return false;
+        if(!write_succeed(written, 1, output_file_name)) return false;
         // write value if not null
         if(row->double_list[i]){
             written = fwrite(row->double_list[i], sizeof(double), 1, output_file);
-            if(!write_succeed(written, 1, output_file)) return false;
+            if(!write_succeed(written, 1, output_file_name)) return false;
         }
     }
 
@@ -148,17 +150,17 @@ bool export_row(FILE* output_file, char* output_file_name, Row* row){
         // null marker 
         null_marker = row->str_list[i] ? 1 : 0;
         written = fwrite(&null_marker, sizeof(unsigned char), 1, output_file);
-        if(!write_succeed(written, 1, output_file)) return false;
+        if(!write_succeed(written, 1, output_file_name)) return false;
         
         // write if not null
         if(row->str_list[i]){
             len_str = strlen(row->str_list[i]) + 1;
             // len of str item
             written = fwrite(&len_str, sizeof(int), 1, output_file);
-            if(!write_succeed(written, 1, output_file)) return false;
+            if(!write_succeed(written, 1, output_file_name)) return false;
             // string value
             written = fwrite(row->str_list[i], sizeof(char), 1, output_file);
-            if(!write_succeed(written, 1, output_file)) return false;
+            if(!write_succeed(written, 1, output_file_name)) return false;
         }
     }
     return true;
@@ -283,7 +285,7 @@ bool export_table(FILE* output_file, char* output_file_name, Table* table){
             current_ht=current_ht->next_hash_table;
         }
     }
-    
+
     return true;
 }
 
@@ -293,41 +295,57 @@ void export_db(char* output_file_name, Table* first_table){
     FILE* output_file = NULL;
     Table* current_table = NULL;
     char* extension = ".bin";
+    char* filename_with_ext = NULL;
     int i;
     int written;
 
     //add the .bin extension
-    output_file_name = realloc(output_file_name, strlen(output_file_name) + strlen(extension) + 1);
-    assert(output_file_name!=NULL);
-    strcat(output_file_name, extension);
+    filename_with_ext = malloc(strlen(output_file_name) + strlen(extension) + 1);
+    assert(filename_with_ext != NULL);
+    strcpy(filename_with_ext, output_file_name);
+    strcat(filename_with_ext, extension);
 
     // open file to write
-    output_file = fopen(output_file_name, "wb");
+    output_file = fopen(filename_with_ext, "wb");
     if(!output_file){
-        fprintf(stderr, "Export error: failed to create '%s'.\n\n", output_file_name);
+        fprintf(stderr, "Export error: failed to create '%s'.\n\n", filename_with_ext);
+        free(filename_with_ext);
+        filename_with_ext = NULL;
         return;
     }
 
     // write number of tables in db
     written = fwrite(&table_count, sizeof(int), 1, output_file);
-    if(!write_succeed(written, 1, output_file_name)){
+    if(!write_succeed(written, 1, filename_with_ext)){
         fclose(output_file);
+        free(filename_with_ext);
+        filename_with_ext = NULL;
         return;
     } 
 
     // empty database
     if(table_count==0){
         fclose(output_file);
+        free(filename_with_ext);
+        filename_with_ext = NULL;
         return;
     }
     
     // write table one by one
     current_table = first_table;
     for(i=0; i<table_count; i++){
-        if(!export_table(output_file, output_file_name, current_table)){
+        if(!export_table(output_file, filename_with_ext, current_table)){
             fclose(output_file);
+            free(filename_with_ext);
+            filename_with_ext = NULL;
             return;
         }
         current_table = current_table->next_table;
     }
+
+    fclose(output_file);
+    free(filename_with_ext);
+    filename_with_ext = NULL;
+
+    printf("Current database exported to '%s' successfully.\n\n", filename_with_ext);
 }
