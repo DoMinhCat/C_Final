@@ -14,6 +14,7 @@ Group 2 ESGI 2A3
 /*
 NOTE: export structure for table to fwrite in order:
     # metadata
+    strlen(tab_name) + 1
     Table name
     Num of Cols
     Num of Rows
@@ -43,33 +44,120 @@ NOTE: export structure for table to fwrite in order:
 
 */ 
 
-void export_col(FILE* output_file, Col* col){
+bool write_succeed(int written, int count, char* file_name){
+    if(written != count){
+        fprintf(stderr, "Export error: writing to '%s' failed.\n\n");
+        return false;
+    }
+    return true;
+}
+
+bool export_col(FILE* output_file, char* output_file_name, Col* col){
+    int written;
+    int len_name = strlen(col->name) + 1;
+    int len_ref_tab = strlen(col->refer_table)+1;
+    int len_ref_col = strlen(col->refer_col)+1;
+    
+    // len of col name
+    written = fwrite(&len_name, sizeof(int), 1, output_file);
+    if(!write_succeed(written, 1, output_file_name)) return false;
+    // col name
+    written = fwrite(col->name, sizeof(char), len_name, output_file);
+    if(!write_succeed(written, len_name, output_file_name)) return false;
+
+    // type
+    written = fwrite(&col->type, sizeof(ColType), 1, output_file);
+    if(!write_succeed(written, 1, output_file_name)) return false;
+    // constraint
+    written = fwrite(&col->constraint, sizeof(ColConstraintType), 1, output_file);
+    if(!write_succeed(written, 1, output_file_name)) return false;
+
+    // len of refer table
+    written = fwrite(&len_ref_tab, sizeof(int), 1, output_file);
+    if(!write_succeed(written, 1, output_file_name)) return false;
+    // refer tab
+    written = fwrite(col->refer_table, sizeof(char), len_ref_tab, output_file);
+    if(!write_succeed(written, len_ref_tab, output_file_name)) return false;
+
+    // len of refer col
+    written = fwrite(&len_ref_col, sizeof(int), 1, output_file);
+    if(!write_succeed(written, 1, output_file_name)) return false;
+    // refer col
+    written = fwrite(col->refer_col, sizeof(char), len_ref_col, output_file);
+    if(!write_succeed(written, len_ref_col, output_file_name)) return false;    
+
+    return true;
+}
+
+bool export_row(FILE* output_file, char* output_file_name, Row* row){
+    int written;
+
+    // int count
+}
+
+bool export_hash_node(FILE* output_file, Node* hash_node){
     // TODO
 }
 
-void export_row(FILE* output_file, Row* row){
+bool export_hash_table(FILE* output_file, HashTable* ht_to_export){
     // TODO
 }
 
-void export_hash_node(FILE* output_file, Node* hash_node){
-    // TODO
-}
+bool export_table(FILE* output_file, char* output_file_name, Table* table){
+    int written;
+    int tab_name_len = strlen(table->name) + 1;
+    int i;
+    Col* current_col = NULL;
+    Row* current_row = NULL;
 
-void export_hash_table(FILE* output_file, HashTable* ht_to_export){
-    // TODO
-}
+    // write length of table name + 1 (for \0)
+    written = fwrite(&tab_name_len, sizeof(int), 1, output_file);
+    if(!write_succeed(written, 1, output_file_name)) return false;
+    // name of table
+    written = fwrite(table->name, sizeof(char), tab_name_len, output_file);
+    if(!write_succeed(written, tab_name_len, output_file_name)) return false;
 
-void export_table(FILE* output_file, Table* table){
-    // TODO
+    // num of cols
+    written = fwrite(&(table->col_count), sizeof(int), 1, output_file);
+    if(!write_succeed(written, 1, output_file_name)) return false;
+    // num of rows
+    written = fwrite(&(table->row_count), sizeof(int), 1, output_file);
+    if(!write_succeed(written, 1, output_file_name)) return false;
+    // num of hash tables
+    written = fwrite(&(table->hash_table_count), sizeof(int), 1, output_file);
+    if(!write_succeed(written, 1, output_file_name)) return false;
+
+    // next_id
+    written = fwrite(&(table->next_id), sizeof(int), 1, output_file);
+    if(!write_succeed(written, 1, output_file_name)) return false;
+
+    // write columns
+    current_col = table->first_col;
+    for(i=0; i<table->col_count; i++){
+        if(!export_col(output_file, output_file_name, current_col)) return false;
+        current_col=current_col->next_col;
+    }
+
+    // write rows
+    current_row = table->first_row;
+    for(i=0; i<table->row_count; i++){
+        if(!export_row(output_file, output_file_name, current_row)) return false;
+        current_row=current_row->next_row;
+    }
+    
+
+
+    return true;
 }
 
 void export_db(char* output_file_name, Table* first_table){
     // export the whole database to a binary file
 
     FILE* output_file = NULL;
-    Table* current_table = first_table;
+    Table* current_table = NULL;
     char* extension = ".bin";
     int i;
+    int written;
 
     //add the .bin extension
     output_file_name = realloc(output_file_name, strlen(output_file_name) + strlen(extension) + 1);
@@ -79,13 +167,21 @@ void export_db(char* output_file_name, Table* first_table){
     // open file to write
     output_file = fopen(output_file_name, "wb");
     if(!output_file){
-        fprintf(stderr, "Export error: failed to create '%s.bin'.\n", output_file_name);
+        fprintf(stderr, "Export error: failed to create '%s'.\n\n", output_file_name);
         return;
     }
+
+    // write number of tables in db
+    written = fwrite(&table_count, sizeof(int), 1, output_file);
+    if(!write_succeed(written, 1, output_file_name)) return;
     
     // write table one by one
+    current_table = first_table;
     for(i=0; i<table_count; i++){
-        export_table(output_file, current_table);
+        if(!export_table(output_file, output_file_name, current_table)){
+            fclose(output_file);
+            return;
+        }
         current_table = current_table->next_table;
     }
 }
