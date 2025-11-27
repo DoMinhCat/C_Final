@@ -225,6 +225,7 @@ void create_table(Query* query){
     HashTable* new_hash_table = NULL;
     HashTable* last_ht = NULL;
     int refer_list_index=0;
+    int ht_count = 0;
     // loop through the col list and add them in the linked list
     for(i=0; i<col_count; i++){
         // set basic info
@@ -273,10 +274,12 @@ void create_table(Query* query){
                 last_ht->next_hash_table = new_hash_table;
                 last_ht = new_hash_table;
             }
+            ht_count++;
         }
     }
     new_tb->col_count = col_count;
     new_tb->row_count = 0;
+    new_tb->hash_table_count = ht_count;
 
     // add table to the linked list
     if(!first_table) first_table = new_tb;
