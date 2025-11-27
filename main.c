@@ -135,7 +135,7 @@ int main(int argc, char **argv){
                     if (cmd_count == 1) {
                         printf("Confirm deletion of all rows from '%s' table, press 'y' to proceed (cancel on default): ", 
                                parser_output->params.delete_params.table_name);
-                        confirm = getchar();
+                        scanf(" %c", &confirm);
                         flush_extra();
                         
                         if (confirm == 'y') {
@@ -156,7 +156,7 @@ int main(int argc, char **argv){
                     printf("Confirm deletion of %d %s, press 'y' to proceed (cancel on default): ", 
                            parser_output->params.drop_params.table_count, 
                            parser_output->params.drop_params.table_count > 1 ? "tables" : "table");
-                    confirm = getchar();
+                    scanf(" %c", &confirm);
                     flush_extra();
                     
                     if (confirm == 'y') {

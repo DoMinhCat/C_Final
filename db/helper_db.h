@@ -29,6 +29,7 @@ bool col_exists(Table* table, char* col_name);
 bool refer_val_exists(char* str_to_check, int val_to_check, char* ref_table_name, char* ref_col_name);
 bool pk_value_is_unique(char* str_to_check, int val_to_check, HashTable* hash_tab, char* constraint);
 int compare_double(double val1, double val2);
+bool ref_integrity_check_delete(Table* table, FilteredRow* rows_to_del_fr, bool delete_all);
 
 // functions for select
 void* get_col_value(Table* table, Row* row, char* col_name, ColType col_type);

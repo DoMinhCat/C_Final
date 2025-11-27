@@ -635,3 +635,73 @@ FilteredRow* copy_data_lists_to_filtered(Row* row1, Row* row2){
 
     return new_node;
 }
+
+bool ref_integrity_check_delete(Table* table, FilteredRow* rows_to_del_fr, bool delete_all){
+    // check if any col on any other table has value refering to the data of table to be deleted based on a list of filtered rows
+    
+    Table* current_table = NULL;
+    HashTable* ht_check = NULL;
+    Node* value_exist;
+    Col* current_col = NULL;
+    Row* current_row = NULL;
+    FilteredRow* current_row_to_del = NULL;
+    int data_index_referencing;
+    int data_index_referenced;  
+
+    // check referential integrity looping all tables except the one to be deleted
+    for(current_table=first_table; current_table!=NULL; current_table=current_table->next_table){
+        if(strcmp(current_table->name, table->name) != 0){
+            // loop all cols of table to check
+            for(current_col=current_table->first_col; current_col!=NULL; current_col=current_col->next_col){
+                if(current_col->constraint == FK && strcmp(current_col->refer_table, table->name) == 0){
+                    data_index_referencing = get_data_list_index(current_table, current_col->name);
+                    data_index_referenced = get_data_list_index(table, current_col->refer_col);
+                    ht_check = get_ht_by_col_name(table->first_hash_table, current_col->refer_col);
+
+                    // loop all rows to check
+                    for(current_row = current_table->first_row; current_row!=NULL; current_row=current_row->next_row){
+                        if(current_col->type == INT && current_row->int_list[data_index_referencing]){
+                            value_exist = exist_in_ht(ht_check, current_row->int_list[data_index_referencing][0], NULL);  
+                            if(value_exist){
+                                if(delete_all){
+                                    // since we delete all rows, the referencing existing in hash table means it also exists in the col of table to del 
+                                    fprintf(stderr, "Execution error: referential integrity violated, '%s' column is referenced by '%s' column of '%s' table.\n\n", current_col->refer_col, current_col->name, current_table->name);
+                                    return false;
+                                }else{
+                                    // traverse rows to del and check if it contain the referencing value
+                                    for(current_row_to_del=rows_to_del_fr; current_row_to_del!=NULL; current_row_to_del=current_row_to_del->next_filtered_row){
+                                        if(current_row->int_list[data_index_referencing][0] == current_row_to_del->int_joined_list[data_index_referenced][0]){
+                                            fprintf(stderr, "Execution error: referential integrity violated, '%s' column is referenced by '%s' column of '%s' table.\n\n", current_col->refer_col, current_col->name, current_table->name);
+                                            return false;
+                                        }
+                                    }
+                                }
+                            }
+                        }else if(current_col->type == STRING && current_row->str_list[data_index_referencing]){
+                            value_exist = exist_in_ht(ht_check, 0, current_row->str_list[data_index_referencing]);  
+                            if(value_exist){
+                                if(delete_all){
+                                    fprintf(stderr, "Execution error: referential integrity violated, '%s' column is referenced by '%s' column of '%s' table.\n\n", current_col->refer_col, current_col->name, current_table->name);
+                                    return false;
+                                }else{
+                                    // traverse rows to del and check if it contain the referencing value
+                                    for(current_row_to_del=rows_to_del_fr; current_row_to_del!=NULL; current_row_to_del=current_row_to_del->next_filtered_row){
+                                        if(strcmp(current_row->str_list[data_index_referencing], current_row_to_del->str_joined_list[data_index_referenced]) == 0){
+                                            fprintf(stderr, "Execution error: referential integrity violated, '%s' column is referenced by '%s' column of '%s' table.\n\n", current_col->refer_col, current_col->name, current_table->name);
+                                            return false;
+                                        }
+                                    }
+                                }
+                            }
+                        }else{
+                            fprintf(stderr, "Execution error: an unexpected error occured.\n\n");
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
+

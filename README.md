@@ -12,13 +12,14 @@ Projet final de C à ESGI
     - Strings does not need to be wrapped inside quotes or double quotes
     - Table and column names are case sensitive
     - Available types : int, string, and double
+    - Multiple commands execution supported, each command must be separated by a new-line character and the command chain must end with a semicolon
     - Insert: values will be inserted in the order of which columns are created and all columns must be inserted (can't insert only 4 values into a table with 5 columns)
     - Operators AND and OR are not available yet
     - With SELECT using JOIN, if both tables have a column with the same name as the selected column, by default that column will refer to the first table
     - With SELECT using both WHERE and JOIN, the WHERE column is assumed to belong to the first table. If both tables contain a column with the same name, avoid using such columns in the WHERE clause to prevent ambiguity.
     - Tables can't be altered one created, altering must be done through deleting the table, recreate it and manually reinsert all data :)
     - NOT NULL constraint is not available yet
-    - Only one primary key is allowed for each table => relation many-many not available
+    - Only one primary key is allowed for each table => relation many-many not available yet
     - Primary key and foreign key must be of type int or string, can't be 0 or negative if is int
     - Primary key type INT auto-incrementation supported
     - All foreign keys are ON DELETE RESTRICT
@@ -49,7 +50,7 @@ gcc main.c ui/parser.c ui/create.c ui/delete.c ui/drop.c ui/insert.c ui/select.c
 Commands to test:
 
 create table customers ( id int pk, name string unique, age int )
-create table orders ( order_id int pk, customer_id int fk references customers id, amount double );
+create table orders ( order_id int pk, customer_id int fk references customers id, amount double );x
 
 insert into customers ( id, name, age ) values ( 1, Alice, 30 )
 insert into customers ( id, name, age ) values ( 2, Bob, 25 )
@@ -86,13 +87,4 @@ delete from customers
 delete from customers where id = 1
 delete from customers where id = 3;
 
-
-
-drop table customers, orders
-
-
-**Ideas:**
-default constraint
-
-**Current bugs:**
-delete with where failed ref integrity check
+drop table customers, orders;
