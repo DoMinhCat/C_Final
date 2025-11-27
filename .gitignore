@@ -9,3 +9,4 @@ sandbox.c
 /shelf/
 /workspace.xml
 .idea
+*.bin

@@ -84,6 +84,8 @@ void drop_table(Query* query) {
         }
     }
 
+    table_count--;
+
     // print result
     fprintf(stdout, "Executed: %s ", table_count > 1 ? "tables" : "table");
     for (i = 0; i < table_count; i++) {

@@ -199,14 +199,13 @@ int main(int argc, char **argv){
     if(import_export_choice == 'y' || import_export_choice == 'Y'){
         print_divider();
         do{
-            printf("Choose a name for your export file: ");
+            printf("\nChoose a name for your file to be exported (without extension): ");
             export_name = read_file_name(file_buffer);
         } while(!export_name);
         
         printf("Exporting database...\n");
-        // export_db(export_name, first_table);
-        
-        printf("Database exported successfully to '%s'.\n", export_name);
+        export_db(export_name, first_table);
+
         free(export_name);
         export_name = NULL;
         print_divider();

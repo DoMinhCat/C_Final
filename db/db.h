@@ -52,6 +52,7 @@ typedef struct Table{
 
     int col_count;
     int row_count;
+    int hash_table_count;
 
     struct Table *next_table;
 } Table;
