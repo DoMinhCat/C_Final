@@ -14,53 +14,9 @@ Group 2 ESGI 2A3
 #include "../hash/hash.h"
 #include "../global_var.h"
 
-/*
-IMPORTANT: for all strings read later need to alloc strlen + 1 and set \0 at the end
-
-NOTE: export structure for table to fwrite in order:
-    # metadata:
-    strlen(tab_name) + 1
-    Table name
-
-    Num of Cols
-    Num of Rows
-    Num of Hash Tables
-
-    Next_id of table (int)
-    Col one by one:
-        name
-        type
-        constraint
-        strlen of refer_table
-        refer_table (str)   
-        strlen of refer_col
-        refer_col (str)
-
-    Row one by one:
-        int_count
-        double_count
-        str_count
-
-        IMPORTANT: before each item is a char 1 or 0 to indicate if it is null or not
-        example: 0|1value
-
-        int items: null marker then item
-        double items: null marker then item
-        str items: null marker, string len + 1 then item
-
-    Write hash table one by one:
-        strlen of col_name, col_name
-
-        write 67 buckets one by one:
-            Loop to count then write num of nodes that handle collision
-            write each collision node:
-                IMPORTANT: for prev_row and row, write the row position (int) from first row (first row=1), not the pointer value. So if prev_row_index=0 => prev_row=NULL
-                strlen of original_value and original_value (str)
-*/ 
-
 bool write_succeed(int written, int count, char* file_name){
     if(written != count){
-        fprintf(stderr, "Export error: writing to '%s' failed, exportation aborted.\n\n");
+        fprintf(stderr, "Exportation error: unable to write to '%s', exportation aborted.\n\n", file_name);
         return false;
     }
     return true;
@@ -312,7 +268,7 @@ void export_db(char* output_file_name, Table* first_table){
     // open file to write
     output_file = fopen(filename_with_ext, "wb");
     if(!output_file){
-        fprintf(stderr, "Export error: failed to create '%s'.\n\n", filename_with_ext);
+        fprintf(stderr, "Exportation error: unable to write to '%s', exportation aborted.\n\n", filename_with_ext);
         free(filename_with_ext);
         filename_with_ext = NULL;
         return;

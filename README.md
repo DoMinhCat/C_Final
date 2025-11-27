@@ -29,6 +29,8 @@ Projet final de C à ESGI
     - The order of tables passed for DROP matters (foreign key constraint violation)
     - "exit" or "quit" to exit the program
 
+    - Import file must be in the current directory
+
     - Max col per table = 50
     - Max length for str values 256 (\0 excluded)
     - Max table = 100
