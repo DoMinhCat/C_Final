@@ -16,44 +16,45 @@ Group 2 ESGI 2A3
 #include "../init/init.h"
 #include "../global_var.h"
 #include "../clean/clean.h"
+#include "../hash/hash.h"
 
 void drop_table(Query* query) {
-    Table* current_table;
+    Table* current_table = NULL;
+    Table* tb_to_del = NULL;
     Table* prev_table = NULL;
     Col* current_col = NULL;
     Col* next_col = NULL;
-    Table* tb_to_del = NULL;
+    HashTable* current_ht = NULL;
+    Node* tmp_node = NULL;
+    Node* current_node = NULL;
+    Row* current_row = NULL;
+    Row* tmp_row = NULL;
     char* table_name = NULL;
 
     int i;
     int table_count = query->params.drop_params.table_count;
+    int data_refer_index;
+    int data_refered_index;
 
-    // Loop through each table provided in query, check and free one by one 
+    // Loop through each table provided in query, check 
     for(i=0; i<table_count; i++){
         table_name = query->params.drop_params.table_list[i];
     
         // check existence
-        if(!table_exists(table_name)) return;
+        tb_to_del = get_table_by_name(table_name);
+        if(!tb_to_del){
+            fprintf(stderr, "Execution error: '%s' table not found.\n\n", table_name);
+            return;
+        } 
 
         // Check if any other table has a foreign key col references to current table
-        current_table = first_table;
-        while(current_table != NULL) {
-            // no need to check itself 
-            if(strcmp(current_table->name, table_name) != 0){
-                current_col = current_table->first_col;
-                while(current_col != NULL) {
-                    // return error if col refer to table to delete
-                    if(current_col->constraint == FK && strcmp(current_col->refer_table, table_name) == 0) {
-                        fprintf(stderr, "Execution error: '%s' 'is referenced by '%s' column  of table '%s'.\n\n", table_name, current_col->name, current_table->name);
-                        return;
-                    }
-                    current_col = current_col->next_col;
-                }
-            } 
-            current_table = current_table->next_table;
-        }
+        if(!ref_integrity_check_delete(tb_to_del, NULL, true)) return;   
+    }  
 
-        // done checking, now drop table
+    for(i=0; i<table_count; i++){
+        table_name = query->params.drop_params.table_list[i];
+        
+        // drop table
         current_table = first_table;
         prev_table = NULL;
         while(current_table != NULL) {
