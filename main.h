@@ -8,8 +8,6 @@ Group 2 ESGI 2A3
 #define MAIN_H
 
 void print_divider();
-void flush_extra();
-int main(int argc, char ** argv);
 
 typedef enum ColType{
     INT,

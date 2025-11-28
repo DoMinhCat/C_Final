@@ -47,9 +47,4 @@ SelectedColInfo* build_col_info_list(Table* tab1, Table* tab2, SelectParams* par
 void* get_col_value_for_join(FilteredRow* filtered_set, SelectedColInfo col_info);
 bool str_to_col_type(Col* condition_col, char* condition_val, int* int_val, double* double_val, char** str_val);
 
-// format printing
-int calculate_col_width(int col_count);
-void print_separator_line(int col_count, int col_width);
-void print_cell(char* content, int width);
-
 #endif
