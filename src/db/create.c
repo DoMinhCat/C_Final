@@ -9,15 +9,13 @@ Group 2 ESGI 2A3
 #include <stdio.h>
 #include <assert.h>
 
-#include "db.h"
-#include "helper_db.h"
-#include "../main.h"
-#include "../ui/parser.h"
-#include "../init/init.h"
-#include "../hash/hash.h"
-#include "../global_var.h"
-#include "../clean/clean.h"
-
+#include "../../include/db.h"
+#include "../../helper/db/db.h"
+#include "../../include/parser.h"
+#include "../../include/init.h"
+#include "../../include/hash.h"
+#include "../../include/global.h"
+#include "../../include/clean.h"
 
 void create_table(Query* query){
     Table* current_table = first_table;

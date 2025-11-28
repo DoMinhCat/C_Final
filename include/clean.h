@@ -7,13 +7,8 @@ Group 2 ESGI 2A3
 #ifndef CLEAN_H
 #define CLEAN_H
 
-typedef struct Query Query;
-typedef struct Col Col;
-typedef struct Row Row;
-typedef struct Table Table; 
-typedef struct HashTable HashTable;  
-typedef struct Node Node;  
-typedef struct FilteredRow FilteredRow;  
+#include "db.h" 
+#include "hash.h"
 
 void free_current_cmd(char** cmd_string, Query** query);
 void free_query(Query** query);

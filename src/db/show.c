@@ -7,9 +7,9 @@ Group 2 ESGI 2A3
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "db.h"
-#include "../ui/parser.h"
-#include "../global_var.h"
+#include "../../include/db.h"
+#include "../../include/parser.h"
+#include "../../include/global.h"
 
 void show(Query* query){
     Table* current_table = first_table;

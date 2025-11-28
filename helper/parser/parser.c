@@ -11,9 +11,8 @@ Group 2 ESGI 2A3
 #include <string.h>
 #include <assert.h>
 
-#include "helper_ui.h"
+#include "../../include/parser.h"
 #include "parser.h"
-
 
 bool contains_visible_char(char* str_to_check){
     // function to check at the end of commands if it is white spaces or invalid extra commands

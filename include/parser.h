@@ -13,7 +13,9 @@ Group 2 ESGI 2A3
 #define TABLE_NAME_MAX 101
 #define MAX_FILE_NAME 255
 
-#include "../main.h"
+typedef enum ColType ColType;
+typedef enum ColConstraintType ColConstraintType;
+
 typedef enum CommandType{
     CREATE,
     INSERT,

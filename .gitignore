@@ -1,7 +1,6 @@
 .vscode
 *.exe
 *.txt
-sandbox.c
 *.out
 /dataSources/
 /dataSources.local.xml

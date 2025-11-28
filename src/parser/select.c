@@ -8,8 +8,8 @@ Group 2 ESGI 2A3
 #include <assert.h>
 #include <stdlib.h>
 
-#include "parser.h"
-#include "helper_ui.h"
+#include "../../include/parser.h"
+#include "../../helper/parser/parser.h"
 
 void parse_select(Query** query){
     char* token = NULL;

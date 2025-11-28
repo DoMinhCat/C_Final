@@ -9,10 +9,10 @@ Group 2 ESGI 2A3
 #include <stdbool.h>
 #include <string.h>
 
-#include "db.h"
-#include "helper_db.h"
-#include "../hash/hash.h"
-#include "../init/init.h"
+#include "../../helper/db/db.h"
+#include "../../include/ini.h"
+#include "../../include/db.h"
+#include "../../include/hash.h"
 
 FilteredRow* hash_lookup(HashTable* hash_table, int condition_int, char* condition_str){
     // perform a hash look up to the hash table of pk/unique column and return linked list of FilteredRow (but 1 item only because hash table is for unique/pk col) for WHERE clause in SELECT

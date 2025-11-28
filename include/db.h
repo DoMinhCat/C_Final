@@ -6,18 +6,31 @@ Group 2 ESGI 2A3
 
 #ifndef DB_H
 #define DB_H
+
 #define MAX_TABLE_COUNT 100
 #define MAX_COL_COUNT 50
 #define MAX_STR_LEN 256
 
 #include <stdbool.h>
 
-#include "../main.h"
-#include "../ui/parser.h"
+#include "parser.h"
 
 typedef struct HashTable HashTable;
 typedef struct Query Query;
 typedef struct SelectParams SelectParams;
+
+typedef enum ColConstraintType{
+    NONE,
+    FK,
+    PK,
+    UNIQUE
+} ColConstraintType;
+
+typedef enum ColType{
+    INT,
+    DOUBLE,
+    STRING    
+} ColType;
 
 typedef struct Row{
     int **int_list; // unset int will be NULL, int_list[int_count][0]

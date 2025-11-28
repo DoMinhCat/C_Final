@@ -10,14 +10,14 @@ Group 2 ESGI 2A3
 #include <stdbool.h>
 #include <assert.h>
 
-#include "db.h"
-#include "helper_db.h"
-#include "../main.h"
-#include "../ui/parser.h"
-#include "../init/init.h"
-#include "../hash/hash.h"
-#include "../global_var.h"
-#include "../clean/clean.h"
+#include "../../helper/db/db.h"
+#include "../../include/db.h"
+#include "../../helper/format/format.h"
+#include "../../include/parser.h"
+#include "../../include/ini.h"
+#include "../../include/clean.h"
+#include "../../include/hash.h"
+#include "../../include/global.h"
 
 void print_header_row(Table* table1, Table* table2, SelectParams* params) {
     bool select_all = params->col_count == 1 && strcmp(params->col_list[0], "*") == 0;

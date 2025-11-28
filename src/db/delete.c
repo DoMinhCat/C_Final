@@ -9,12 +9,12 @@ Group 2 ESGI 2A3
 #include <string.h>
 #include <stdbool.h>
 
-#include "db.h"
-#include "helper_db.h"
-#include "../init/init.h"
-#include "../hash/hash.h"
-#include "../global_var.h"
-#include "../clean/clean.h"
+#include "../../include/db.h"
+#include "../../helper/db/db.h"
+#include "../../include/init.h"
+#include "../../include/hash.h"
+#include "../../include/clean.h"
+#include "../../include/global.h"
 
 void delete_all(Table* table){
     Row* current_row = NULL;

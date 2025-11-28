@@ -10,8 +10,9 @@ Group 2 ESGI 2A3
 #include <stdlib.h>
 #include <ctype.h>
 
-#include "parser.h"
-#include "helper_ui.h"
+#include "../../include/parser.h"
+#include "../../include/db.h"
+#include "../../helper/parser/parser.h"
 
 void parse_create(Query** query){
     char* token;

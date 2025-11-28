@@ -6,9 +6,8 @@ Group 2 ESGI 2A3
 
 #include <stdlib.h>
 
-#include "clean.h"
-#include "../ui/parser.h"
-
+#include "../../include/clean.h"
+#include "../../include/parser.h"
 
 /*IMPORTANT : 
 - Free all dynamic pointers in a struct before freeing the struct

@@ -6,9 +6,9 @@ Group 2 ESGI 2A3
 
 #include <stdlib.h>
 
-#include "clean.h"
-#include "../db/db.h"
-#include "../hash/hash.h"
+#include "../../include/clean.h"
+#include "../../include/db.h"
+#include "../../include/hash.h"
 
 void free_col(Col* col){
     free(col->name);

@@ -12,12 +12,14 @@ Group 2 ESGI 2A3
 #include <float.h>
 #include <math.h>
 
-#include "helper_db.h"
-#include "../ui/parser.h"
-#include "db.h"
-#include "../global_var.h"
-#include "../hash/hash.h"
-#include "../init/init.h"
+#include "../../include/parser.h"
+#include "../../include/db.h"
+#include "../../helper/db/db.h"
+#include "../../include/parser.h"
+#include "../../include/init.h"
+#include "../../include/hash.h"
+#include "../../include/global.h"
+#include "../../include/clean.h"
 
 bool table_exists(char* table_name){
     // check for table existence, print error if not.

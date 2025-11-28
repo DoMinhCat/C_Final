@@ -10,9 +10,9 @@ Group 2 ESGI 2A3
 #include <string.h>
 #include <assert.h>
 
-#include "../db/db.h"
-#include "../hash/hash.h"
-#include "../global_var.h"
+#include "../../include/db.h"
+#include "../../include/hash.h"
+#include "../../include/global.h"
 
 /*
 IMPORTANT: for all strings read later need to alloc strlen + 1 and set \0 at the end

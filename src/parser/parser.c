@@ -9,8 +9,8 @@ Group 2 ESGI 2A3
 #include <string.h>
 #include <assert.h>
 
-#include "parser.h"
-#include "../init/init.h"
+#include "../../include/parser.h"
+#include "../../include/ini.h"
 
 char* read_batch_cmd(char* batch_buffer) {
     char* batch_string = NULL;

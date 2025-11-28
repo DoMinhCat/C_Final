@@ -7,8 +7,8 @@ Group 2 ESGI 2A3
 #include <stdlib.h>
 #include <assert.h>
 
-#include "../hash/hash.h"
-#include "init.h"
+#include "../../include/hash.h"
+#include "../../include/ini.h"
 
 Node* init_node(){
     Node* node = NULL;

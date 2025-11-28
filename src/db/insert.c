@@ -11,11 +11,11 @@ Group 2 ESGI 2A3
 #include <string.h>
 #include <math.h>
 
-#include "db.h"
-#include "helper_db.h"
-#include "../ui/parser.h"
-#include "../hash/hash.h"
-#include "../init/init.h"
+#include "../../helper/db/db.h"
+#include "../../include/db.h"
+#include "../../include/parser.h"
+#include "../../include/ini.h"
+#include "../../include/hash.h"
 
 void free_insert_before_exit(
     int*** int_list_to_insert, char*** str_list_to_insert, double*** double_list_to_insert, char** pk_int_col_name, 

@@ -9,19 +9,15 @@ Group 2 ESGI 2A3
 #include <assert.h>
 #include <string.h>
 
-#include "main.h"
-#include "ui/parser.h"
-#include "db/db.h"
-#include "clean/clean.h"
-#include "init/init.h"
-#include "global_var.h"
-#include "hash/hash.h"
-#include "file/file.h"
+#include "../include/clean.h"
+#include "../include/parser.h"
+#include "../include/db.h"
+#include "../include/ini.h"
+#include "../include/global.h"
+#include "../include/hash.h"
+#include "../include/file.h"
+#include "../helper/format/format.h"
 
-void print_divider(){
-    for(int i=0; i<20; i++) printf("-");
-    printf("\n");
-}
 void flush_extra(){
     int c = getchar();
     if (c != '\n' && c != EOF) {
@@ -29,7 +25,7 @@ void flush_extra(){
     }
 }
 
-int main(int argc, char **argv){
+int main(){
     char import_export_choice;
     char* export_name = NULL;
 

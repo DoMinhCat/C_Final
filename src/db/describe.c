@@ -10,9 +10,9 @@ Group 2 ESGI 2A3
 #include <assert.h>
 
 #include "db.h"
-#include "../ui/parser.h"
-#include "helper_db.h"
-#include "../global_var.h"
+typedef struct Query Query;
+#include "../../include/global.h"
+#include "../../helper/db/db.h";
 
 void describe_table(Query* query){
     Table* table = NULL;

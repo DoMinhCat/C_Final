@@ -8,8 +8,8 @@ Group 2 ESGI 2A3
 #include <assert.h>
 #include <string.h>
 
-#include "init.h"
-#include "../ui/parser.h"
+#include "../../include/parser.h"
+#include "../../include/ini.h"
 
 // safely initialise Query struct
 Query* init_query(){

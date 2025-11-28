@@ -5,6 +5,11 @@
 int MAX_TABLE_WIDTH = 150;
 int MIN_COL_WIDTH = 15;
 
+void print_divider(){
+    for(int i=0; i<20; i++) printf("-");
+    printf("\n");
+}
+
 void print_separator_line(int col_count, int col_width) {
     printf("|");
     for (int i = 0; i < col_count; i++) {

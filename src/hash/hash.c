@@ -8,11 +8,11 @@ Group 2 ESGI 2A3
 #include <assert.h>
 #include <stdlib.h>
 
-#include "hash.h"
-#include "../db/db.h"
-#include "../init/init.h"
-#include "../db/helper_db.h"
-#include "../clean/clean.h"
+#include "../../include/hash.h"
+#include "../../helper/db/db.h"
+#include "../../include/db.h"
+#include "../../include/ini.h"
+#include "../../include/clean.h"
 
 unsigned int hash_string(char* string_to_hash){
     //DJB2 Algorithm

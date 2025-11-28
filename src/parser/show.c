@@ -7,8 +7,8 @@ Group 2 ESGI 2A3
 #include <stdlib.h>
 #include <string.h>
 
-#include "parser.h"
-#include "helper_ui.h"
+#include "../../include/parser.h"
+#include "../../helper/parser/parser.h"
 
 void parse_show(Query** query){
     char* token = NULL;

@@ -9,11 +9,10 @@ Group 2 ESGI 2A3
 #include <string.h>
 #include <assert.h>
 
-
-#include "db.h"
-#include "../init/init.h"
-#include "helper_db.h"
-#include "../clean/clean.h"
+#include "../../helper/db/db.h"
+#include "../../include/db.h"
+#include "../../include/ini.h"
+#include "../../include/clean.h"
 
 int compare_data_field(int* int_data1, int* int_data2, char* str_data1, char* str_data2, double* double_data1, double* double_data2, ColType col_type){
     // compare any 2 data fields of same type. Return 0 if equal, -1 if val1 < val2, 1 if val1 > val2
