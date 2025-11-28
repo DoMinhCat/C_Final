@@ -10,3 +10,4 @@
 .idea
 *.bin
 /build/
+*.o
