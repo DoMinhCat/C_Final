@@ -16,7 +16,7 @@ Group 2 ESGI 2A3
 #include "../../include/db.h"
 #include "../../helper/db/db.h"
 #include "../../include/parser.h"
-#include "../../include/init.h"
+#include "../../include/ini.h"
 #include "../../include/hash.h"
 #include "../../include/global.h"
 #include "../../include/clean.h"
@@ -201,7 +201,6 @@ void* get_col_value(Table* table, Row* row, char* col_name, ColType col_type) {
 void* get_col_value_for_join(FilteredRow* filtered_set, SelectedColInfo col_info) {
     if(!filtered_set) return NULL;
 
-    int i;
     int data_index = col_info.data_index;
 
     switch (col_info.type) {
@@ -224,6 +223,7 @@ void* get_col_value_for_join(FilteredRow* filtered_set, SelectedColInfo col_info
         return NULL;
         break;
     }
+    return NULL;
 }
 
 void format_value_to_string(ColType col_type, void* value, char* buffer, size_t buffer_size) {

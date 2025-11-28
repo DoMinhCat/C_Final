@@ -8,10 +8,10 @@ Group 2 ESGI 2A3
 #include <stdio.h>
 
 #include "../../include/db.h"
-#include "../../include/parser.h"
 #include "../../include/global.h"
+#include "../../helper/format/format.h"
 
-void show(Query* query){
+void show(){
     Table* current_table = first_table;
     int tb_count = 0;
     

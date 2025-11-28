@@ -216,10 +216,6 @@ void print_data_for_join(FilteredRow* filtered_row, SelectedColInfo* col_info, S
 void select_simple(SelectParams* params, Table* table){
     // select without JOIN and WHERE: SELECT */col1, col2,... from tab1
 
-    bool select_all = params->col_count == 1 && strcmp(params->col_list[0], "*") == 0;
-    Col* current_col = NULL;
-    ColType col_type;
-
     print_header_row(table, NULL, params);
 
     // starts printing data
@@ -252,7 +248,6 @@ void select_where_only(SelectParams* params, Table* table){
     char* condition_val = params->condition_val;
     ColType col_type = condition_col->type;
     Row* current_row = NULL;
-    bool select_all = params->col_count == 1 && strcmp(params->col_list[0], "*") == 0;
     int row_count = 0;
 
     int int_val;
@@ -292,13 +287,10 @@ void select_where_only(SelectParams* params, Table* table){
 void select_join_where(SelectParams* params, Table* tab, Table* condition_tab, Col* col_tab, Col* col_tab_where, SelectedColInfo* col_info){
     // SELECT with WHERE and JOIN
 
-    bool select_all = params->col_count == 1 && strcmp(params->col_list[0], "*") == 0;
     FilteredRow* filtered_where = NULL;
     FilteredRow* result = NULL;
     FilteredRow* current_fr = NULL;
     Col* condition_col = NULL;
-    Col* col1 = NULL;
-    Col* col2 = NULL;
     char* condition_val = params->condition_val;
     int int_val;
     double double_val;
@@ -311,14 +303,10 @@ void select_join_where(SelectParams* params, Table* tab, Table* condition_tab, C
     // determine tab and col order to print in correct order
     if(where_tab_is_first){
         tab1 = condition_tab;
-        col1 = col_tab_where;
         tab2 = tab;
-        col2 = col_tab;
     }else{
         tab2 = condition_tab;
-        col2 = col_tab_where;
         tab1 = tab;
-        col1 = col_tab;
     }
     
     // get condition column
@@ -359,7 +347,6 @@ void select_join_only(Table* tab1, Table* tab2, SelectParams* params, SelectedCo
     FilteredRow* filtered = join(tab1, tab2, col1, col2, params);
     FilteredRow* current_fr = NULL;
     
-    bool select_all = params->col_count == 1 && strcmp(params->col_list[0], "*") == 0;
     int row_count = 0;
 
     print_header_row(tab1, tab2, params);

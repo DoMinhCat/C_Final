@@ -12,7 +12,7 @@ Group 2 ESGI 2A3
 #include "../../include/db.h"
 #include "../../helper/db/db.h"
 #include "../../include/parser.h"
-#include "../../include/init.h"
+#include "../../include/ini.h"
 #include "../../include/hash.h"
 #include "../../include/global.h"
 #include "../../include/clean.h"
@@ -218,7 +218,6 @@ void create_table(Query* query){
     assert(new_tb->name != NULL);
 
     // add col
-    Col* current_col = NULL;
     Col* last_col = NULL;
     HashTable* new_hash_table = NULL;
     HashTable* last_ht = NULL;

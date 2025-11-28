@@ -98,6 +98,6 @@ delete from customers where id = 3;
 
 drop table customers, orders;
 
-**Ideas to improve**
+**Ideas to improve (if time allows)**
     - Select col AS abc (if not too complicated)
     - Default constraint

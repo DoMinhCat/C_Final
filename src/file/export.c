@@ -60,7 +60,7 @@ NOTE: export structure for table to fwrite in order:
 
 bool write_succeed(int written, int count, char* file_name){
     if(written != count){
-        fprintf(stderr, "Export error: writing to '%s' failed, exportation aborted.\n\n");
+        fprintf(stderr, "Export error: writing to '%s' failed, exportation aborted.\n\n", file_name);
         return false;
     }
     return true;

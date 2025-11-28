@@ -89,6 +89,10 @@ void remove_from_ht(HashTable* ht, Row* row, int data_index, ColType col_type){
         prev_node = current_node;
         current_node = current_node->next_node;
     }
+    if(should_free){
+        free(val_to_cmp);
+        val_to_cmp = NULL;
+    }
 }
 
 Node* exist_in_ht(HashTable* hash_tab, int condition_int, char* condition_str){

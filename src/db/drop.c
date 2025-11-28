@@ -16,23 +16,15 @@ Group 2 ESGI 2A3
 #include "../../include/hash.h"
 #include "../../include/clean.h"
 #include "../../include/global.h"
+
 void drop_table(Query* query) {
     Table* current_table = NULL;
     Table* tb_to_del = NULL;
     Table* prev_table = NULL;
-    Col* current_col = NULL;
-    Col* next_col = NULL;
-    HashTable* current_ht = NULL;
-    Node* tmp_node = NULL;
-    Node* current_node = NULL;
-    Row* current_row = NULL;
-    Row* tmp_row = NULL;
     char* table_name = NULL;
 
     int i;
     int table_count = query->params.drop_params.table_count;
-    int data_refer_index;
-    int data_refered_index;
 
     // Loop through each table provided in query, check 
     for(i=0; i<table_count; i++){

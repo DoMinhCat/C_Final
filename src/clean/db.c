@@ -96,7 +96,6 @@ void free_hash_table(HashTable* hash_table){
 
 void free_table(Table* table){
     // this is to clean only 1 table
-    int i;
     Col* current_col = table->first_col;
     Col* tmp_col; // temporary to free current col
     Row* current_row = table->first_row;

@@ -9,10 +9,11 @@ Group 2 ESGI 2A3
 #include <string.h>
 #include <assert.h>
 
-#include "db.h"
 typedef struct Query Query;
+#include "db.h"
 #include "../../include/global.h"
-#include "../../helper/db/db.h";
+#include "../../helper/db/db.h"
+#include "../../helper/format/format.h"
 
 void describe_table(Query* query){
     Table* table = NULL;
@@ -26,6 +27,7 @@ void describe_table(Query* query){
     int col_width = 20;  
     int num_cols = 5;
     int max_width = MAX_TABLE_WIDTH;
+    int i;
 
     // check if table exists
     table = get_table_by_name(query->params.describe_params.table_name);
@@ -40,7 +42,7 @@ void describe_table(Query* query){
     char* headers[] = {"Column", "Type", "Constraint", "Table of Reference", "Column of Reference"};
     int printed_headers = 0;
     
-    for(int i = 0; i < num_cols; i++) {
+    for(i = 0; i < num_cols; i++) {
         if(current_width + col_width + 3 > max_width && i > 0) {  // +3 for " | "
             printf("| ...");
             break;
@@ -58,7 +60,7 @@ void describe_table(Query* query){
 
     // Print separator line
     current_width = 0;
-    for(int i = 0; i < printed_headers; i++) {
+    for(i = 0; i < printed_headers; i++) {
         if(i == 0) {
             printf("|-");
             for(int j = 0; j < col_width; j++) printf("-");
@@ -112,7 +114,7 @@ void describe_table(Query* query){
             }
             
             // Truncate value if needed
-            if(strlen(values[i]) > col_width) {
+            if((int)strlen(values[i]) > col_width) {
                 strncpy(truncated, values[i], col_width - 3);
                 truncated[col_width - 3] = '\0';
                 strcat(truncated, "...");

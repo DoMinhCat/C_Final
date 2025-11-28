@@ -1,39 +1,31 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -O2 -g -Iinclude -Ihelper
+CFLAGS = -Wall -Wextra -Werror -O2 -g -std=c11 -Iinclude -Ihelper
 
-# Directories
 SRC_DIR = src
 HELPER_DIR = helper
-BUILD_DIR = build
 
-# Collect all .c files from src/ and helper/
-SRC = $(wildcard $(SRC_DIR)/*.c) $(wildcard $(HELPER_DIR)/*.c)
+# Recursively get all .c files in src/ and helper/
+SRC = $(shell dir /S /B $(SRC_DIR)\*.c)
+HELPER_SRC = $(shell dir /S /B $(HELPER_DIR)\*.c)
 
-# Convert e.g. src/db.c → build/db.o
-OBJ = $(patsubst %.c, $(BUILD_DIR)/%.o, $(notdir $(SRC)))
+ALL_SRC = $(SRC) $(HELPER_SRC)
+OBJ = $(ALL_SRC:.c=.o)
 
-# Output exe name
-TARGET = MiniDB
+TARGET = MiniDB.exe
 
-# Default rule
 all: $(TARGET)
 
-# Link all object files into the final executable
+# Link all object files
 $(TARGET): $(OBJ)
 	$(CC) $(OBJ) -o $(TARGET)
 
-# Rule to compile .c → .o inside build/
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
+# Compile rule (works for all .c files)
+%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/%.o: $(HELPER_DIR)/%.c | $(BUILD_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# Create build/ directory if missing
-$(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
-
+# Clean
 clean:
-	rm -rf $(BUILD_DIR) $(TARGET)
+	del /Q $(OBJ) 2>nul
+	if exist $(TARGET) del /Q $(TARGET)
 
 .PHONY: all clean

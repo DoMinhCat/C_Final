@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "format.h"
 
@@ -23,7 +24,7 @@ void print_separator_line(int col_count, int col_width) {
 
 void print_cell(char* content, int width) {
     // Helper function to print a cell with proper width and truncation
-    int content_len = strlen(content);
+    int content_len = (int)strlen(content);
     
     // Width includes the spaces, so actual content space is width - 2
     int available_width = width - 2;

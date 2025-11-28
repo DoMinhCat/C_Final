@@ -14,13 +14,10 @@ Group 2 ESGI 2A3
 void parse_select(Query** query){
     char* token = NULL;
     char* col_list = NULL;
-    char* col_name = NULL;
     char* from = NULL;
     char* table = NULL;
-    char* after_table_name = NULL;
     char* extra_clause = NULL;
     char* extra_of_join = NULL;
-    char error_msg[200];
     int current_col_count = 0;
 
     (*query)->cmd_type = SELECT;

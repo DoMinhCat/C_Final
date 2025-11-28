@@ -14,7 +14,6 @@ Group 2 ESGI 2A3
 void parse_delete(Query** query){
     char* token = NULL;
     char* extra_where_clause = NULL;
-    char error_msg[200];
 
     (*query)->cmd_type = DELETE;
 

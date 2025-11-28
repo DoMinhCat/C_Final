@@ -18,7 +18,7 @@ int compare_data_field(int* int_data1, int* int_data2, char* str_data1, char* st
     // compare any 2 data fields of same type. Return 0 if equal, -1 if val1 < val2, 1 if val1 > val2
     // IMPORTANT: NULL < Not NULL
 
-    int result;
+    int result = 0;
     
     switch (col_type) { 
     case INT:
@@ -182,9 +182,9 @@ FilteredRow* merge_sorted_lists(Table* tab1, Table* tab2, SelectParams* params, 
     Row* row2 = NULL;
     Col* current_col = NULL;
     SelectedColInfo col_info[params->col_count];
-    int cmp;
-    int cmp1;
-    int cmp2;
+    int cmp = 0;
+    int cmp1 = 0;
+    int cmp2 = 0;
     int i;
     int int_count = 0;
     int double_count = 0;

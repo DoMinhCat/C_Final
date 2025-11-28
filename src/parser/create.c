@@ -23,7 +23,6 @@ void parse_create(Query** query){
     char* col_name = NULL;
     char* col_type = NULL;
     char* col_constraint = NULL;
-    char* reference_keyword = NULL;
     char* extra_cmd = NULL;
     int fk_count;
     char err_msg[200];

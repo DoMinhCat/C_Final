@@ -11,7 +11,7 @@ Group 2 ESGI 2A3
 
 #include "../../include/db.h"
 #include "../../helper/db/db.h"
-#include "../../include/init.h"
+#include "../../include/ini.h"
 #include "../../include/hash.h"
 #include "../../include/clean.h"
 #include "../../include/global.h"
@@ -22,9 +22,6 @@ void delete_all(Table* table){
     HashTable* current_ht = NULL;
     Node* tmp_node = NULL;
     Node* current_node = NULL;
-    FilteredRow* fr_to_check = NULL;
-    FilteredRow* new_fr = NULL;
-    FilteredRow* last_fr = NULL;
     int total_row = table->row_count;
     int i;
 
@@ -108,8 +105,7 @@ void delete_where(Table* table, Col* condition_col, char* condition_val){
     FilteredRow* to_del_list = NULL;    
     FilteredRow* new_fr = NULL;    
     FilteredRow* last_fr = NULL;    
-    FilteredRow* current_fr = NULL;  
-    bool is_null;
+    FilteredRow* current_fr = NULL;
     bool should_add;
     
     int row_count = 0;
@@ -279,7 +275,6 @@ void delete_from_table(Query* query) {
     Table* table = NULL;
     Col* condition_col = NULL;
     
-    int delete_count = 0;
     bool include_where = false;
 
     // check table exists

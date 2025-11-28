@@ -99,7 +99,7 @@ void drop_table(Query *query);
 void insert(Query *query);
 void delete_from_table(Query* query);
 void describe_table(Query *query);
-void show(Query *query);
+void show();
 
 void select(Query* query);
 void select_simple(SelectParams* params, Table* table);
